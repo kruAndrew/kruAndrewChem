@@ -409,14 +409,13 @@ const NOTES = [
 ];
 
 /* ---------- MOCK PAPERS ---------- ["Paper name", "question paper link", "markscheme link"] */
-/* Markschemes are left blank so students can't see them before a mock.
-   To release one, paste it in, e.g. D("1hcvk_1h6G9Y5FX79PRz2vMGdLNdVpmo2o2_SIEWmvV0")
+/* Third item = markscheme link (leave "" to hide it). Example: D("1hcvk_1h6G9Y5FX79PRz2vMGdLNdVpmo2o2_SIEWmvV0")
    HL Mock 1 markscheme IDs: Paper 1 = 1hcvk_1h6G9Y5FX79PRz2vMGdLNdVpmo2o2_SIEWmvV0
                              Paper 2 = 1R6ifOLtpF8WhgX1cl1Qiir4IZ3sUZE8FMUx-ZL7_gGA */
 const MOCKS = [
-  ["HL Mock 1 · Paper 1A (multiple choice) · Paper 1 is 2 h in total", D("1VQTNqJlBMrPIz9_IWMufZtOctDJv0OpLv9OYi_9hJ3E"), ""],
-  ["HL Mock 1 · Paper 1B (data-based questions)", D("1LzuItkQ0yw7rg85pmmFZFo6T7T8HSAvDrQB9L5gX9to"), ""],
-  ["HL Mock 1 · Paper 2 · 2 h 30 min", D("1yhcahq0IsNeaq3PjpxPhyvwH24MstviamiBGCep2VQA"), ""],
+  ["HL Mock 1 · Paper 1A (multiple choice) · Paper 1 is 2 h in total", D("1VQTNqJlBMrPIz9_IWMufZtOctDJv0OpLv9OYi_9hJ3E"), D("1hcvk_1h6G9Y5FX79PRz2vMGdLNdVpmo2o2_SIEWmvV0")],
+  ["HL Mock 1 · Paper 1B (data-based questions)", D("1LzuItkQ0yw7rg85pmmFZFo6T7T8HSAvDrQB9L5gX9to"), D("1hcvk_1h6G9Y5FX79PRz2vMGdLNdVpmo2o2_SIEWmvV0")],
+  ["HL Mock 1 · Paper 2 · 2 h 30 min", D("1yhcahq0IsNeaq3PjpxPhyvwH24MstviamiBGCep2VQA"), D("1R6ifOLtpF8WhgX1cl1Qiir4IZ3sUZE8FMUx-ZL7_gGA")],
   ["SL Mock 1 · Paper 1 (1A + 1B) · 1 h 30 min", "", ""],
   ["SL Mock 1 · Paper 2 · 1 h 30 min", "", ""]
 ];
@@ -500,8 +499,8 @@ renderNotes("");
 /* mocks */
 $("#mockList").innerHTML = MOCKS.map(m => `<div class="card sim"><h3>${esc(m[0])}</h3>${
   m[1] ? `<a class="btn" href="${m[1]}" target="_blank" rel="noopener">Question paper</a>` : `<span class="btn off">Coming soon</span>`}${
-  m[2] ? `<a href="${m[2]}" target="_blank" rel="noopener">Markscheme</a>` : ""}</div>`).join("");
-$("#mockFolder").innerHTML = `Markschemes are released by your teacher after each mock.`;
+  m[2] ? `<a href="${m[2]}" target="_blank" rel="noopener">Markscheme (Paper ${m[0].includes("Paper 2")?"2":"1"})</a>` : ""}</div>`).join("");
+$("#mockFolder").innerHTML = `Try the paper under timed conditions before you open the markscheme.`;
 
 /* simulators */
 $("#simList").innerHTML = SIMS.map(s => `<div class="card sim"><span class="tag">${esc(s[2])}</span><h3>${esc(s[0])}</h3><p class="small" style="margin:0">${esc(s[3])}</p><a class="btn" href="${s[1]}">Open simulator</a></div>`).join("");
