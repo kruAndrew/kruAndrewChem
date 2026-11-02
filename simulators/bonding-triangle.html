@@ -1,0 +1,260 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bonding Triangle Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+body{margin:0;padding:0}
+:root{
+  --paper:#f2f4f3; --card:#ffffff; --ink:#18222d; --muted:#5a6870; --line:#cbd4d2; --grid:#e1e7e5;
+  --ionic:#c2385a; --polar:#3aa58b; --covalent:#167060; --metallic:#5f78a3; --mark:#e09a00;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11171d; --card:#18212a; --ink:#e4eaee; --muted:#93a2ab; --line:#2f3c46; --grid:#222d36;
+  --ionic:#ec6b8a; --polar:#4fc4a6; --covalent:#36a88f; --metallic:#8aa2cf; --mark:#ffbf3c; color-scheme:dark}}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.back{display:inline-block;margin:12px 16px 0;font:600 13px var(--body);color:var(--muted)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px;display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.1;margin:0;letter-spacing:-.01em}
+h1 span{color:var(--muted);font-weight:500}
+.sub{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:600 12px var(--mono);padding:6px 10px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:1fr}}
+.plot{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.plot svg{width:100%;height:auto;display:block;touch-action:none}
+.cursor{font:12px var(--mono);color:var(--muted);padding:4px 6px 0;min-height:1.6em}
+.panel{display:grid;gap:14px;min-width:0}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.slot{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:10px 12px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;display:grid;gap:2px}
+.slot[aria-pressed="true"]{border-color:var(--mark)}
+.slot .lab{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.slot .sym{font:700 2rem/1 var(--display)}
+.slot .en{font:13px var(--mono);color:var(--muted)}
+.readout{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:12px}
+.verdict{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{font:700 14px var(--display);padding:4px 12px;border-radius:999px;color:#fff}
+.pair{font:600 15px var(--mono)}
+dl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
+dl div{border-top:1px solid var(--grid);padding-top:6px}
+dt{font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+dd{margin:0;font:600 1.25rem var(--mono)}
+.why{margin:0;font-size:14px}
+.calc{margin:0;font:12px var(--mono);color:var(--muted);line-height:1.6}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:600 13px var(--body);padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+h2{font-family:var(--display);font-size:1.05rem;margin:0 0 8px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 13px var(--mono);padding:5px 9px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.pins .chip{display:inline-flex;gap:6px;align-items:center}
+.pins .x{color:var(--muted);font-weight:400}
+.table-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.thead{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:baseline}
+.hint{font-size:13px;color:var(--muted)}
+.pt-scroll{overflow-x:auto}
+.pt{display:grid;grid-template-columns:repeat(18,minmax(30px,1fr));gap:3px;min-width:560px;margin-top:8px}
+.el{aspect-ratio:1/1.05;border-radius:5px;border:1px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;font:inherit;color:#0f1a22;position:relative}
+.el b{font:700 clamp(11px,1.3vw,15px)/1 var(--display)}
+.el small{font:10px var(--mono);opacity:.8;margin-top:2px}
+.el:disabled{cursor:default;background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.el.sel{outline:3px solid var(--mark);outline-offset:-1px}
+.el .tag{position:absolute;top:-6px;right:-5px;font:700 9px var(--mono);background:var(--mark);color:#1a1200;border-radius:4px;padding:0 3px}
+.legend{display:flex;align-items:center;gap:8px;font:11px var(--mono);color:var(--muted);margin-top:10px}
+.ramp{width:160px;height:8px;border-radius:4px}
+.note{font-size:13px;color:var(--muted);max-width:80ch;margin:0}
+</style></head><body>
+<a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Bonding Triangle <span>· van Arkel–Ketelaar</span></h1>
+      <p class="sub">Pick two elements. The pair plots at its mean electronegativity (χ̄) against its electronegativity difference (Δχ), and its position predicts the dominant bonding.</p>
+    </div>
+    <div class="toggle">Values
+      <span class="seg" role="group" aria-label="Electronegativity precision">
+        <button id="dp1" aria-pressed="true">1 d.p.</button>
+        <button id="dp2" aria-pressed="false">2 d.p.</button>
+      </span>
+    </div>
+  </header>
+  <section class="main">
+    <div class="plot">
+      <svg id="tri" viewBox="0 0 620 450" role="img" aria-label="Bonding triangle plot"></svg>
+      <div class="cursor" id="cursor">Move over the triangle to read any position.</div>
+    </div>
+    <div class="panel">
+      <div class="slots">
+        <button class="slot" id="slotA" aria-pressed="true"><span class="lab">Element A</span><span class="sym" id="symA"></span><span class="en" id="enA"></span></button>
+        <button class="slot" id="slotB" aria-pressed="false"><span class="lab">Element B</span><span class="sym" id="symB"></span><span class="en" id="enB"></span></button>
+      </div>
+      <div class="readout">
+        <div class="verdict"><span class="pill" id="pill"></span><span class="pair" id="pair"></span></div>
+        <dl>
+          <div><dt>Mean χ̄</dt><dd id="avg"></dd></div>
+          <div><dt>Δχ</dt><dd id="dlt"></dd></div>
+          <div><dt>% ionic*</dt><dd id="pct"></dd></div>
+        </dl>
+        <p class="calc" id="calc"></p>
+        <p class="why" id="why"></p>
+        <div class="btnrow">
+          <button class="btn primary" id="pin">Pin to plot</button>
+          <button class="btn" id="swap">Swap A ↔ B</button>
+        </div>
+      </div>
+      <div><h2>Try a substance</h2><div class="chips" id="presets"></div></div>
+      <div class="pins">
+        <h2>Pinned <button class="btn" id="clear" style="font-size:11px;padding:2px 8px;margin-left:6px">Clear</button></h2>
+        <div class="chips" id="pins"></div>
+      </div>
+    </div>
+  </section>
+  <section class="table-card">
+    <div class="thead"><h2>Choose elements</h2><span class="hint">Tap an element to set A, then B. Tap a slot above to choose which one changes.</span></div>
+    <div class="pt-scroll"><div class="pt" id="pt"></div></div>
+    <div class="legend">χ low <span class="ramp" id="ramp"></span> high · Pauling scale · noble gases and period 7 omitted</div>
+  </section>
+  <p class="note">* % ionic character uses Pauling's estimate, 100(1 − e<sup>−Δχ²/4</sup>); textbooks give slightly different curves. Region boundaries are approximate: ionic above Δχ ≈ 1.8 (a common rule of thumb), and a sloping metallic/covalent divide near χ̄ ≈ 2.0 that runs through the metalloids. The model uses only which two elements are present, not the formula, oxidation state or structure, so substances near a boundary (Al₂O₃, AlCl₃, GaAs) show mixed character, and some, such as LiH, land in the "wrong" region.</p>
+</div>
+<script>
+const ROWS = [
+ "H:2.20,,,,,,,,,,,,,,,,,He:",
+ "Li:0.98,Be:1.57,,,,,,,,,,,B:2.04,C:2.55,N:3.04,O:3.44,F:3.98,Ne:",
+ "Na:0.93,Mg:1.31,,,,,,,,,,,Al:1.61,Si:1.90,P:2.19,S:2.58,Cl:3.16,Ar:",
+ "K:0.82,Ca:1.00,Sc:1.36,Ti:1.54,V:1.63,Cr:1.66,Mn:1.55,Fe:1.83,Co:1.88,Ni:1.91,Cu:1.90,Zn:1.65,Ga:1.81,Ge:2.01,As:2.18,Se:2.55,Br:2.96,Kr:",
+ "Rb:0.82,Sr:0.95,Y:1.22,Zr:1.33,Nb:1.60,Mo:2.16,Tc:1.90,Ru:2.20,Rh:2.28,Pd:2.20,Ag:1.93,Cd:1.69,In:1.78,Sn:1.96,Sb:2.05,Te:2.10,I:2.66,Xe:",
+ "Cs:0.79,Ba:0.89,La:1.10,Hf:1.30,Ta:1.50,W:2.36,Re:1.90,Os:2.20,Ir:2.20,Pt:2.28,Au:2.54,Hg:2.00,Tl:1.62,Pb:1.87,Bi:2.02,Po:2.00,At:2.20,Rn:"
+];
+const EL = {}; const CELLS = [];
+ROWS.forEach((r,ri)=>r.split(",").forEach((c,ci)=>{
+  if(!c){CELLS.push(null);return}
+  const [s,v]=c.split(":"); const en=v?parseFloat(v):null;
+  EL[s]={s,en}; CELLS.push({s,en,row:ri,col:ci});
+}));
+const PRESETS=[["NaCl","Na","Cl"],["CsF","Cs","F"],["MgO","Mg","O"],["Al₂O₃","Al","O"],["AlCl₃","Al","Cl"],["SiO₂","Si","O"],["H₂O","H","O"],["HCl","H","Cl"],["CH₄","C","H"],["Cl₂","Cl","Cl"],["Na","Na","Na"],["Cu","Cu","Cu"],["CuZn (brass)","Cu","Zn"],["GaAs","Ga","As"],["SiC","Si","C"],["LiH","Li","H"]];
+const label=(a,b)=>{const p=PRESETS.find(p=>(p[1]===a&&p[2]===b)||(p[1]===b&&p[2]===a));return p?p[0]:(a===b?a:a+"–"+b)};
+let S={a:"Na",b:"Cl",slot:"a",dp:1,pins:[["Cs","F"],["Mg","O"],["Al","Cl"],["Si","O"],["H","O"],["Cl","Cl"],["Cu","Cu"],["Ga","As"]]};
+try{const s=JSON.parse(localStorage.getItem("btri")||"null");if(s){S.dp=s.dp||1;if(Array.isArray(s.pins))S.pins=s.pins.filter(p=>EL[p[0]]&&EL[p[1]]);}}catch(e){}
+const save=()=>{try{localStorage.setItem("btri",JSON.stringify({dp:S.dp,pins:S.pins}))}catch(e){}};
+const en=s=>{const v=EL[s].en;return S.dp===1?Math.round(v*10)/10:v};
+const fmt=v=>v.toFixed(S.dp===1?1:2);
+const ION=1.8, POL=0.4, bx=y=>2.0+(0.4/1.8)*y;
+function region(x,y){ if(y>=ION) return "ionic"; if(x<bx(y)) return "metallic"; return y>=POL?"polar":"covalent"; }
+const NAME={ionic:"Ionic",polar:"Polar covalent",covalent:"Covalent",metallic:"Metallic"};
+const WHY={
+ ionic:"Large Δχ: electrons are effectively transferred, giving a lattice of oppositely charged ions. Expect high melting points and conduction only when molten or dissolved.",
+ polar:"Electrons are shared but pulled toward the more electronegative atom, giving partial charges (δ+ / δ−). Character becomes more ionic as Δχ grows.",
+ covalent:"Both atoms are fairly electronegative and similar, so electrons are shared almost equally between them.",
+ metallic:"Both atoms have low electronegativity and hold valence electrons loosely, so the electrons delocalise around a lattice of cations."
+};
+const pctIonic=d=>100*(1-Math.exp(-d*d/4));
+const W=620,H=450,m={l:56,r:62,t:16,b:50},X0=0.5,X1=4.2,Y1=3.4;
+const pw=W-m.l-m.r, ph=H-m.t-m.b;
+const sx=v=>m.l+(v-X0)/(X1-X0)*pw, sy=v=>m.t+ph-(v/Y1)*ph;
+const ix=px=>X0+(px-m.l)/pw*(X1-X0), iy=py=>(m.t+ph-py)/ph*Y1;
+const P=pts=>pts.map(([x,y])=>sx(x).toFixed(1)+","+sy(y).toFixed(1)).join(" ");
+const svg=document.getElementById("tri");
+let hover=null;
+function draw(){
+  const lo=en("Cs"), hi=en("F"), ax=(lo+hi)/2, ay=hi-lo;
+  const tri=[[lo,0],[hi,0],[ax,ay]];
+  let g=`<defs><clipPath id="cp"><polygon points="${P(tri)}"/></clipPath></defs>`;
+  for(let v=1;v<=4.001;v+=0.5){g+=`<line x1="${sx(v)}" x2="${sx(v)}" y1="${m.t}" y2="${m.t+ph}" stroke="var(--grid)"/><text x="${sx(v)}" y="${m.t+ph+18}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--mono)">${v.toFixed(1)}</text>`}
+  for(let v=0;v<=3.001;v+=0.5){g+=`<line x1="${m.l}" x2="${m.l+pw}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${m.l-8}" y="${sy(v)+4}" text-anchor="end" font-size="12" fill="var(--muted)" font-family="var(--mono)">${v.toFixed(1)}</text>`}
+  [10,25,50,75,90].forEach(p=>{const d=2*Math.sqrt(-Math.log(1-p/100));g+=`<line x1="${m.l+pw}" x2="${m.l+pw+5}" y1="${sy(d)}" y2="${sy(d)}" stroke="var(--muted)"/><text x="${m.l+pw+8}" y="${sy(d)+4}" font-size="11" fill="var(--muted)" font-family="var(--mono)">${p}%</text>`});
+  g+=`<line x1="${m.l+pw}" x2="${m.l+pw}" y1="${m.t}" y2="${m.t+ph}" stroke="var(--line)"/>`;
+  g+=`<text x="${m.l+pw/2}" y="${H-8}" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="var(--body)">Mean electronegativity, χ̄ = (χA + χB)/2</text>`;
+  g+=`<text transform="translate(16 ${m.t+ph/2}) rotate(-90)" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="var(--body)">Electronegativity difference, Δχ</text>`;
+  g+=`<text transform="translate(${W-6} ${m.t+ph/2}) rotate(90)" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--body)">% ionic character (est.)</text>`;
+  g+=`<g clip-path="url(#cp)">
+   <polygon points="${P([[X0,0],[2,0],[bx(ION),ION],[X0,ION]])}" fill="var(--metallic)" fill-opacity=".28"/>
+   <polygon points="${P([[2,0],[X1,0],[X1,POL],[bx(POL),POL]])}" fill="var(--covalent)" fill-opacity=".32"/>
+   <polygon points="${P([[bx(POL),POL],[X1,POL],[X1,ION],[bx(ION),ION]])}" fill="var(--polar)" fill-opacity=".22"/>
+   <polygon points="${P([[X0,ION],[X1,ION],[X1,Y1],[X0,Y1]])}" fill="var(--ionic)" fill-opacity=".24"/>
+   <line x1="${sx(X0)}" x2="${sx(X1)}" y1="${sy(ION)}" y2="${sy(ION)}" stroke="var(--ink)" stroke-opacity=".45" stroke-dasharray="5 4"/>
+   <line x1="${sx(2)}" y1="${sy(0)}" x2="${sx(bx(ION))}" y2="${sy(ION)}" stroke="var(--ink)" stroke-opacity=".45" stroke-dasharray="5 4"/>
+   <line x1="${sx(bx(POL))}" x2="${sx(X1)}" y1="${sy(POL)}" y2="${sy(POL)}" stroke="var(--ink)" stroke-opacity=".25" stroke-dasharray="2 4"/>
+  </g>`;
+  g+=`<polygon points="${P(tri)}" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/>`;
+  const rl=(x,y,t,c,s=15)=>`<text x="${sx(x)}" y="${sy(y)}" text-anchor="middle" font-size="${s}" font-weight="700" fill="${c}" font-family="var(--display)">${t}</text>`;
+  g+=rl(ax,2.35,"IONIC","var(--ionic)",17)+rl(1.35,0.55,"METALLIC","var(--metallic)")+rl(2.85,1.0,"POLAR COVALENT","var(--polar)",13)+rl(3.15,0.12,"COVALENT","var(--covalent)",12);
+  const vt=(x,y,t,dx,dy,anc)=>`<text x="${sx(x)+dx}" y="${sy(y)+dy}" text-anchor="${anc}" font-size="12" font-weight="600" fill="var(--ink)" font-family="var(--mono)">${t}</text>`;
+  g+=vt(lo,0,"Cs",-4,-6,"end")+vt(hi,0,"F₂",4,-6,"start")+vt(ax,ay,"CsF",0,-7,"middle");
+  S.pins.forEach(([a,b])=>{const xa=en(a),xb=en(b),x=(xa+xb)/2,y=Math.abs(xa-xb);
+    g+=`<g><circle cx="${sx(x)}" cy="${sy(y)}" r="4" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="${sx(x)+7}" y="${sy(y)-6}" font-size="11" fill="var(--ink)" font-family="var(--mono)">${label(a,b)}</text></g>`});
+  const xa=en(S.a),xb=en(S.b),x=(xa+xb)/2,y=Math.abs(xa-xb);
+  g+=`<g stroke="var(--mark)" stroke-width="1.8" stroke-dasharray="4 3"><line x1="${sx(xa)}" y1="${sy(0)}" x2="${sx(x)}" y2="${sy(y)}"/><line x1="${sx(xb)}" y1="${sy(0)}" x2="${sx(x)}" y2="${sy(y)}"/></g>`;
+  [[xa,S.a],[xb,S.b]].forEach(([v,s],i)=>{ if(i===1&&S.a===S.b) return;
+    g+=`<circle cx="${sx(v)}" cy="${sy(0)}" r="4" fill="var(--mark)"/><text x="${sx(v)}" y="${sy(0)+32}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--mark)" font-family="var(--mono)">${s}</text>`});
+  g+=`<circle cx="${sx(x)}" cy="${sy(y)}" r="8" fill="var(--mark)" stroke="var(--card)" stroke-width="2.5"/>`;
+  g+=`<text x="${sx(x)+12}" y="${sy(y)+18}" font-size="13" font-weight="700" fill="var(--ink)" font-family="var(--mono)">${label(S.a,S.b)}</text>`;
+  if(hover){g+=`<g stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3" pointer-events="none"><line x1="${sx(hover[0])}" x2="${sx(hover[0])}" y1="${m.t}" y2="${m.t+ph}"/><line x1="${m.l}" x2="${m.l+pw}" y1="${sy(hover[1])}" y2="${sy(hover[1])}"/></g>`}
+  svg.innerHTML=g;
+}
+function readout(){
+  const xa=en(S.a),xb=en(S.b),x=(xa+xb)/2,y=Math.abs(xa-xb),r=region(x,y);
+  symA.textContent=S.a; symB.textContent=S.b;
+  enA.textContent="χ = "+fmt(xa); enB.textContent="χ = "+fmt(xb);
+  slotA.setAttribute("aria-pressed",S.slot==="a"); slotB.setAttribute("aria-pressed",S.slot==="b");
+  pill.textContent=NAME[r]; pill.style.background=`var(--${r})`;
+  pair.textContent=S.a===S.b?`${S.a} (pure element)`:label(S.a,S.b);
+  avg.textContent=fmt(x); dlt.textContent=fmt(y); pct.textContent=Math.round(pctIonic(y))+"%";
+  calc.innerHTML=`χ̄ = (${fmt(xa)} + ${fmt(xb)}) / 2 = ${fmt(x)}<br>Δχ = |${fmt(xa)} − ${fmt(xb)}| = ${fmt(y)}`;
+  let w=WHY[r];
+  const nearI=Math.abs(y-ION)<0.25, nearM=y<ION && Math.abs(x-bx(y))<0.12;
+  if(nearI||nearM) w+=" This point sits close to a boundary, so expect intermediate behaviour.";
+  if(S.a==="Li"&&S.b==="H"||S.a==="H"&&S.b==="Li") w+=" Note: LiH is in fact an ionic solid (Li⁺ H⁻), a known limit of this simple model.";
+  why.textContent=w;
+  dp1.setAttribute("aria-pressed",S.dp===1); dp2.setAttribute("aria-pressed",S.dp===2);
+  pinsEl.innerHTML=S.pins.length?S.pins.map((p,i)=>`<button class="chip" data-i="${i}" title="Remove">${label(p[0],p[1])}<span class="x">×</span></button>`).join(""):`<span class="hint">Nothing pinned. Pin pairs to compare them on the plot.</span>`;
+  document.querySelectorAll(".el[data-s]").forEach(b=>{const s=b.dataset.s;const t=[];if(s===S.a)t.push("A");if(s===S.b)t.push("B");
+    b.classList.toggle("sel",t.length>0); b.querySelector(".tag")?.remove();
+    if(t.length){const sp=document.createElement("span");sp.className="tag";sp.textContent=t.join("");b.appendChild(sp)}
+    b.querySelector("small").textContent=fmt(en(s));});
+  draw();
+}
+const ramp=t=>{const st=[[176,214,232],[186,226,190],[246,214,130],[244,160,150]];
+  const k=Math.min(2.999,Math.max(0,t*3)),i=Math.floor(k),f=k-i,a=st[i],b=st[i+1];
+  return `rgb(${a.map((v,j)=>Math.round(v+(b[j]-v)*f)).join(",")})`};
+const pt=document.getElementById("pt");
+pt.innerHTML=CELLS.map(c=>{
+  if(!c) return `<span></span>`;
+  if(c.en==null) return `<button class="el" disabled aria-label="${c.s}, no value"><b>${c.s}</b><small>–</small></button>`;
+  return `<button class="el" data-s="${c.s}" style="background:${ramp((c.en-0.79)/(3.98-0.79))}" aria-label="${c.s}, electronegativity ${c.en}"><b>${c.s}</b><small></small></button>`;
+}).join("");
+document.getElementById("ramp").style.background=`linear-gradient(90deg,${[0,.33,.66,1].map(ramp).join(",")})`;
+const pinsEl=document.getElementById("pins");
+pt.addEventListener("click",e=>{const b=e.target.closest(".el[data-s]");if(!b)return;
+  S[S.slot]=b.dataset.s; S.slot=S.slot==="a"?"b":"a"; readout();});
+slotA.onclick=()=>{S.slot="a";readout()}; slotB.onclick=()=>{S.slot="b";readout()};
+swap.onclick=()=>{[S.a,S.b]=[S.b,S.a];readout()};
+pin.onclick=()=>{if(!S.pins.some(p=>(p[0]===S.a&&p[1]===S.b)||(p[0]===S.b&&p[1]===S.a)))S.pins.push([S.a,S.b]);save();readout()};
+clear.onclick=()=>{S.pins=[];save();readout()};
+pinsEl.onclick=e=>{const b=e.target.closest("[data-i]");if(!b)return;S.pins.splice(+b.dataset.i,1);save();readout()};
+dp1.onclick=()=>{S.dp=1;save();readout()}; dp2.onclick=()=>{S.dp=2;save();readout()};
+document.getElementById("presets").innerHTML=PRESETS.map((p,i)=>`<button class="chip" data-p="${i}">${p[0]}</button>`).join("");
+presets.onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;const p=PRESETS[+b.dataset.p];S.a=p[1];S.b=p[2];S.slot="a";readout()};
+const cur=document.getElementById("cursor");
+function onMove(e){
+  const pt2=svg.createSVGPoint();pt2.x=e.clientX;pt2.y=e.clientY;
+  const q=pt2.matrixTransform(svg.getScreenCTM().inverse());
+  const x=ix(q.x),y=iy(q.y);
+  if(x<X0||x>X1||y<0||y>Y1){hover=null;cur.textContent="Move over the triangle to read any position.";draw();return}
+  hover=[x,y];
+  const lo=en("Cs"),hi=en("F"),inside=y<=2*(x-lo)+1e-9&&y<=2*(hi-x)+1e-9;
+  cur.textContent=`χ̄ ${x.toFixed(2)} · Δχ ${y.toFixed(2)} · `+(inside?`${NAME[region(x,y)]} · ~${Math.round(pctIonic(y))}% ionic`:"outside the triangle: no pair of elements lands here");
+  draw();
+}
+svg.addEventListener("pointermove",onMove);
+svg.addEventListener("pointerleave",()=>{hover=null;cur.textContent="Move over the triangle to read any position.";draw()});
+readout();
+</script>
+</body></html>

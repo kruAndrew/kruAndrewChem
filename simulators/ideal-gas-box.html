@@ -1,0 +1,489 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ideal Gas Box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --stage:#E3E9F1; --ink:#16202E; --muted:#56637A;
+  --line:#CFD8E4; --accent:#2457C5; --accent-soft:#E2EAFB; --chamber:#7F8DA3;
+  --p-cool:#2F7FD8; --p-mid:#8E5BD6; --p-hot:#E0702B; --good:#1E8A5A; --particle:#34425A;
+  --font-display:"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body:"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#161D27; --stage:#111821; --ink:#E5EBF3; --muted:#93A1B5;
+    --line:#29343F; --accent:#7EA3F4; --accent-soft:#1C2A45; --chamber:#6C7C92;
+    --p-cool:#4A97EE; --p-mid:#A57BE6; --p-hot:#F2924F; --good:#4CC28A; --particle:#D3DCE8;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5}
+.back{display:inline-block;font-weight:600;font-size:13px;color:var(--muted)}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 56px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:6px;max-width:68ch}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(28px,4.4vw,44px);line-height:1.05;margin:0;letter-spacing:-.02em}
+.lede{margin:0;color:var(--muted)}
+.lede b{color:var(--ink);font-weight:600}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-width:640px}
+@media (max-width:480px){.modes{grid-template-columns:minmax(0,1fr)}}
+.mode{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;display:flex;flex-direction:column;gap:2px}
+.mode strong{font-weight:600}
+.mode span{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.mode[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.mode:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lab{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:880px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:14px;overflow:hidden;height:clamp(330px,46vw,540px)}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.stage canvas:active{cursor:grabbing}
+.legend{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);pointer-events:none}
+.scale{display:flex;align-items:center;gap:8px}
+.bar{width:110px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--p-cool),var(--p-mid),var(--p-hot))}
+.stage-tools{position:absolute;right:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.hint{position:absolute;left:12px;bottom:14px;font-size:12px;color:var(--muted);pointer-events:none}
+@media (max-width:520px){.hint{display:none}}
+.btn{appearance:none;font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.gauge{display:flex;flex-direction:column;gap:4px}
+.label{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.big{font-family:var(--font-mono);font-weight:500;font-size:clamp(30px,4vw,40px);line-height:1.1}
+.big small{font-size:.45em;color:var(--muted);margin-left:6px}
+.compare{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;color:var(--muted)}
+.compare b{font-family:var(--font-mono);font-weight:500;color:var(--ink);text-align:right}
+.ctrl{display:flex;flex-direction:column;gap:6px}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ctrl-head label{font-weight:600}
+.val{font-family:var(--font-mono)}
+.val small{color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+input[type=range]:disabled{opacity:.45}
+.lock{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 8px}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+.calc{background:var(--bg);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.eq{font-family:var(--font-mono);font-size:14px}
+.tbl{width:100%;overflow-x:auto}
+.states{border-collapse:collapse;width:100%;font-size:13.5px}
+.states th,.states td{padding:4px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.states thead th{font-weight:600;color:var(--muted);font-size:12px}
+.states tbody th{text-align:left;font-weight:600;color:var(--muted)}
+.states td{font-family:var(--font-mono)}
+.states tr.k td{color:var(--accent);font-weight:500}
+.predict{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.predict label{font-size:13px;font-weight:600}
+.predict input{font:inherit;font-family:var(--font-mono);font-size:14px;width:7.5em;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 8px}
+.fb{margin:0;font-size:13.5px;min-height:1.4em}
+.fb.ok strong{color:var(--good)}
+.fb.no strong{color:var(--p-hot)}
+.toggle{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;cursor:pointer}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+.notebook{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:880px){.notebook{grid-template-columns:minmax(0,1fr)}}
+.side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2{font-family:var(--font-display);font-size:19px;font-weight:700;margin:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.toolbar label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+select{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 8px}
+.chart{width:100%;height:300px;display:block}
+.chart.small{height:180px}
+.fit{font-family:var(--font-mono);font-size:13px;min-height:1.5em}
+.guide ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.why{background:var(--bg);border-radius:10px;padding:12px 14px;font-size:14px}
+.why strong{display:block;margin-bottom:4px}
+.foot{font-size:12.5px;color:var(--muted);max-width:75ch}
+</style></head><body>
+<div class="wrap">
+  <a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+  <header>
+    <div class="eyebrow">IB Chemistry · S1.5 Ideal gases</div>
+    <h1>Ideal Gas Box</h1>
+    <p class="lede">A box of gas particles you can squeeze, heat and fill. Change <b>volume</b>, <b>temperature</b> or <b>amount</b> and watch what happens to the <b>pressure</b>. Use pV = nRT to calculate pressure for any state, or compare a gas before and after a change with p₁V₁/T₁ = p₂V₂/T₂.</p>
+  </header>
+  <nav class="modes" aria-label="Choose an investigation">
+    <button class="mode" data-mode="ideal" aria-pressed="true"><strong>pV = nRT</strong><span>change p, V, T and n</span></button>
+    <button class="mode" data-mode="combined" aria-pressed="false"><strong>p₁V₁/T₁ = p₂V₂/T₂</strong><span>fixed amount of gas · before and after</span></button>
+  </nav>
+  <section class="lab">
+    <div class="stage" id="stage">
+      <canvas id="three" aria-label="3D view of gas particles in a box with a movable piston"></canvas>
+      <div class="legend">
+        <div>Box tint shows temperature</div>
+        <div class="scale"><span>100 K</span><span class="bar"></span><span>600 K</span></div>
+        <div>1 particle = 1 mmol of N₂</div>
+      </div>
+      <div class="hint">Drag to rotate · scroll to zoom</div>
+      <div class="stage-tools">
+        <button class="btn" id="viewBtn">Reset view</button>
+        <button class="btn" id="pauseBtn">Pause</button>
+        <button class="btn" id="resetBtn">Reset all</button>
+      </div>
+    </div>
+    <aside class="panel">
+      <div class="gauge">
+        <span class="label">Pressure</span>
+        <div class="big"><span id="pMeas">0.0</span><small>kPa</small></div>
+        <div class="compare">
+          <span>Measured from wall hits</span><b id="pMeas2">–</b>
+          <span>Calculated, p = nRT / V</span><b id="pCalc">–</b>
+          <span>Wall hits per second</span><b id="hits">–</b>
+          <span>Particle collisions per second</span><b id="colls">–</b>
+        </div>
+      </div>
+      <hr>
+      <div class="ctrl">
+        <div class="ctrl-head"><label for="sV">Volume, V</label><span class="val" id="vV"></span></div>
+        <input type="range" id="sV" min="1" max="4" step="0.1" value="2">
+        <span id="lockV"></span>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-head"><label for="sT">Temperature, T</label><span class="val" id="vT"></span></div>
+        <input type="range" id="sT" min="100" max="600" step="10" value="300">
+        <span id="lockT"></span>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-head"><label for="sN">Amount, n</label><span class="val" id="vN"></span></div>
+        <input type="range" id="sN" min="0.02" max="0.12" step="0.005" value="0.05">
+        <span id="lockN"></span>
+      </div>
+      <label class="toggle"><input type="checkbox" id="collChk" checked> Particles collide with each other</label>
+      <p class="note" id="modeNote"></p>
+      <div class="calc" id="calc"></div>
+    </aside>
+  </section>
+  <section class="notebook">
+    <div class="card">
+      <h2>Your graph</h2>
+      <div class="toolbar">
+        <label>y-axis
+          <select id="axY"><option value="p">p / kPa</option><option value="V">V / dm³</option><option value="pV">pV / kPa dm³</option></select>
+        </label>
+        <label>x-axis
+          <select id="axX"><option value="V">V / dm³</option><option value="invV">1/V / dm⁻³</option><option value="TK">T / K</option><option value="TC">T / °C</option><option value="n">n / mol</option></select>
+        </label>
+        <label><input type="checkbox" id="fitChk"> Line of best fit</label>
+      </div>
+      <canvas class="chart" id="graph" aria-label="Graph of recorded data points"></canvas>
+      <div class="fit" id="fitText"></div>
+      <div class="toolbar">
+        <button class="btn primary" id="recBtn">Record point</button>
+        <button class="btn" id="clrBtn">Clear graph</button>
+        <span class="note" id="ptCount">0 points</span>
+      </div>
+      <p class="note">The ring shows where the gas is right now. Recorded points use the calculated pressure so the pattern is clear. The live gauge shows the noisier measured value.</p>
+    </div>
+    <div class="side">
+      <div class="card guide" id="guide"></div>
+      <div class="card">
+        <h2>Particle speeds</h2>
+        <canvas class="chart small" id="hist" aria-label="Histogram of particle speeds"></canvas>
+        <p class="note">Bars: speeds in the box right now. Line: the Maxwell–Boltzmann prediction. Mean speed <b class="val" id="meanSpd">–</b></p>
+      </div>
+    </div>
+  </section>
+  <p class="foot">Model assumptions: particles have no volume and no attractions, and they bounce off the walls without losing energy. Collisions between particles are perfectly elastic: individual particles speed up and slow down, but the total kinetic energy, and so the temperature, stays the same. The particles are drawn with a small size so you can see them collide; this has a negligible effect on pressure. Speeds are for nitrogen. R = 8.31 J K⁻¹ mol⁻¹, and kPa × dm³ = J.</p>
+</div>
+<script src="lib/three.min.js"></script>
+<script>
+(function(){
+const R=8.31, C=0.047, M=0.028;
+const SPD=Math.sqrt(R/(M*C));
+const H=10, D=10, LPER=4, LMAX=16, RAD=0.28, MAXN=120;
+const F=H*D*LPER*R/(1000*C);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+const state={mode:'ideal',V:2,T:300,n:0.05,s1:null,paused:false};
+let L=LPER*state.V, N=0;
+const pos=new Float32Array(MAXN*3), vel=new Float32Array(MAXN*3);
+let pMeas=0, hitsRate=0, imp=0, hitsAcc=0, collRate=0, collAcc=0, collOn=true;
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function addParticle(){
+  const i=N++, s=Math.sqrt(C*state.T);
+  pos[i*3]=Math.random()*L; pos[i*3+1]=Math.random()*H; pos[i*3+2]=Math.random()*D;
+  vel[i*3]=gauss()*s; vel[i*3+1]=gauss()*s; vel[i*3+2]=gauss()*s;
+}
+function syncN(){const t=Math.round(state.n*1000); while(N<t)addParticle(); if(N>t)N=t; normKE();}
+function normKE(){let s=0; for(let i=0;i<N*3;i++)s+=vel[i]*vel[i]; if(!s)return; const k=Math.sqrt(3*N*C*state.T/s); for(let i=0;i<N*3;i++)vel[i]*=k;}
+function setT(t){const k=Math.sqrt(t/state.T); for(let i=0;i<N*3;i++)vel[i]*=k; state.T=t;}
+const pCalc=()=>state.n*R*state.T/state.V;
+const canvas=$('three'), stage=$('stage');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+const scene=new THREE.Scene();
+const camera=new THREE.OrthographicCamera(-1,1,1,-1,0.1,500);
+scene.add(new THREE.HemisphereLight(0xffffff,0x8899aa,0.75));
+const dl=new THREE.DirectionalLight(0xffffff,0.7); dl.position.set(10,20,15); scene.add(dl);
+const g=new THREE.Group(); g.position.set(-LMAX/2,-H/2,-D/2); scene.add(g);
+const chamberMat=new THREE.LineBasicMaterial({color:0x888888,transparent:true,opacity:.9});
+const chamber=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(LMAX+2*RAD,H+2*RAD,D+2*RAD).translate(LMAX/2,H/2,D/2)),chamberMat);
+g.add(chamber);
+const fillMat=new THREE.MeshBasicMaterial({color:0x4488ff,transparent:true,opacity:.13,depthWrite:false,side:THREE.DoubleSide});
+const fill=new THREE.Mesh(new THREE.BoxGeometry(1,H+2*RAD,D+2*RAD).translate(.5,H/2,D/2),fillMat); g.add(fill);
+const pistonMat=new THREE.MeshStandardMaterial({color:0x2457c5,transparent:true,opacity:.55,roughness:.5});
+const piston=new THREE.Mesh(new THREE.BoxGeometry(.3,H+2*RAD+.2,D+2*RAD+.2).translate(.15,H/2,D/2),pistonMat); g.add(piston);
+const rodMat=new THREE.MeshStandardMaterial({color:0x888888,roughness:.4,metalness:.3});
+const rod=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,1,16).rotateZ(Math.PI/2).translate(.5,H/2,D/2),rodMat); g.add(rod);
+const pMat=new THREE.MeshStandardMaterial({roughness:.35,metalness:.05});
+const parts=new THREE.InstancedMesh(new THREE.SphereGeometry(RAD,14,10),pMat,MAXN);
+parts.instanceMatrix.setUsage(THREE.DynamicDrawUsage); g.add(parts);
+const tmpM=new THREE.Matrix4(), tmpC=new THREE.Color();
+let cCool,cMid,cHot;
+for(let i=0;i<MAXN;i++)parts.setColorAt(i,new THREE.Color(1,1,1));
+function applyTheme(){
+  chamberMat.color.set(css('--chamber')); rodMat.color.set(css('--chamber'));
+  pistonMat.color.set(css('--accent'));
+  pMat.color.set(css('--particle'));
+  cCool=new THREE.Color(css('--p-cool')); cMid=new THREE.Color(css('--p-mid')); cHot=new THREE.Color(css('--p-hot'));
+  drawGraph(); drawHist();
+}
+let theta=.55, phi=1.18, rad=60;
+function placeCam(){camera.position.set(rad*Math.sin(phi)*Math.sin(theta),rad*Math.cos(phi),rad*Math.sin(phi)*Math.cos(theta));camera.lookAt(0,0,0);}
+function defaultView(){theta=.55;phi=1.18;camera.zoom=1;camera.updateProjectionMatrix();placeCam();}
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;theta-=(e.clientX-drag.x)*.008;phi=Math.min(2.9,Math.max(.2,phi-(e.clientY-drag.y)*.008));drag={x:e.clientX,y:e.clientY};placeCam();});
+const endDrag=()=>drag=null; canvas.addEventListener('pointerup',endDrag); canvas.addEventListener('pointercancel',endDrag);
+canvas.addEventListener('wheel',e=>{e.preventDefault();camera.zoom=Math.min(3,Math.max(.5,camera.zoom*(1-Math.sign(e.deltaY)*.08)));camera.updateProjectionMatrix();},{passive:false});
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);
+  const asp=w/h, vh=Math.max(20,28/asp)/2;
+  camera.left=-vh*asp;camera.right=vh*asp;camera.top=vh;camera.bottom=-vh;camera.updateProjectionMatrix();}
+new ResizeObserver(()=>{resize();}).observe(stage);
+const MODES={
+  ideal:{locks:[],x:'V',y:'p',
+    note:'Every control is free. Change one thing at a time if you want a fair test.',
+    title:'pV = nRT',
+    tasks:['Before you move a slider, predict the new pressure. Then check it against the working box.','Calculate p for n = 0.080 mol, T = 400 K and V = 3.0 dm³. Set the sliders to check your answer.','Find a combination of n, T and V that gives p close to 100 kPa, about atmospheric pressure.','Watch the two pressure readings. Why does the measured one wobble while the calculated one stays steady?','Follow one particle. Does it keep the same speed after it hits another particle? Does the mean speed change?'],
+    why:'Pressure comes from particles hitting the walls. More particles (n) or a smaller box (V) means more frequent hits. Higher temperature (T) means faster particles, which hit more often and harder. pV = nRT puts all three effects into one equation.'},
+  combined:{locks:['n'],x:'V',y:'p',
+    note:'The amount of gas is fixed, so n stays the same between state 1 and state 2.',
+    title:'p₁V₁/T₁ = p₂V₂/T₂',
+    tasks:['Save the current gas as state 1. Halve the volume without changing T. Calculate p₂ before you look at the gauge, then type it in and check.','Save state 1 again. Change T to 450 K and V to 3.0 dm³. Calculate p₂ and check.','Look at the pV/T row. Why is it the same in both states? Compare it with n × R.','Why must T be in kelvin? Try your last calculation using °C and see what goes wrong.'],
+    why:'For a fixed amount of gas, pV/T always equals nR. Since n and R don’t change, pV/T is the same before and after, which gives p₁V₁/T₁ = p₂V₂/T₂. When T doesn’t change, the T terms cancel and you get p₁V₁ = p₂V₂.'}
+};
+const sV=$('sV'),sT=$('sT'),sN=$('sN');
+function lockTag(el,txt){el.innerHTML=txt?`<span class="lock">${txt}</span>`:'';}
+const CALC={
+  ideal:`<div class="label">Working</div>
+    <div class="eq">p = nRT / V</div><div class="eq" id="eq1"></div><div class="eq" id="eq2"></div>
+    <p class="note">With V in dm³, p comes out in kPa. With V in m³, it comes out in Pa.</p>`,
+  combined:`<div class="label">State 1 and state 2</div>
+    <div class="tbl"><table class="states"><thead><tr><th></th><th>State 1</th><th>State 2 (now)</th></tr></thead><tbody>
+      <tr><th>p / kPa</th><td id="s1p"></td><td id="s2p"></td></tr>
+      <tr><th>V / dm³</th><td id="s1V"></td><td id="s2V"></td></tr>
+      <tr><th>T / K</th><td id="s1T"></td><td id="s2T"></td></tr>
+      <tr class="k"><th>pV/T</th><td id="s1k"></td><td id="s2k"></td></tr></tbody></table></div>
+    <p class="note" id="simp"></p>
+    <button class="btn" id="saveS1">Save current as state 1</button>
+    <div class="predict"><label for="pred">Your p₂ / kPa</label><input id="pred" type="number" step="0.1" inputmode="decimal" placeholder="e.g. 41.5"><button class="btn primary" id="checkPred">Check</button></div>
+    <p class="fb" id="fb" aria-live="polite"></p>`
+};
+function saveS1(){state.s1={p:pCalc(),V:state.V,T:state.T}; $('fb').textContent=''; updateUI();}
+function checkPred(){
+  const raw=$('pred').value.trim(), fb=$('fb'), s1=state.s1, p2=pCalc();
+  const work=`p₂ = p₁ × V₁/V₂ × T₂/T₁ = ${s1.p.toFixed(1)} × ${s1.V.toFixed(1)}/${state.V.toFixed(1)} × ${Math.round(state.T)}/${Math.round(s1.T)} = ${p2.toFixed(1)} kPa`;
+  if(raw===''){fb.className='fb';fb.textContent='Type your value of p₂ first.';return;}
+  const v=+raw, ok=Math.abs(v-p2)<=Math.max(0.5,0.01*p2);
+  fb.className='fb '+(ok?'ok':'no');
+  fb.innerHTML=(ok?'<strong>Correct.</strong> ':'<strong>Not quite.</strong> ')+work;
+}
+function setMode(m){
+  state.mode=m; const md=MODES[m];
+  document.querySelectorAll('.mode').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));
+  sV.disabled=md.locks.includes('V'); sT.disabled=md.locks.includes('T'); sN.disabled=md.locks.includes('n');
+  lockTag($('lockV'),sV.disabled?'held constant':''); lockTag($('lockT'),sT.disabled?'held constant':''); lockTag($('lockN'),sN.disabled?'held constant':'');
+  $('modeNote').textContent=md.note;
+  $('calc').innerHTML=CALC[m];
+  if(m==='combined'){state.s1={p:pCalc(),V:state.V,T:state.T}; $('saveS1').addEventListener('click',saveS1); $('checkPred').addEventListener('click',checkPred);
+    $('pred').addEventListener('keydown',e=>{if(e.key==='Enter')checkPred();});}
+  $('axX').value=md.x; $('axY').value=md.y; points.length=0; $('fitChk').checked=false;
+  $('guide').innerHTML=`<h2>${md.title}: try this</h2><ol>${md.tasks.map(t=>`<li>${t}</li>`).join('')}</ol><div class="why"><strong>Why it works</strong>${md.why}</div>`;
+  updateUI(); drawGraph();
+}
+document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+function onSlide(){ if($('fb'))$('fb').textContent=''; updateUI(); drawGraph(); }
+sV.addEventListener('input',()=>{state.V=+sV.value;onSlide();});
+sT.addEventListener('input',()=>{setT(+sT.value);onSlide();});
+sN.addEventListener('input',()=>{state.n=+sN.value;syncN();onSlide();});
+function updateUI(){
+  $('vV').innerHTML=`${state.V.toFixed(1)} <small>dm³</small>`;
+  sV.value=state.V;
+  $('vT').innerHTML=`${Math.round(state.T)} K <small>(${Math.round(state.T-273)} °C)</small>`;
+  $('vN').innerHTML=`${state.n.toFixed(3)} <small>mol</small>`;
+  const p=pCalc();
+  $('pCalc').textContent=p.toFixed(1)+' kPa';
+  if(state.mode==='ideal'){
+    $('eq1').textContent=`p = (${state.n.toFixed(3)} × 8.31 × ${Math.round(state.T)}) ÷ ${state.V.toFixed(1)}`;
+    $('eq2').textContent=`p = ${p.toFixed(1)} kPa`;
+  } else {
+    const s1=state.s1;
+    $('s1p').textContent=s1.p.toFixed(1); $('s1V').textContent=s1.V.toFixed(1); $('s1T').textContent=Math.round(s1.T); $('s1k').textContent=(s1.p*s1.V/s1.T).toFixed(4);
+    $('s2p').textContent=p.toFixed(1); $('s2V').textContent=state.V.toFixed(1); $('s2T').textContent=Math.round(state.T); $('s2k').textContent=(p*state.V/state.T).toFixed(4);
+    const sameT=Math.abs(state.T-s1.T)<.5, sameV=Math.abs(state.V-s1.V)<.05;
+    $('simp').textContent= sameT&&sameV ? 'Nothing has changed yet. Move the V or T slider.'
+      : sameT ? 'T₁ = T₂, so the T terms cancel: p₁V₁ = p₂V₂.'
+      : sameV ? 'V₁ = V₂, so the V terms cancel: p₁/T₁ = p₂/T₂.'
+      : 'V and T have both changed, so use the full equation.';
+  }
+}
+const points=[];
+const GX={V:s=>s.V,invV:s=>1/s.V,TK:s=>s.T,TC:s=>s.T-273,n:s=>s.n};
+const GY={p:s=>s.p,V:s=>s.V,pV:s=>s.p*s.V};
+const XR={V:[0,4],invV:[0,1.2],TK:[0,600],TC:[-300,350],n:[0,0.12]};
+const XL={V:'V / dm³',invV:'1/V / dm⁻³',TK:'T / K',TC:'T / °C',n:'n / mol'};
+const YL={p:'p / kPa',V:'V / dm³',pV:'pV / kPa dm³'};
+function niceCeil(v){if(v<=0)return 1;const e=Math.pow(10,Math.floor(Math.log10(v)));for(const m of[1,1.2,1.5,2,2.5,3,4,5,6,8,10])if(m*e>=v-1e-9)return m*e;return 10*e;}
+function fmt(v){const a=Math.abs(v);if(a===0)return'0';if(a>=100)return v.toFixed(0);if(a>=10)return v.toFixed(1).replace(/\.0$/,'');if(a>=1)return v.toFixed(2).replace(/\.?0+$/,'');return v.toFixed(3).replace(/\.?0+$/,'');}
+function sf3(v){return Number(v.toPrecision(3)).toString();}
+function sizeCanvas(cv){const dpr=Math.min(window.devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return[c,w,h];}
+function drawGraph(){
+  const cv=$('graph'); const [c,w,h]=sizeCanvas(cv); if(!w)return;
+  c.clearRect(0,0,w,h);
+  const ax=$('axX').value, ay=$('axY').value, gx=GX[ax], gy=GY[ay];
+  const cur={p:pCalc(),V:state.V,T:state.T,n:state.n};
+  const xr=XR[ax];
+  let ymax;
+  if(ay==='V')ymax=4.5; else {const ys=points.map(gy).concat([gy(cur)]);ymax=niceCeil(Math.max(...ys)*1.15);}
+  const yr=[0,ymax];
+  const pl=58,pr=16,pt=14,pb=44, W=w-pl-pr, Hh=h-pt-pb;
+  const X=v=>pl+(v-xr[0])/(xr[1]-xr[0])*W, Y=v=>pt+Hh-(v-yr[0])/(yr[1]-yr[0])*Hh;
+  const ink=css('--ink'),muted=css('--muted'),line=css('--line'),acc=css('--accent');
+  c.font='12px '+css('--font-mono'); c.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const xv=xr[0]+(xr[1]-xr[0])*i/5, yv=yr[0]+(yr[1]-yr[0])*i/5;
+    c.strokeStyle=line; c.beginPath(); c.moveTo(X(xv),pt); c.lineTo(X(xv),pt+Hh); c.moveTo(pl,Y(yv)); c.lineTo(pl+W,Y(yv)); c.stroke();
+    c.fillStyle=muted; c.textAlign='center'; c.textBaseline='top'; c.fillText(fmt(xv),X(xv),pt+Hh+6);
+    c.textAlign='right'; c.textBaseline='middle'; c.fillText(fmt(yv),pl-6,Y(yv));
+  }
+  c.strokeStyle=muted; c.beginPath();
+  if(xr[0]<0){c.moveTo(X(0),pt);c.lineTo(X(0),pt+Hh);} c.moveTo(pl,Y(0)); c.lineTo(pl+W,Y(0)); c.stroke();
+  c.fillStyle=ink; c.font='600 12px '+css('--font-body'); c.textAlign='center'; c.textBaseline='bottom';
+  c.fillText(XL[ax],pl+W/2,h-4);
+  c.save(); c.translate(14,pt+Hh/2); c.rotate(-Math.PI/2); c.textBaseline='middle'; c.fillText(YL[ay],0,0); c.restore();
+  c.save(); c.beginPath(); c.rect(pl,pt,W,Hh); c.clip();
+  let fitTxt='';
+  if($('fitChk').checked && points.length>=2){
+    const xs=points.map(gx), ys=points.map(gy), k=xs.length;
+    const mx=xs.reduce((a,b)=>a+b)/k, my=ys.reduce((a,b)=>a+b)/k;
+    let sxx=0,sxy=0,syy=0; xs.forEach((x,i)=>{sxx+=(x-mx)**2;sxy+=(x-mx)*(ys[i]-my);syy+=(ys[i]-my)**2;});
+    if(sxx>1e-12){
+      const m=sxy/sxx, b=my-m*mx, r2=syy>0?(sxy*sxy)/(sxx*syy):1;
+      c.strokeStyle=acc; c.setLineDash([6,5]); c.lineWidth=1.5; c.beginPath(); c.moveTo(X(xr[0]),Y(m*xr[0]+b)); c.lineTo(X(xr[1]),Y(m*xr[1]+b)); c.stroke(); c.setLineDash([]);
+      fitTxt=`y = ${sf3(m)}x ${b<0?'−':'+'} ${sf3(Math.abs(b))}   ·   R² = ${r2.toFixed(3)}`;
+      if(Math.abs(m)>1e-12) fitTxt+=`   ·   crosses y = 0 at x ≈ ${sf3(-b/m)}`;
+    } else fitTxt='Record points at different x values to fit a line.';
+  } else if($('fitChk').checked) fitTxt='Record at least two points to draw a line of best fit.';
+  $('fitText').textContent=fitTxt;
+  c.fillStyle=acc;
+  points.forEach(s=>{c.beginPath();c.arc(X(gx(s)),Y(gy(s)),4.5,0,7);c.fill();});
+  c.strokeStyle=ink; c.lineWidth=2; c.beginPath(); c.arc(X(gx(cur)),Y(gy(cur)),7,0,7); c.stroke();
+  c.restore();
+  $('ptCount').textContent=points.length+(points.length===1?' point':' points');
+}
+$('axX').addEventListener('change',drawGraph); $('axY').addEventListener('change',drawGraph); $('fitChk').addEventListener('change',drawGraph);
+$('recBtn').addEventListener('click',()=>{points.push({p:pCalc(),V:state.V,T:state.T,n:state.n});drawGraph();});
+$('clrBtn').addEventListener('click',()=>{points.length=0;drawGraph();});
+new ResizeObserver(()=>{drawGraph();drawHist();}).observe(document.querySelector('.notebook'));
+const BW=50, NB=30;
+function drawHist(){
+  const cv=$('hist'); const [c,w,h]=sizeCanvas(cv); if(!w)return;
+  c.clearRect(0,0,w,h);
+  const counts=new Array(NB).fill(0); let sum=0;
+  for(let i=0;i<N;i++){const s=Math.hypot(vel[i*3],vel[i*3+1],vel[i*3+2])*SPD; sum+=s; const b=Math.floor(s/BW); if(b<NB)counts[b]++;}
+  $('meanSpd').textContent=N?Math.round(sum/N)+' m s⁻¹':'–';
+  const sig=Math.sqrt(R*state.T/M);
+  const f=v=>Math.sqrt(2/Math.PI)*v*v/(sig**3)*Math.exp(-v*v/(2*sig*sig));
+  const peak=N*BW*f(sig*Math.SQRT2);
+  const ymax=Math.max(peak,...counts)*1.2||1;
+  const pl=34,pr=10,pt=8,pb=34,W=w-pl-pr,Hh=h-pt-pb, vmax=NB*BW;
+  const X=v=>pl+v/vmax*W, Y=v=>pt+Hh-v/ymax*Hh;
+  const muted=css('--muted'),line=css('--line'),ink=css('--ink');
+  c.font='11px '+css('--font-mono'); c.fillStyle=muted; c.textAlign='center'; c.textBaseline='top';
+  for(let v=0;v<=vmax;v+=500){c.strokeStyle=line;c.beginPath();c.moveTo(X(v),pt);c.lineTo(X(v),pt+Hh);c.stroke();c.fillText(v,X(v),pt+Hh+4);}
+  c.fillStyle=ink; c.font='600 11px '+css('--font-body'); c.textBaseline='bottom'; c.fillText('speed / m s⁻¹',pl+W/2,h-2);
+  for(let b=0;b<NB;b++){if(!counts[b])continue;
+    c.fillStyle=css('--accent'); c.fillRect(X(b*BW)+1,Y(counts[b]),W/NB-2,Y(0)-Y(counts[b]));}
+  c.strokeStyle=ink; c.lineWidth=1.6; c.beginPath();
+  for(let v=0;v<=vmax;v+=10){const y=Y(N*BW*f(v)); v?c.lineTo(X(v),y):c.moveTo(X(v),y);} c.stroke();
+  c.strokeStyle=muted; c.lineWidth=1; c.beginPath(); c.moveTo(pl,Y(0)); c.lineTo(pl+W,Y(0)); c.stroke();
+  c.save(); c.translate(10,pt+Hh/2); c.rotate(-Math.PI/2); c.textAlign='center'; c.textBaseline='middle'; c.fillStyle=ink; c.fillText('particles',0,0); c.restore();
+}
+function mixColor(t,out){ if(t<.5)out.copy(cCool).lerp(cMid,t*2); else out.copy(cMid).lerp(cHot,(t-.5)*2); return out; }
+$('collChk').addEventListener('change',e=>{collOn=e.target.checked;collRate=0;});
+$('pauseBtn').addEventListener('click',()=>{state.paused=!state.paused;$('pauseBtn').textContent=state.paused?'Play':'Pause';});
+$('viewBtn').addEventListener('click',defaultView);
+$('resetBtn').addEventListener('click',()=>{
+  state.V=2; state.T=300; state.n=0.05; sV.value=2; sT.min=100; sT.max=600; sT.value=300; sN.value=0.05;
+  N=0; L=LPER*state.V; syncN(); pMeas=pCalc(); setMode(state.mode);
+});
+let last=performance.now(), uiT=0, histT=0;
+function step(dt){
+  const Lt=LPER*state.V; L+=(Lt-L)*Math.min(1,dt*5);
+  const lim=[L,H,D];
+  for(let i=0;i<N;i++){
+    for(let a=0;a<3;a++){
+      const k=i*3+a; let p=pos[k]+vel[k]*dt, v=vel[k];
+      if(p<0){p=-p; v=Math.abs(v); imp+=2*v; hitsAcc++;}
+      else if(p>lim[a]){p=Math.max(0,2*lim[a]-p); v=-Math.abs(v); imp+=-2*v; hitsAcc++;}
+      pos[k]=p; vel[k]=v;
+    }
+  }
+  if(collOn) collide();
+}
+function collide(){
+  const d=2*RAD, d2=d*d;
+  for(let i=0;i<N;i++){const ix=i*3;
+    for(let j=i+1;j<N;j++){const jx=j*3;
+      const dx=pos[jx]-pos[ix]; if(dx>d||dx<-d)continue;
+      const dy=pos[jx+1]-pos[ix+1]; if(dy>d||dy<-d)continue;
+      const dz=pos[jx+2]-pos[ix+2]; const r2=dx*dx+dy*dy+dz*dz;
+      if(r2>=d2||r2===0)continue;
+      const dot=(vel[jx]-vel[ix])*dx+(vel[jx+1]-vel[ix+1])*dy+(vel[jx+2]-vel[ix+2])*dz;
+      if(dot>=0)continue;
+      const k=dot/r2;
+      vel[ix]+=k*dx; vel[ix+1]+=k*dy; vel[ix+2]+=k*dz;
+      vel[jx]-=k*dx; vel[jx+1]-=k*dy; vel[jx+2]-=k*dz;
+      collAcc++;
+    }
+  }
+}
+function measure(dt){
+  const A=2*(H*D+H*L+D*L);
+  const inst=imp/(A*dt)*F*(state.n*1000/Math.max(N,1)); imp=0;
+  const a=1-Math.exp(-dt/1.2); pMeas+=(inst-pMeas)*a;
+  hitsRate+=(hitsAcc/dt-hitsRate)*a; hitsAcc=0;
+  collRate+=(collAcc/dt-collRate)*a; collAcc=0;
+}
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(!state.paused&&dt>0){
+    let v2=0; for(let i=0;i<N*3;i+=3){const s=vel[i]*vel[i]+vel[i+1]*vel[i+1]+vel[i+2]*vel[i+2]; if(s>v2)v2=s;}
+    const ns=Math.min(10,Math.max(1,Math.ceil(Math.sqrt(v2)*dt/RAD)));
+    for(let s=0;s<ns;s++) step(dt/ns);
+    measure(dt);
+  }
+  for(let i=0;i<N;i++){ tmpM.makeTranslation(pos[i*3],pos[i*3+1],pos[i*3+2]); parts.setMatrixAt(i,tmpM); }
+  parts.count=N; parts.instanceMatrix.needsUpdate=true; if(parts.instanceColor)parts.instanceColor.needsUpdate=true;
+  piston.position.x=L+RAD; rod.position.x=L+RAD+.3; rod.scale.x=LMAX+4-(L+RAD+.3); fill.position.x=-RAD; fill.scale.x=L+2*RAD;
+  mixColor(Math.min(1,Math.max(0,(state.T-100)/500)),fillMat.color);
+  renderer.render(scene,camera);
+  uiT+=dt; histT+=dt;
+  if(uiT>.2){uiT=0; $('pMeas').textContent=pMeas.toFixed(1); $('pMeas2').textContent=pMeas.toFixed(1)+' kPa'; $('hits').textContent=Math.round(hitsRate).toLocaleString(); $('colls').textContent=collOn?Math.round(collRate).toLocaleString():'off';}
+  if(histT>.3){histT=0; drawHist();}
+  requestAnimationFrame(frame);
+}
+syncN(); pMeas=pCalc(); hitsRate=0;
+resize(); defaultView(); applyTheme(); setMode('ideal');
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

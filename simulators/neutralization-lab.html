@@ -1,0 +1,414 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R3.1.7 Neutralization Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#eaf1f2; --surface:#ffffff; --surface-2:#f3f7f8; --ink:#11232a; --muted:#566b72; --line:#cfdcdf;
+  --accent:#0b6a74; --accent-ink:#ffffff; --accent-soft:#d6eef0;
+  --c-h:#d4473a; --c-an:#e08a12; --c-cat:#2c6bd4; --c-bp:#14907f; --frag-ink:#ffffff;
+  --good:#1d8549; --bad:#bb3528; --strike:#b4433a; --warn-bg:#fff4dc; --warn-ink:#7a5410;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0c1417; --surface:#132024; --surface-2:#18292e; --ink:#e1eef0; --muted:#94aab0; --line:#2a3f45;
+  --accent:#53c3cb; --accent-ink:#04262a; --accent-soft:#16383d;
+  --c-h:#ee6a5c; --c-an:#f2a93b; --c-cat:#5d95f2; --c-bp:#3cc0ad; --frag-ink:#0a1417;
+  --good:#4fc883; --bad:#f07466; --strike:#f08b7f; --warn-bg:#3a2e12; --warn-ink:#f2d08a; color-scheme:dark }}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;padding:20px 16px 40px}
+.back{display:inline-block;margin-bottom:10px;font-weight:700;font-size:13px;color:var(--muted)}
+.wrap{max-width:1080px;margin:0 auto;display:grid;gap:18px}
+h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4vw,2.6rem);font-weight:800;line-height:1.05}
+h2{font-size:1.15rem;font-weight:600}
+.eyebrow,.lbl{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700}
+.eyebrow{color:var(--accent)} .lbl{color:var(--muted)}
+.lede{color:var(--muted);max-width:62ch;margin:.4rem 0 0}
+sub{font-size:.72em;line-height:0;vertical-align:-.25em}
+sup{font-size:.72em;line-height:0;vertical-align:.45em}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.controls{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:end}
+.field{display:grid;gap:4px;min-width:0}
+select{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;max-width:100%}
+select:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface-2)}
+.seg button{font:inherit;border:0;background:transparent;color:var(--muted);padding:8px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:9px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.pattern{font-size:1.02rem;margin-top:6px}
+.stage{position:relative;margin-top:14px;padding:18px 8px 8px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:10px 8px}
+.plus{align-self:center;font-size:1.4rem;color:var(--muted);padding:0 2px;margin-top:-18px}
+.box{display:grid;justify-items:center;gap:6px;transition:opacity .5s}
+.slots{display:flex;gap:3px;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);min-height:46px;align-items:center;transition:border-color .5s, background .5s}
+.prodrow .slots{border-style:dashed}
+.cap{font-size:.95rem;text-align:center;max-width:22ch}
+.cap .nm{display:block;color:var(--muted);font-size:.82rem}
+.cap .st,.final .st{font-size:.7em;color:var(--muted);margin-left:1px}
+.arrow{display:flex;justify-content:center;align-items:center;gap:10px;margin:14px 0;color:var(--muted)}
+.arrow svg{width:28px;height:34px}
+.arrow span{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.frag,.slot{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 9px;border-radius:14px;font-weight:700;font-size:.95rem;white-space:nowrap}
+.slot{visibility:hidden}
+.frag{position:absolute;left:0;top:0;color:var(--frag-ink);transition:transform .9s cubic-bezier(.5,0,.25,1), opacity .45s;will-change:transform;z-index:2;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.frag.h{background:var(--c-h)} .frag.an{background:var(--c-an)} .frag.cat{background:var(--c-cat)} .frag.bp{background:var(--c-bp)}
+.finals{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.final{font-size:1.25rem;font-weight:700;padding:2px 4px;opacity:0;transform:scale(.9);transition:opacity .45s, transform .45s}
+.box.prod .slots{position:relative}
+.box.prod .finals{position:absolute;inset:0;}
+.stage[data-step="0"] .prodrow .box{opacity:.45}
+.stage[data-step="1"] .reacrow .box,.stage[data-step="2"] .reacrow .box{opacity:.35}
+.stage[data-step="2"] .prodrow .slots{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}
+.stage[data-step="2"] .final{opacity:1;transform:none}
+.stage[data-step="2"] .final.gas{animation:rise 2.4s ease-in-out infinite alternate}
+@keyframes rise{to{transform:translateY(-5px)}}
+.stage[data-step="2"] .frag{opacity:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:.88rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:14px;height:14px;border-radius:7px;display:inline-block}
+.stepper{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepper .seg button{font-size:.9rem}
+.summary{margin-top:12px;font-size:1rem}
+.fnote{font-size:.85rem;color:var(--muted);margin-top:8px}
+.eqgrid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 18px;margin-top:12px;align-items:baseline}
+@media (max-width:640px){.eqgrid{grid-template-columns:minmax(0,1fr)}}
+.eq{font-size:1.15rem;line-height:1.9;overflow-x:auto;white-space:nowrap;padding-bottom:2px}
+.eq .st{font-size:.68em;color:var(--muted);margin-left:1px}
+.eq .op{color:var(--muted);margin:0 .35em}
+.spect{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--strike);text-decoration-thickness:2px}
+.word{font-style:italic;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px dashed var(--muted);border-radius:20px;padding:2px 10px;font-size:.92rem;background:var(--surface-2)}
+.note{background:var(--warn-bg);color:var(--warn-ink);border-radius:9px;padding:8px 12px;font-size:.9rem;margin-top:10px}
+.prac{display:grid;gap:16px;margin-top:10px}
+.prac input[type=number]{width:3.2em;font:inherit;font-family:var(--f-mono);text-align:center;padding:4px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);color:var(--ink)}
+.prac .eq{white-space:normal;line-height:2.3}
+.opts{display:grid;gap:8px;margin-top:6px}
+.opts.inline{display:flex;flex-wrap:wrap}
+.opts label{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:9px;padding:6px 10px;cursor:pointer;background:var(--surface-2);overflow-x:auto}
+.opts label .eq{white-space:nowrap;font-size:1.05rem}
+.fb{font-weight:700;margin-top:4px}
+.fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
+.score{font-family:var(--f-mono);color:var(--muted)}
+footer{color:var(--muted);font-size:.82rem}
+@media (prefers-reduced-motion: reduce){.frag,.final,.box,.slots{transition:none!important}.final.gas{animation:none!important}}
+</style></head><body>
+<div class="wrap">
+  <a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+  <header>
+    <div class="eyebrow">IB DP Chemistry · Reactivity 3.1.7</div>
+    <h1>Neutralization Lab</h1>
+    <p class="lede">Pick an acid and a base. Watch the pieces swap partners to make the products, then read the equations.</p>
+  </header>
+  <section class="card controls" aria-label="Choose reactants">
+    <div class="field"><label class="lbl" for="acid">Acid</label>
+      <select id="acid">
+        <option value="HCl">Hydrochloric acid, HCl</option>
+        <option value="HNO3">Nitric acid, HNO₃</option>
+        <option value="H2SO4">Sulfuric acid, H₂SO₄</option>
+        <option value="CH3COOH">Ethanoic acid, CH₃COOH</option>
+      </select></div>
+    <div class="field"><label class="lbl" for="base">Base</label>
+      <select id="base">
+        <optgroup label="Metal hydroxides">
+          <option value="NaOH">Sodium hydroxide, NaOH</option>
+          <option value="KOH">Potassium hydroxide, KOH</option>
+          <option value="CaOH2">Calcium hydroxide, Ca(OH)₂</option>
+          <option value="MgOH2">Magnesium hydroxide, Mg(OH)₂</option>
+        </optgroup>
+        <optgroup label="Metal oxides">
+          <option value="MgO">Magnesium oxide, MgO</option>
+          <option value="CuO">Copper(II) oxide, CuO</option>
+        </optgroup>
+        <optgroup label="Carbonates and hydrogencarbonates">
+          <option value="Na2CO3" selected>Sodium carbonate, Na₂CO₃</option>
+          <option value="CaCO3">Calcium carbonate, CaCO₃</option>
+          <option value="NaHCO3">Sodium hydrogencarbonate, NaHCO₃</option>
+        </optgroup>
+        <optgroup label="Ammonia and amines">
+          <option value="NH3">Ammonia, NH₃</option>
+          <option value="CH3NH2">Methylamine, CH₃NH₂</option>
+        </optgroup>
+      </select></div>
+    <div class="field"><span class="lbl" id="hlbl">Write the acid species as</span>
+      <div class="seg" role="group" aria-labelledby="hlbl">
+        <button id="hplus" aria-pressed="true">H⁺(aq)</button>
+        <button id="h3o" aria-pressed="false">H₃O⁺(aq)</button>
+      </div></div>
+  </section>
+  <section class="card" aria-label="Products">
+    <div class="head"><h2>What forms?</h2><span class="lbl" id="typeLbl"></span></div>
+    <div class="pattern" id="pattern"></div>
+    <div class="stage" id="stage" data-step="0">
+      <div class="row reacrow" id="reacRow"></div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 28 34"><path d="M14 2 V28 M5 20 L14 30 L23 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>partners swap</span></div>
+      <div class="row prodrow" id="prodRow"></div>
+      <div id="frags"></div>
+    </div>
+    <div class="stepper">
+      <button class="btn primary" id="play">▶ Play reaction</button>
+      <div class="seg" role="group" aria-label="Step">
+        <button data-step="0" aria-pressed="true">1 · Reactants</button>
+        <button data-step="1" aria-pressed="false">2 · Swap partners</button>
+        <button data-step="2" aria-pressed="false">3 · Products</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--c-h)"></i>H⁺ from the acid</span>
+      <span><i class="dot" style="background:var(--c-an)"></i>anion from the acid</span>
+      <span><i class="dot" style="background:var(--c-cat)"></i>cation from the base</span>
+      <span><i class="dot" style="background:var(--c-bp)"></i>proton-accepting part of the base</span>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="fnote" id="fnote"></div>
+  </section>
+  <section class="card" aria-label="Equations">
+    <div class="head"><h2>Equations</h2><span class="lbl">balanced, with state symbols</span></div>
+    <div class="eqgrid">
+      <span class="lbl">Word</span><div class="eq word" id="eqWord"></div>
+      <span class="lbl">Full</span><div class="eq" id="eqMol"></div>
+      <span class="lbl">Full ionic</span><div class="eq" id="eqIon"></div>
+      <span class="lbl">Net ionic</span><div class="eq" id="eqNet"></div>
+      <span class="lbl">Spectators</span><div class="chips" id="spectChips"></div>
+    </div>
+    <div id="eqNote"></div>
+  </section>
+  <section class="card" aria-label="Practice">
+    <div class="head"><h2>Practice: predict the products</h2><span class="score" id="score">Score 0 / 0</span></div>
+    <div id="prac"></div>
+  </section>
+  <footer>IB DP Chemistry (first assessment 2025), Reactivity 3.1.7: equations for reactions of acids with metal oxides, metal hydroxides, carbonates and hydrogencarbonates, including ammonia, amines and organic acids.</footer>
+</div>
+<script>
+const ACIDS={
+  HCl:{f:'HCl',name:'hydrochloric acid',n:1,strong:true,an:{f:'Cl',z:-1,name:'chloride'}},
+  HNO3:{f:'HNO3',name:'nitric acid',n:1,strong:true,an:{f:'NO3',z:-1,name:'nitrate',poly:1}},
+  H2SO4:{f:'H2SO4',name:'sulfuric acid',n:2,strong:true,an:{f:'SO4',z:-2,name:'sulfate',poly:1}},
+  CH3COOH:{f:'CH3COOH',name:'ethanoic acid',n:1,strong:false,an:{f:'CH3COO',z:-1,name:'ethanoate',poly:1,org:1}}
+};
+const NA={f:'Na',z:1,name:'sodium'}, CA={f:'Ca',z:2,name:'calcium'}, MG={f:'Mg',z:2,name:'magnesium'};
+const BASES={
+  NaOH:{f:'NaOH',name:'sodium hydroxide',type:'hydroxide',cat:NA,k:1,c:1,s:'aq'},
+  KOH:{f:'KOH',name:'potassium hydroxide',type:'hydroxide',cat:{f:'K',z:1,name:'potassium'},k:1,c:1,s:'aq'},
+  CaOH2:{f:'Ca(OH)2',name:'calcium hydroxide',type:'hydroxide',cat:CA,k:2,c:1,s:'aq'},
+  MgOH2:{f:'Mg(OH)2',name:'magnesium hydroxide',type:'hydroxide',cat:MG,k:2,c:1,s:'s'},
+  MgO:{f:'MgO',name:'magnesium oxide',type:'oxide',cat:MG,k:2,c:1,s:'s'},
+  CuO:{f:'CuO',name:'copper(II) oxide',type:'oxide',cat:{f:'Cu',z:2,name:'copper(II)'},k:2,c:1,s:'s'},
+  Na2CO3:{f:'Na2CO3',name:'sodium carbonate',type:'carbonate',cat:NA,k:2,c:2,s:'aq'},
+  CaCO3:{f:'CaCO3',name:'calcium carbonate',type:'carbonate',cat:CA,k:2,c:1,s:'s'},
+  NaHCO3:{f:'NaHCO3',name:'sodium hydrogencarbonate',type:'hco3',cat:NA,k:1,c:1,s:'aq'},
+  NH3:{f:'NH3',name:'ammonia',type:'amine',cat:{f:'NH4',z:1,name:'ammonium',poly:1},k:1,c:1,s:'aq'},
+  CH3NH2:{f:'CH3NH2',name:'methylamine',type:'amine',cat:{f:'CH3NH3',z:1,name:'methylammonium',poly:1},k:1,c:1,s:'aq'}
+};
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+function lcm(a,b){return a*b/gcd(a,b)}
+const SP=(f,z,s)=>({f,z,s});
+const keyOf=sp=>sp.f+'|'+sp.z+'|'+sp.s;
+function balance(A,B){
+  const q=B.cat.z,n=A.n,L=lcm(q,n),nc=L/q,na=L/n;
+  for(let t=1;t<=12;t++){
+    const Ac=t*na, Bc=t*nc/B.c;
+    if(Math.abs(Bc-Math.round(Bc))<1e-9){
+      const Bi=Math.round(Bc); let W=0,C=0;
+      if(B.type==='hydroxide') W=B.k*Bi;
+      else if(B.type==='oxide') W=Bi;
+      else if(B.type==='carbonate'||B.type==='hco3'){W=Bi;C=Bi}
+      return {A:Ac,B:Bi,S:t,W,C,nc,na};
+    }
+  }
+}
+function part(ion,count){ if(count===1) return ion.f; return ion.poly?'('+ion.f+')'+count:ion.f+count }
+function saltFormula(cat,an,nc,na){ if(an.org&&cat.f==='CH3NH3'&&nc===1&&na===1) return 'CH3COONH3CH3'; return an.org ? part(an,na)+part(cat,nc) : part(cat,nc)+part(an,na) }
+function mergeSide(list){ const out=[],idx={}; for(const t of list){const k=keyOf(t.sp); if(k in idx) out[idx[k]].n+=t.n; else {idx[k]=out.length; out.push({sp:t.sp,n:t.n})}} return out.filter(t=>t.n>0) }
+function reduce(L,R){ let g=0; for(const t of L.concat(R)) g=gcd(g,t.n); if(g>1){L.forEach(t=>t.n/=g);R.forEach(t=>t.n/=g)} return {L,R} }
+function expand(terms){ const out=[]; for(const t of terms){ if(t.ion) for(const [sp,c] of t.ion) out.push({sp,n:c*t.n}); else out.push({sp:t.sp,n:t.n}) } return mergeSide(out) }
+function toH3O(L,R){
+  L=L.map(t=>({...t})); R=R.map(t=>({...t}));
+  const h=L.find(t=>t.sp.f==='H'&&t.sp.z===1); if(!h) return {L,R};
+  h.sp=SP('H3O',1,'aq');
+  const w=R.find(t=>t.sp.f==='H2O'); if(w) w.n+=h.n; else R.push({sp:SP('H2O',0,'l'),n:h.n});
+  return reduce(L,R);
+}
+function buildEq(A,B,opt={}){
+  const bal=balance(A,B), cat=B.cat, an=A.an;
+  const saltF=saltFormula(cat,an,bal.nc,bal.na);
+  const saltS=(cat.f==='Ca'&&an.f==='SO4')?'s':'aq';
+  const strong=opt.forceStrong??A.strong, baseS=opt.forceAq?'aq':B.s;
+  const H=SP('H',1,'aq'),OH=SP('OH',-1,'aq'),anSp=SP(an.f,an.z,'aq'),catSp=SP(cat.f,cat.z,'aq');
+  const L=[{sp:SP(A.f,0,'aq'),n:bal.A,ion:strong?[[H,A.n],[anSp,1]]:null}];
+  let bion=null;
+  if(baseS==='aq'){
+    if(B.type==='hydroxide') bion=[[catSp,1],[OH,B.k]];
+    else if(B.type==='carbonate') bion=[[catSp,B.c],[SP('CO3',-2,'aq'),1]];
+    else if(B.type==='hco3') bion=[[catSp,1],[SP('HCO3',-1,'aq'),1]];
+    else if(B.type==='oxide') bion=[[catSp,1],[SP('O',-2,'aq'),1]];
+  }
+  L.push({sp:SP(B.f,0,baseS),n:bal.B,ion:bion});
+  const R=[{sp:SP(saltF,0,saltS),n:bal.S,ion:saltS==='aq'?[[catSp,bal.nc],[anSp,bal.na]]:null}];
+  if(bal.W) R.push({sp:SP('H2O',0,'l'),n:bal.W,ion:null});
+  if(bal.C) R.push({sp:SP('CO2',0,'g'),n:bal.C,ion:null});
+  const ionic={L:expand(L),R:expand(R)};
+  const nL=ionic.L.map(t=>({...t})), nR=ionic.R.map(t=>({...t})), spect=[];
+  for(const t of nL){ const u=nR.find(v=>keyOf(v.sp)===keyOf(t.sp)); if(u){const m=Math.min(t.n,u.n); t.n-=m; u.n-=m; if(t.sp.z) spect.push({sp:t.sp,n:m})} }
+  const net=reduce(nL.filter(t=>t.n>0),nR.filter(t=>t.n>0));
+  const saltName=cat.name+' '+an.name;
+  const word=[A.name,B.name].join(' + ')+' → '+[saltName,bal.W?'water':null,bal.C?'carbon dioxide':null].filter(Boolean).join(' + ');
+  return {bal,saltF,saltS,saltName,mol:{L,R},ionic,net,spect,word};
+}
+</script>
+<script>
+const $=s=>document.querySelector(s);
+const state={acid:'HCl',base:'Na2CO3',h3o:false,step:0};
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function chargeStr(z){ if(!z) return ''; const m=Math.abs(z); return (m>1?m:'')+(z>0?'+':'−') }
+function fmtF(f){ return f.replace(/([A-Za-z)])(\d+)/g,'$1<sub>$2</sub>') }
+function spHTML(sp,st=true){ return `<span class="sp">${fmtF(sp.f)}${sp.z?`<sup>${chargeStr(sp.z)}</sup>`:''}${st&&sp.s?`<span class="st">(${sp.s})</span>`:''}</span>` }
+function sideHTML(list,spectKeys,st=true){ return list.map(t=>{const h=(t.n>1?t.n:'')+spHTML(t.sp,st); return spectKeys&&t.sp.z&&spectKeys.has(t.sp.f+'|'+t.sp.z)?`<span class="spect">${h}</span>`:h}).join('<span class="op">+</span>') }
+function eqHTML(L,R,spectKeys,st=true){ return sideHTML(L,spectKeys,st)+'<span class="op">→</span>'+sideHTML(R,spectKeys,st) }
+const ion=(f,z)=>fmtF(f)+(z?`<sup>${chargeStr(z)}</sup>`:'');
+const cap1=s=>s[0].toUpperCase()+s.slice(1);
+const TYPE={hydroxide:'acid + metal hydroxide → <b>salt + water</b>',oxide:'acid + metal oxide → <b>salt + water</b>',carbonate:'acid + metal carbonate → <b>salt + water + carbon dioxide</b>',hco3:'acid + hydrogencarbonate → <b>salt + water + carbon dioxide</b>',amine:'acid + ammonia (or amine) → <b>salt only</b> (no water)'};
+const TYPELBL={hydroxide:'metal hydroxide',oxide:'metal oxide',carbonate:'carbonate',hco3:'hydrogencarbonate',amine:'ammonia / amine'};
+function stageModel(A,B,eq){
+  const bal=eq.bal, frags=[]; let id=0;
+  const F=(html,kind)=>{const f={id:id++,html,kind};frags.push(f);return f};
+  const reac=[], hs=[], anions=[], cats=[], parts=[];
+  for(let i=0;i<bal.A;i++){ const fr=[]; for(let k=0;k<A.n;k++){const h=F(ion('H',1),'h');fr.push(h);hs.push(h)} const a=F(ion(A.an.f,A.an.z),'an'); fr.push(a); anions.push(a); reac.push({fr,cap:spHTML(SP(A.f,0,'aq')),nm:A.name}) }
+  const bp={hydroxide:ion('OH',-1),oxide:ion('O',-2),carbonate:ion('CO3',-2),hco3:ion('HCO3',-1),amine:ion(B.f,0)}[B.type];
+  for(let j=0;j<bal.B;j++){ const fr=[];
+    if(B.type!=='amine') for(let l=0;l<B.c;l++){const c=F(ion(B.cat.f,B.cat.z),'cat');fr.push(c);cats.push([c])}
+    const np=B.type==='hydroxide'?B.k:1; for(let p=0;p<np;p++){const q=F(bp,'bp');fr.push(q);parts.push(q)}
+    reac.push({fr,cap:spHTML(SP(B.f,0,B.s)),nm:B.name}) }
+  const prods=[], other=[];
+  if(B.type==='amine'){ for(const p of parts) cats.push([hs.shift(),p]) }
+  else if(B.type==='hydroxide'){ for(const p of parts) other.push({fr:[hs.shift(),p],fin:[[SP('H2O',0,'l')]],nm:'water'}) }
+  else if(B.type==='oxide'){ for(const p of parts) other.push({fr:[hs.shift(),hs.shift(),p],fin:[[SP('H2O',0,'l')]],nm:'water'}) }
+  else { const nH=B.type==='carbonate'?2:1; for(const p of parts){const fr=[];for(let k=0;k<nH;k++)fr.push(hs.shift());fr.push(p);other.push({fr,fin:[[SP('H2O',0,'l')],[SP('CO2',0,'g'),'gas']],nm:'water + carbon dioxide'})} }
+  for(let s=0;s<bal.S;s++){ const fr=[]; for(let c=0;c<bal.nc;c++) fr.push(...cats.shift()); for(let a=0;a<bal.na;a++) fr.push(anions.shift());
+    prods.push({fr,fin:[[SP(eq.saltF,0,eq.saltS)]],nm:eq.saltName+(eq.saltS==='s'?' (insoluble salt)':' (salt)')}) }
+  return {frags,reac,prods:prods.concat(other)};
+}
+let SM=null;
+function buildStage(){
+  const A=ACIDS[state.acid],B=BASES[state.base],eq=buildEq(A,B);
+  SM=stageModel(A,B,eq);
+  const slot=f=>`<span class="slot" data-slot="${f.id}">${f.html}</span>`;
+  $('#reacRow').innerHTML=SM.reac.map(b=>`<div class="box"><div class="slots">${b.fr.map(slot).join('')}</div><div class="cap">${b.cap}<span class="nm">${b.nm}</span></div></div>`).join('<span class="plus">+</span>');
+  $('#prodRow').innerHTML=SM.prods.map(b=>`<div class="box prod"><div class="slots">${b.fr.map(f=>`<span class="slot" data-pslot="${f.id}">${f.html}</span>`).join('')}<div class="finals">${b.fin.map(([sp,g])=>`<span class="final${g?' gas':''}">${spHTML(sp)}</span>`).join('<span class="plus" style="margin:0;font-size:1rem">+</span>')}</div></div><div class="cap"><span class="nm">${b.nm}</span></div></div>`).join('<span class="plus">+</span>');
+  $('#frags').innerHTML=SM.frags.map(f=>`<span class="frag ${f.kind}" data-frag="${f.id}">${f.html}</span>`).join('');
+  $('#pattern').innerHTML=TYPE[B.type];
+  $('#typeLbl').textContent='base type: '+TYPELBL[B.type];
+  const prodNames=[`<b>${eq.saltName}</b>, ${spHTML(SP(eq.saltF,0,eq.saltS))} (the salt)`];
+  if(eq.bal.W) prodNames.push(`<b>water</b>, ${spHTML(SP('H2O',0,'l'))}`);
+  if(eq.bal.C) prodNames.push(`<b>carbon dioxide</b>, ${spHTML(SP('CO2',0,'g'))}`);
+  $('#summary').innerHTML='Products: '+prodNames.join(' · ')+`<br><span style="color:var(--muted)">The salt's name comes from the base (${B.cat.name}) and the acid (${A.an.name}). Its formula balances the charges: ${ion(B.cat.f,B.cat.z)} and ${ion(A.an.f,A.an.z)} combine ${eq.bal.nc}:${eq.bal.na} to give ${spHTML(SP(eq.saltF,0,''),false)}.</span>`;
+  const fn=[];
+  if(!A.strong) fn.push('Ethanoic acid is weak: it is mostly un-ionized, so the H⁺ shown is the proton transferred during the reaction, not a free ion in the acid.');
+  if(B.s==='s') fn.push(`${cap1(B.name)} is a solid: the pieces show where its ions end up, not that it dissolves before reacting.`);
+  if(B.type==='amine') fn.push(`${B.f==='NH3'?'NH₃':'CH₃NH₂'} accepts H⁺ through its nitrogen lone pair to become ${ion(B.cat.f,1)}, which then plays the cation's role in the salt.`);
+  $('#fnote').innerHTML=fn.join(' ');
+  renderEquations(A,B,eq);
+  setStep(0,true);
+}
+function place(){
+  const st=$('#stage').getBoundingClientRect();
+  for(const f of SM.frags){
+    const target=document.querySelector(state.step===0?`[data-slot="${f.id}"]`:`[data-pslot="${f.id}"]`);
+    const el=document.querySelector(`[data-frag="${f.id}"]`); if(!target||!el) continue;
+    const r=target.getBoundingClientRect();
+    el.style.transform=`translate(${r.left-st.left}px,${r.top-st.top}px)`;
+  }
+}
+function setStep(n,instant){
+  state.step=n; $('#stage').dataset.step=n;
+  document.querySelectorAll('.stepper .seg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.step===n));
+  const frs=document.querySelectorAll('.frag');
+  if(instant||reduceMotion) frs.forEach(e=>e.style.transition='none');
+  else frs.forEach((e,i)=>e.style.transitionDelay=(n===1?i*60:0)+'ms');
+  place();
+  if(instant||reduceMotion){ void $('#stage').offsetWidth; frs.forEach(e=>e.style.transition='') }
+}
+let timers=[];
+function play(){ timers.forEach(clearTimeout); timers=[]; setStep(0,true);
+  if(reduceMotion){setStep(2,true);return}
+  timers.push(setTimeout(()=>setStep(1),450)); timers.push(setTimeout(()=>setStep(2),450+900+SM.frags.length*60+250)) }
+new ResizeObserver(()=>{ if(SM){ document.querySelectorAll('.frag').forEach(e=>e.style.transition='none'); place(); requestAnimationFrame(()=>document.querySelectorAll('.frag').forEach(e=>e.style.transition='')) } }).observe($('#stage'));
+function renderEquations(A,B,eq){
+  const spectKeys=new Set(eq.spect.map(s=>s.sp.f+'|'+s.sp.z));
+  let io=eq.ionic, net=eq.net; if(state.h3o){io=toH3O(io.L,io.R); net=toH3O(net.L,net.R)}
+  $('#eqWord').textContent=eq.word;
+  $('#eqMol').innerHTML=eqHTML(eq.mol.L,eq.mol.R);
+  $('#eqIon').innerHTML=eqHTML(io.L,io.R,spectKeys);
+  $('#eqNet').innerHTML=eqHTML(net.L,net.R);
+  $('#spectChips').innerHTML=eq.spect.length?eq.spect.map(s=>`<span class="chip">${spHTML(s.sp)}</span>`).join(''):'<span class="word">None: every ion ends up in the insoluble salt.</span>';
+  const n=[];
+  if(!A.strong) n.push('Ethanoic acid is weak, so it stays as CH₃COOH molecules in the ionic equations. Writing H⁺(aq) for it is a common error.');
+  if(B.s==='s') n.push(`${cap1(B.name)} is insoluble, so it is written as (s) and not split into ions.`);
+  if(eq.saltS==='s') n.push('CaSO₄ is only slightly soluble, so it is written as a solid and its ions are not spectators.');
+  if(A.f==='H2SO4') n.push('H₂SO₄ is written as fully dissociated, following IB convention.');
+  $('#eqNote').innerHTML=n.map(x=>`<div class="note">${x}</div>`).join('');
+}
+let prac=null, score={right:0,total:0};
+const pick=o=>{const k=Object.keys(o);return k[Math.floor(Math.random()*k.length)]};
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+function newPractice(){
+  const ak=pick(ACIDS),bk=pick(BASES),A=ACIDS[ak],B=BASES[bk],eq=buildEq(A,B);
+  const tf=x=>state.h3o?toH3O(x.L,x.R):x;
+  const sf=new Set([eq.saltF]);
+  for(const [nc,na] of [[1,1],[1,2],[2,1],[1,3],[3,1]]) sf.add(saltFormula(B.cat,A.an,nc,na));
+  if(B.type==='amine') sf.add(saltFormula({f:B.f,z:1,poly:1},A.an,eq.bal.nc,eq.bal.na));
+  if(B.type!=='amine') sf.add(saltFormula({f:B.f.replace(/\(OH\)\d|OH$|O$|CO3$|HCO3$/,''),z:B.cat.z},A.an,1,1));
+  const saltOpts=shuffle([eq.saltF,...shuffle([...sf].filter(f=>f!==eq.saltF&&f)).slice(0,3)]);
+  const net=tf(eq.net), correct=eqHTML(net.L,net.R), cands=[];
+  const io=tf(eq.ionic); cands.push(eqHTML(io.L,io.R));
+  {const g=tf({L:[{sp:SP('H',1,'aq'),n:1},{sp:SP('OH',-1,'aq'),n:1}],R:[{sp:SP('H2O',0,'l'),n:1}]}); cands.push(eqHTML(g.L,g.R))}
+  if(!A.strong){const e=tf(buildEq(A,B,{forceStrong:true}).net); cands.push(eqHTML(e.L,e.R))}
+  if(B.s==='s'){const e=tf(buildEq(A,B,{forceAq:true}).net); cands.push(eqHTML(e.L,e.R))}
+  {const L=net.L.map(t=>({...t})); L[0].n+=1; cands.push(eqHTML(L,net.R))}
+  const netOpts=shuffle([correct,...shuffle([...new Set(cands)].filter(c=>c!==correct)).slice(0,3)]);
+  prac={A,B,eq,saltOpts,netOpts,correct};
+  const blank=(list,side)=>list.map((t,i)=>`<input type="number" min="1" max="12" id="c-${side}${i}" aria-label="coefficient for ${t.sp.f}"> ${spHTML(t.sp)}`).join('<span class="op">+</span>');
+  $('#prac').innerHTML=`<div class="prac">
+    <div class="eq" style="font-size:1.25rem">${spHTML(SP(A.f,0,'aq'))}<span class="op">+</span>${spHTML(SP(B.f,0,B.s))}<span class="op">→</span>?</div>
+    <div><div class="lbl">1 · Formula of the salt</div><div class="opts inline">${saltOpts.map((f,i)=>`<label><input type="radio" name="salt" value="${i}"><span class="eq">${spHTML(SP(f,0,''),false)}</span></label>`).join('')}</div><div class="fb" id="fb1"></div></div>
+    <div><div class="lbl">2 · Other products (tick all that form)</div><div class="opts inline">
+      <label><input type="checkbox" id="pW"> water</label><label><input type="checkbox" id="pC"> carbon dioxide</label><label><input type="checkbox" id="pH"> hydrogen</label></div><div class="fb" id="fb2"></div></div>
+    <div><div class="lbl">3 · Balance the full equation (lowest whole numbers; type 1 where needed)</div>
+      <div class="eq">${blank(eq.mol.L,'L')}<span class="op">→</span>${blank(eq.mol.R,'R')}</div><div class="fb" id="fb3"></div></div>
+    <div><div class="lbl">4 · Net ionic equation</div><div class="opts">${netOpts.map((o,i)=>`<label><input type="radio" name="net" value="${i}"><span class="eq">${o}</span></label>`).join('')}</div><div class="fb" id="fb4"></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="check">Check answers</button><button class="btn" id="next">New reaction</button><button class="btn" id="show">Show it on the stage</button></div>
+  </div>`;
+  $('#check').onclick=check; $('#next').onclick=newPractice;
+  $('#show').onclick=()=>{state.acid=ak;state.base=bk;$('#acid').value=ak;$('#base').value=bk;buildStage();$('#stage').scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'center'});setTimeout(play,400)};
+}
+function fb(id,ok,msg){const e=$(id);e.className='fb '+(ok?'ok':'no');e.innerHTML=ok?'Correct.':msg;return ok?1:0}
+function check(){
+  const {A,B,eq,saltOpts,netOpts,correct}=prac; let pts=0;
+  const s=document.querySelector('input[name=salt]:checked');
+  pts+=fb('#fb1',s&&saltOpts[+s.value]===eq.saltF,`The salt is ${spHTML(SP(eq.saltF,0,''),false)}: ${ion(B.cat.f,B.cat.z)} and ${ion(A.an.f,A.an.z)} combine ${eq.bal.nc}:${eq.bal.na} so the charges cancel.`);
+  const w=$('#pW').checked,c=$('#pC').checked,h=$('#pH').checked;
+  pts+=fb('#fb2',w===!!eq.bal.W&&c===!!eq.bal.C&&!h,`${TYPE[B.type]}. Hydrogen forms only when an acid reacts with a metal, not a base.`);
+  const all=eq.mol.L.map((t,i)=>[t.n,+$('#c-L'+i).value]).concat(eq.mol.R.map((t,i)=>[t.n,+$('#c-R'+i).value]));
+  const r=all.map(([c,u])=>u/c), same=all.every(([c,u])=>u>0)&&r.every(x=>Math.abs(x-r[0])<1e-9);
+  pts+=fb('#fb3',same&&r[0]===1,same?'Balanced, but not in lowest whole numbers: divide through.':'Not balanced. Answer: '+eqHTML(eq.mol.L,eq.mol.R));
+  const n=document.querySelector('input[name=net]:checked');
+  pts+=fb('#fb4',n&&netOpts[+n.value]===correct,'Answer: '+correct+(!A.strong?' (ethanoic acid is weak, so it stays as molecules).':B.s==='s'?' (the solid base is not split into ions).':'.'));
+  score.right+=pts; score.total+=4; $('#score').textContent=`Score ${score.right} / ${score.total}`;
+}
+$('#acid').onchange=e=>{state.acid=e.target.value;buildStage();play()};
+$('#base').onchange=e=>{state.base=e.target.value;buildStage();play()};
+$('#play').onclick=play;
+document.querySelectorAll('.stepper .seg button').forEach(b=>b.onclick=()=>{timers.forEach(clearTimeout);setStep(+b.dataset.step)});
+function setH(v){state.h3o=v;$('#hplus').setAttribute('aria-pressed',!v);$('#h3o').setAttribute('aria-pressed',v);renderEquations(ACIDS[state.acid],BASES[state.base],buildEq(ACIDS[state.acid],BASES[state.base]));newPractice()}
+$('#hplus').onclick=()=>setH(false); $('#h3o').onclick=()=>setH(true);
+buildStage(); newPractice();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>setStep(state.step,true));
+setTimeout(play,600);
+</script>
+</body></html>

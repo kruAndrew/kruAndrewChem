@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DP CHEMISTRY HUB · UWC Thailand
+  =====================================================================
+  HOW TO EDIT (no coding needed)
+  All the content lives in the "EDIT HERE" block near the bottom of
+  this file. Each item is one line in quotes. Copy a line, paste it,
+  and change the words or the link. Keep the commas at line ends.
+
+  • Schedule rows:    ["2026-11-02", "Topic text", "A"]
+                      Put "A" as the third item to mark an assessment week.
+                      A line with just "October Break" makes a break row.
+  • Slide decks:      ["Deck title", "link"]
+  • Practice packs:   Google Doc IDs (the long code in a Docs link
+                      between /d/ and /edit). Leave "" if not ready yet.
+  • Notes:            ["Title", link, "Checklist" | "Notes" | "Worksheet" | "Practical"]
+  • Mock papers:      ["Paper name", "link"]  (leave link "" = coming soon)
+  • Simulators:       ["Title", "simulators/file.html", "Topic", "What it does"]
+
+  Save, then re-upload (or press Commit on GitHub). Done.
+  =====================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DP Chemistry Hub</title>
+<style>
+  :root{
+    --ink:#1d2433; --muted:#5b6475; --bg:#f6f7fb; --card:#fff;
+    --line:#e3e6ee; --accent:#0f766e; --accent-soft:#e6f4f2;
+    --hl:#7c3aed; --hl-soft:#f1ebff; --amber:#b45309; --amber-soft:#fff4e0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
+  header{background:var(--accent);color:#fff;padding:24px 20px 0}
+  .wrap{max-width:1050px;margin:0 auto}
+  header h1{margin:0 0 2px;font-size:1.8rem}
+  header p{margin:0 0 16px;opacity:.9}
+  nav{display:flex;flex-wrap:wrap;gap:4px}
+  nav a{color:#fff;opacity:.8;text-decoration:none;padding:10px 14px;border-radius:8px 8px 0 0}
+  nav a:hover{opacity:1;background:rgba(255,255,255,.12)}
+  nav a.active{background:var(--bg);color:var(--accent);opacity:1;font-weight:600}
+  main{padding:24px 20px 60px}
+  section{display:none} section.active{display:block}
+  h2{margin:0 0 6px;font-size:1.4rem}
+  h3{margin:0 0 8px;font-size:1.05rem}
+  .lead{color:var(--muted);margin:0 0 18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;margin-bottom:14px}
+  .seg button{font:inherit;border:0;background:transparent;padding:8px 16px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:600}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:.95rem}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#fafbfd;font-size:.85rem;color:var(--muted);font-weight:600}
+  td.wk{color:var(--muted);width:3.5em} td.dt{white-space:nowrap;width:8em}
+  tr.brk td{background:#f1f2f6;color:var(--muted);text-align:center;font-style:italic}
+  tr.asm td{background:var(--amber-soft)}
+  tr.now td{box-shadow:inset 4px 0 0 var(--accent)}
+  .badge{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}
+  .b-asm{background:var(--amber);color:#fff}
+  .b-now{background:var(--accent);color:#fff}
+  .b-hl{background:var(--hl-soft);color:var(--hl)}
+  .tbc{color:var(--muted);font-style:italic}
+  .topic{margin-bottom:12px}
+  .topic h3 .code{color:var(--accent);margin-right:6px}
+  .topic ul{margin:0;padding-left:18px}
+  .topic li{margin:3px 0}
+  .grade-h{margin:22px 0 10px;font-size:1.1rem;color:var(--accent);border-bottom:2px solid var(--accent-soft);padding-bottom:4px}
+  a{color:var(--accent)}
+  .packs{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .pk{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:5px 10px;text-decoration:none;font-size:.9rem;background:#fff}
+  .pk:hover{border-color:var(--accent)}
+  .pk.hl{border-color:#ddd0fb}
+  .pk.soon{color:var(--muted);border-style:dashed}
+  .small{font-size:.85rem;color:var(--muted)}
+  input.search{width:100%;max-width:420px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;margin-bottom:14px}
+  .sim{display:flex;flex-direction:column;gap:6px}
+  .sim .tag{font-size:.75rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+  .btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;align-self:flex-start;margin-top:4px}
+  .btn.off{background:#c9ced8;pointer-events:none}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1 id="siteTitle"></h1>
+  <p id="siteSub"></p>
+  <nav id="nav">
+    <a href="#schedule">Course schedule</a>
+    <a href="#notes">Notes &amp; checklists</a>
+    <a href="#slides">Slide decks</a>
+    <a href="#practice">Practice questions</a>
+    <a href="#mocks">Mock papers</a>
+    <a href="#simulators">Simulators</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <section id="schedule">
+    <h2>Course schedule 2026–27</h2>
+    <p class="lead">What we're studying each week. <span class="badge b-asm">Assessment</span> marks a test, summative or exam week. This week is highlighted. Dates can change, so check with your teacher.</p>
+    <div class="seg" id="gradeSeg"><button data-g="g11" class="on">Grade 11</button><button data-g="g12">Grade 12</button></div>
+    <table><thead><tr><th>Wk</th><th>Week of</th><th>Topic</th></tr></thead><tbody id="schedBody"></tbody></table>
+  </section>
+
+  <section id="notes">
+    <h2>Unit notes &amp; checklists</h2>
+    <p class="lead">Summary notes, learning checklists, worksheets and practical guides for each unit. Use a checklist to find your gaps, then go to the notes and practice questions for that topic.</p>
+    <div class="seg" id="noteFilter"><button data-t="" class="on">All</button><button data-t="Checklist">Checklists</button><button data-t="Notes">Notes</button><button data-t="Worksheet">Worksheets</button><button data-t="Practical">Practicals</button></div>
+    <div class="grid" id="noteList"></div>
+  </section>
+
+  <section id="slides">
+    <h2>Slide decks</h2>
+    <p class="lead">Every deck in the order we teach it. Decks marked <span class="badge b-hl">HL</span> are for Higher Level only. The decks open in Google Slides, so sign in with your school account.</p>
+    <input class="search" id="slideSearch" placeholder="Filter decks, e.g. equilibrium or R3.1">
+    <div id="slideList"></div>
+  </section>
+
+  <section id="practice">
+    <h2>Practice questions</h2>
+    <p class="lead">Exam-style question packs for every topic, with separate SL and HL versions and a markscheme for each. Try the questions before you open the markscheme.</p>
+    <div class="card small" id="folderLinks"></div>
+    <div id="packList"></div>
+    <p class="small">More worksheets and checklists are in the <a href="#notes">Notes &amp; checklists</a> tab.</p>
+  </section>
+
+  <section id="mocks">
+    <h2>Full mock papers</h2>
+    <p class="lead">Complete practice papers in the IB format. Paper 1 has two parts in one sitting: 1A is multiple choice and 1B is data-based questions. Paper 2 has short-answer and extended-response questions. Time yourself and use the data booklet.</p>
+    <div class="grid" id="mockList"></div>
+    <div class="card small" id="mockFolder"></div>
+  </section>
+
+  <section id="simulators">
+    <h2>Simulators</h2>
+    <p class="lead">Interactive models to explore and practise with. They work on laptops, tablets and phones.</p>
+    <div class="grid" id="simList"></div>
+  </section>
+</main>
+<footer id="foot"></footer>
+
+<script>
+/* =====================================================================
+   EDIT HERE
+   ===================================================================== */
+const SITE = {
+  title: "DP Chemistry Hub",
+  subtitle: "IB Diploma Chemistry, SL & HL · UWC Thailand",
+  footer: "DP Chemistry Hub · updated October 2026"
+};
+
+/* ---------- COURSE SCHEDULE ---------- */
+const G11 = [
+  ["2026-08-17","Orientation (no Chemistry lessons)"],
+  ["2026-08-24","Welcome to Chemistry; S1.1 Atoms"],
+  ["2026-08-31","S1.1 States of matter, vocabulary; separating substances"],
+  ["2026-09-07","S1.2 Nuclear atom, isotopes, mass spectrometry (S1 problem set quiz)"],
+  ["2026-09-14","S1.3 Electrons (diffraction grating lab)"],
+  ["2026-09-21","S1.4 Chemical quantities: moles"],
+  ["2026-09-28","S1.4 Moles (cont.); S1.1–1.3 Test","A"],
+  ["2026-10-05","S1.5 Ideal gases; chemical quantities in action (titration lab)"],
+  "October Break",
+  ["2026-10-19","R2.1 Stoichiometry (% yield lab)"],
+  ["2026-10-26","S3.1 Periodicity: the periodic table and its patterns"],
+  ["2026-11-02","S3.1 Groups and their properties (Group 1 reactivity lab); S1 Test (S1.1–1.5)","A"],
+  ["2026-11-09","S3.1 Ionisation energy, atomic and ionic radius (Group 17 reactivity lab)"],
+  ["2026-11-16","S3.1 Electronegativity, oxides, oxidation states (colorimetry)"],
+  ["2026-11-23","S2.1 Ionic bonding (ionic lab) | HL: resonance and hybrid bonds"],
+  ["2026-11-30","S3.1 & R2.1 Summative; S2.2 Covalent bonding | HL: formal charge","A"],
+  ["2026-12-07","S2.2 Covalent bonding, molecular shapes | HL: orbital hybridisation"],
+  ["2026-12-14","S2.2 Finish covalent; intermolecular forces (chromatography)"],
+  "December Break",
+  ["2027-01-11","S2.3 Metallic bonding"],
+  ["2027-01-18","Finish and consolidate bonding | HL: S2.4 Models to materials"],
+  ["2027-01-25","S2 Bonding Summative","A"],
+  ["2027-02-01","Skills week (no classes)"],
+  ["2027-02-08","S3.2 Organic: functional groups, IUPAC naming"],
+  "February Break",
+  ["2027-02-22","S3.2 Finish and consolidate | HL: stereoisomers"],
+  ["2027-03-01","Organic quiz | HL: mass spectrometry, IR and ¹H NMR"],
+  ["2027-03-08","S3.2 Organic Summative","A"],
+  ["2027-03-15","Esters lab (distillation demo)"],
+  ["2027-03-22","R1.1 Measuring energy changes: calorimetry investigation"],
+  ["2027-03-29","IA discussions and practical techniques | HL: R1.2 Born–Haber cycles"],
+  "April Break",
+  ["2027-04-19","R1.2 Energy cycles + quiz | HL: R1.4 Entropy"],
+  ["2027-04-26","R1.2 + R1 unit test | HL: R1.4 Entropy","A"],
+  ["2027-05-03","Revision: G11 end-of-year exam prep"],
+  ["2027-05-10","R1.3 Energy from fuels; R1.2 Hess's law lab (Thu)"],
+  ["2027-05-17","G11 end-of-year exams","A"],
+  ["2027-05-24","R2.3 Equilibria"],
+  ["2027-05-31","R2.3 Equilibria | HL: R1.4 Entropy; IA planning"],
+  ["2027-06-07","Project Week"],
+  ["2027-06-14","Future Prep Week"]
+];
+const G12 = [
+  ["2026-08-17","Welcome back, equilibria recap; R1.3 Energy from fuels (self-study)"],
+  ["2026-08-24","R2.3 Equilibria Summative","A"],
+  ["2026-08-31","R2.2 Kinetics"],
+  ["2026-09-07","R2.2 Rate expression"],
+  ["2026-09-14","R2.2 The Arrhenius equation"],
+  ["2026-09-21","R3.1 Acids and bases: proton transfer"],
+  ["2026-09-28",""],
+  ["2026-10-05",""],
+  "October Break",
+  ["2026-10-19",""],
+  ["2026-10-26",""],
+  ["2026-11-02","R3.1 Acids and bases"],
+  ["2026-11-09","R3.1 Salt hydrolysis"],
+  ["2026-11-16",""],
+  ["2026-11-23","R3.1 Summative","A"],
+  ["2026-11-30","R3.2 Redox"],
+  ["2026-12-07","R3.2 Redox: writing redox equations"],
+  ["2026-12-14",""],
+  "December Break",
+  ["2027-01-11",""],
+  ["2027-01-18",""],
+  ["2027-01-25","R3.2 Summative (electrolytic cells)","A"],
+  ["2027-02-01","Mock exams · R3.2 checklist; cell potential and Gibbs energy","A"],
+  ["2027-02-08","Mock exams (check final dates with your teacher)","A"],
+  "February Break",
+  ["2027-02-22","Mock review"],
+  ["2027-03-01","R3.3 Electron sharing reactions"],
+  ["2027-03-08","R3.4 Electron-pair sharing reactions"],
+  ["2027-03-15","SL revision | HL: mechanisms"],
+  ["2027-03-22","SL revision | HL revision"],
+  ["2027-03-29","SL revision | HL revision"],
+  "April Break",
+  ["2027-04-19","Study leave"],
+  ["2027-04-26","IB examinations","A"],
+  ["2027-05-03","IB examinations","A"],
+  ["2027-05-10","IB examinations (Chemistry Paper 1; check the IB timetable)","A"],
+  ["2027-05-17","IB examinations (Chemistry Paper 2; check the IB timetable)","A"],
+  ["2027-05-24","Transition Week"]
+];
+
+/* ---------- SLIDE DECKS (teaching order) ---------- */
+const S = id => "https://docs.google.com/presentation/d/" + id + "/edit?usp=sharing";
+const SLIDES = [
+ {grade:"Grade 11", code:"S1.1", name:"Introduction to the particulate nature of matter", decks:[
+   ["S1.1 Intro: models of the particulate nature of matter", S("1KyRQPS8yOEFGnzBSdCuejHgTlZ_mAj6K9G-ZTGjMQtc")],
+   ["Structure 1.1: introduction to the particulate nature of matter", S("1Auirxj-nUbBM-aetpP-WxZUVghVuSH6TBOnNtpzoyFk")],
+   ["Missing isotopes and heating curves", S("1qXYK0WZoIrUXIiOt8zSFcYD6Bvwz_4xDlStDbUp0RSg")]]},
+ {grade:"Grade 11", code:"S1.2", name:"The nuclear atom", decks:[
+   ["Structure 1.2: the nuclear atom", S("1GJN3N1LXoZlwU96q2Juv_WVg4_3c4qMHaocg8ynG3CA")]]},
+ {grade:"Grade 11", code:"S1.3", name:"Electron configurations", decks:[
+   ["S1.3 Electron configuration", S("1aKzWIpuVAXWZXe_qtC2H-SdapDIymNw164PcaYvFAtI")],
+   ["Structure 1.3: electron configurations", S("1VWgPXalftfDaHi-AY6q4fBlAgds2bxh1-OEqouIDu7E")]]},
+ {grade:"Grade 11", code:"S1.4", name:"Counting particles by mass: the mole", decks:[
+   ["S1.4, S1.5, R2.1 The mole", S("1lKMtMl5oXWlW1i5vrU1m9IHTwp47Ulk73eWCCYMvETo")],
+   ["S1.4 The mole (InThinking)", S("1qayuppx08yYJIGTBvWK6jU7-YfIKLQnmVyU1v9kpYOw")],
+   ["Structure 1.4: counting particles by mass", S("1ULcrzecq_7YUMRkjL1cS5lIxpBA1l8_hMDVWXRIs2h8")]]},
+ {grade:"Grade 11", code:"S1.5", name:"Ideal gases", decks:[
+   ["Structure 1.5: ideal gases", S("1yaBeiY3pw-GHJB5I9ptvScj7rryI5OT3oUyYNk9hNJc")]]},
+ {grade:"Grade 11", code:"R2.1", name:"How much? The amount of chemical change", decks:[
+   ["Atom economy", S("1fS0q7lO_ZfmA-QuPdpMYgwuYB95ZyoG8cAsDatqfNcc")]]},
+ {grade:"Grade 11", code:"S3.1", name:"The periodic table: classification of elements", decks:[
+   ["S3.1 Periodicity", S("1AuCtNsMklCNPXaryxcYAZx1WD56oteVBDJ447l6uGp8")],
+   ["Structure 3.1: the periodic table", S("1-sUeh9MxQpVBiBza-8GGJafF8OZA5r6EfUZQyw9R_lE")],
+   ["S3.1 Transition elements", S("1k2frbf_nGhp8yPXNCCUWZxGBw6NS8u7gYQKKM-ymFzk"), "HL"],
+   ["S3.1.7 Transition element complexes", S("12S238FxOp-yr8Ro3Ac3Ry0VKia-0UBjqk2ELDqXLJfE"), "HL"]]},
+ {grade:"Grade 11", code:"S2.1", name:"The ionic model", decks:[
+   ["S2.1 Models of bonding and structure", S("1cgATx-hvkW2wuSM8frYPO7JYrSyTPtfsOkkwCim_Wks")]]},
+ {grade:"Grade 11", code:"S2.2", name:"The covalent model", decks:[
+   ["S2.2 Covalent bonding", S("1-DfRtNKsmstnuLtEH6IjzQHU3B2jA0sxv457wHVLvII")],
+   ["S2.2 Molecular shapes (PowerPoint)", "https://drive.google.com/file/d/1B8cCyeYQJffe-E2rnVjaa8fciAeWNFZI/view?usp=sharing"],
+   ["S2.2 Intermolecular forces", S("1fRBksUYnk_WsuCVZfG3pPLeWuvSDv4LIe8f38nWWlys")],
+   ["S2.2 Covalent bonding AHL: resonance and expanded octets", S("1RwEPsM-tjRune33jN0vX0lquR282wBU0r8w8goccZWM"), "HL"],
+   ["Lewis structures and formal charges", S("1uTwS-qAHuvppxC8nFFQmGiHsaSvHEIH-nHrJr5OqXiU"), "HL"],
+   ["S2.2.14 Formal charge", S("16BO-eZgXFZg7TxkHKlJUIE9XOIScyOl6QLtEJ-Dc8Ds"), "HL"],
+   ["S2.2 sp hybridisation", S("1lsgCm2938nmHwLyOpdFvprZpffPkPm3YBo2hR9ddVTg"), "HL"]]},
+ {grade:"Grade 11", code:"S2.3", name:"The metallic model", decks:[
+   ["S2.3 The metallic bond model", S("12KlBKZRZ0xETVcGwtiXrLEInhqHA127yXQPBSOHQ8Cw")]]},
+ {grade:"Grade 11", code:"S2.4", name:"From models to materials", decks:[
+   ["S2.4 From models to material properties", S("1kJ7_h0AmtKyIEFLyvWog95oNn7YdqYzBIHJvGhl75Hw")],
+   ["Polymers (SL and HL)", S("1dAYXa_i1xDUurDeSg5BBLmcQVojdZ8elDScbj9DTSjM")],
+   ["S2.4 Models to materials", S("1Lauf3WKh-5A_uKzS4yVNooJ_fjEWp_Wg9tKPA-Ea8Xo"), "HL"]]},
+ {grade:"Grade 11", code:"S3.2", name:"Functional groups: classification of organic compounds", decks:[
+   ["S3.2 Functional groups", S("1XYpDZMhfHVb_tuIoisXt-rp75I1-3dDlCK--yqh3gFg")],
+   ["Stereoisomers", S("1COvvHuZ-qYyLaiypVqGpuyHRJTpeaChTFkKo7uIP_DI"), "HL"],
+   ["Mass spectrometry, IR and ¹H NMR spectroscopy", S("193VlPVNEcfrThSKQk8MKYEA7_YqcW6xbfR_mG0nFmR4"), "HL"]]},
+ {grade:"Grade 11", code:"R1.1", name:"Measuring enthalpy changes", decks:[
+   ["R1.1 Measuring energy changes", S("1BBV8Gs6AmyzpZLqGpf1rq00AkA89h4Lx3Nyx7Bp7D9c")],
+   ["Reactivity 1.1: measuring enthalpy changes", S("1ol-bvQkngXSpK4MVPzjrbJnxQn2PBYBPq2xJI6RSAok")]]},
+ {grade:"Grade 11", code:"R1.2", name:"Energy cycles in reactions", decks:[
+   ["R1.2 Energy cycles in reactions", S("1EFR2utHwJ-gDkanONwWulz6FGjCFC2p-clZsI9Bd16Y")],
+   ["Reactivity 1.2: energy cycles in reactions", S("1uXqJoyHALAGEqQFJtNqlkmAt8k4JU7f4txL9Kxx9fkk")],
+   ["R1.2 Standard enthalpy changes and Born–Haber cycles", S("1bTDT5L5ZbjMGNWdzbreP1X1PXFmJu6BNODe2XCNjN58"), "HL"]]},
+ {grade:"Grade 11", code:"R1.4", name:"Entropy and spontaneity", hl:true, decks:[
+   ["Reactivity 1.4: entropy and spontaneity", S("13VBOf93GUR_aX4aTg9Qgq7Cw77vekJdSxacEMCvoaWM"), "HL"]]},
+ {grade:"Grade 11", code:"R1.3", name:"Energy from fuels", decks:[
+   ["R1.3 Energy from fuels", S("1HZ_UNl4QhoYcNWSR6K9ilnX45HIAwrQSHXFImz6DFg8")],
+   ["Reactivity 1.3: energy from fuels", S("1cV8TFKqXx1p8nUi2Muz2bejF-rQ_yKNDJ64cFkRUf-0")]]},
+ {grade:"Grade 11", code:"R2.3", name:"How far? The extent of chemical change", decks:[
+   ["R2.3 Equilibria", S("1d_0kx8cjC_5W9Qi-wN4RjGrv0gJ-f4azP9f5j23KmJ4")],
+   ["Reactivity 2.3: how far? The extent of chemical change", S("1CRb3J0Mu9GcnTcQoNqxHjxF_LwpCz5sKjUi_Je4f0Oc")]]},
+ {grade:"Grade 12", code:"R2.2", name:"How fast? The rate of chemical change", decks:[
+   ["Reactivity 2.2: how fast? The rate of chemical change", S("15cllK01T-7-8XC-pL1AK-pY1WhlxHyDg5Q8KXPoiZA0")],
+   ["Concentration vs rate", S("1Nek2mK3S5HHWda_hqb4bGaFaxwBZYy1tGu54nQRgdXI")],
+   ["R2.2 Rate expression (InThinking)", S("1B_OlMrunJZe6H8jhJeNYHDZsZ_zNIXj6bfq5CfrZW3s"), "HL"],
+   ["The Arrhenius equation", S("1OaGV6aSJa05s22SGs9b_i99dw5RZpGSVIYd8toqUb5Q"), "HL"],
+   ["R2.2 Arrhenius (InThinking)", S("1RH4k0Lr66gNlGiyLcb0BwJMwsUP_C5BpaWiWzk2XOoA"), "HL"]]},
+ {grade:"Grade 12", code:"R3.1", name:"Proton transfer reactions", decks:[
+   ["R3.1 Acids and bases: SL content", S("1I7hGQG2vL3yJnCrcHRdzKFSZ0Opq5Xaxl5cSSOu4-vg")],
+   ["R3.1 Acids and bases (InThinking)", S("1XFEqiFif070wxvk2hKq3iWDdEuUqHT4HVdm6uvszhQg")],
+   ["Reactivity 3.1: proton transfer reactions", S("1BT-eCILR1_KX1U6uj8JvxDQ0cIv7FCWTO74BFTKUbEo")],
+   ["R3.1 Salt hydrolysis and buffers", S("1Ru5uz6IkxjhPdroBEb4pelih_L-BkIlito4yewEq61c"), "HL"]]},
+ {grade:"Grade 12", code:"R3.2", name:"Electron transfer reactions", decks:[
+   ["Reactivity 3.2: electron transfer reactions", S("1ngxr4ZIdZ6masmKEibY3ku1ICV6VvkA-o85zYjBHSY4")],
+   ["R3.2 Redox (InThinking)", S("1mINOMFF5HtBR0PI00G_ZHfPLpu203iuAMnhbY4e8SFA")],
+   ["R3.2 Electrolytic cells", S("1LbX23fTzCTon7Ii45v9_0d7eEDEldRPLxX05TedprgA")],
+   ["R3.2 Organic redox", S("1Wn1zWjgDthVciiuNgbn0ZZ6zsDz_BXJAHs8QPmODsHY")],
+   ["Cell potential and Gibbs energy", S("1ceMQPKCbEBe_EPH-SNT7Vvi80i7DF3hYWEs-R8ScVgo"), "HL"]]},
+ {grade:"Grade 12", code:"R3.3", name:"Electron sharing reactions", decks:[
+   ["R3.3 Electron sharing reactions", S("1S3QGQSLFmmOzlKG2GKzMBj-atk6QZHjgKtusJPh1jr0")]]},
+ {grade:"Grade 12", code:"R3.4", name:"Electron-pair sharing reactions", decks:[
+   ["R3.4 Electron-pair sharing reactions", S("1Qp_U90G2Cath4pKdI3_01OYFwyIH1debKfy1bF3sp24")]]}
+];
+
+/* ---------- PRACTICE QUESTION PACKS ----------
+   Order: [code, name, SL questions, SL markscheme, HL questions, HL markscheme]
+   Each is a Google Doc ID. "" = not ready yet (shows "coming soon").     */
+const PACKS = [
+ ["S1.1","Introduction to the particulate nature of matter","1Bib-HAY5DrB85GJvoONG68kuVx2Pu-mstTxm56DWXC4","1BHFgdPsp2KdbVOq_x2eCSwh7uXsW8zfIThhL2R-xThU","1sBeOV6SDLBotL9S9zdXpxqYGgLfa6kdmHS1p6KgIJ2s","1s-DqKDruzbV1wXc7ceAiarUdtMtl77CuOGGomRHa6OI"],
+ ["S1.2","The nuclear atom","1B8pEBxRBJjHNxNyaCgIEv51ACIF2EVPK_wJzcKpUEBI","1f7Ny1bHInTz6ywrwi1djF75Izi8xXy6CN0o45zlx0ec","1ElX6yHWbUJURZiYFwHC6iFCsq-MNzaIcFe5W4hE9cQ8","18smaMMDFQEPIOROuhOCTh-qZRJsLCxxjjjVMkhuFR4g"],
+ ["S1.3","Electron configurations","1sZKqg9U2mmq4frmPDrR7YfRyerWBIvDkDDZpbnK4xYQ","1LvjuhgoMcR_4Us09_4mZrtXByOR48Xq6nrwjI8rB_Ws","1V8iWb5Q6tB-fwnIzvALImVqDi5-Qw3SUXrWILWdMH44","1LAwGUYE4eSYTg2gwt7vBKHuzYrTjkosFC7XUyexL9ow"],
+ ["S1.4","Counting particles by mass: the mole","1zG9UvtJcTvEZsD1y-brj3L8rJnRnOZtKVVTrW7-8I_0","1foOiIb4o93wMiNboqUzgpJ4cloaBKtO5pW2LPNU30Go","1Bb_PNpC5DBzI6YwfvDnI3ArWJBKXbh47Z1ZwbLDXB34","1uXBwPDLNm-G27mj6BwPzutV4Ct5qxsgF8ZOt7xPQlmo"],
+ ["S1.5","Ideal gases","1MVU-fhK4A9YTrptrG3rZ5zHcA-3bPHW0Yb6FH8lhxtg","1365gUUcgcURZXQA6eBClNmMAIOKtQxqVDoL9H5B6bM4","1iyx5CN2liR5VIZm-OdEGG-HHqwlMwesJvIQhwDXrrpU","1h3X3rTj07f69SVvrwNH7fLV96eV1fokwcXA_3dF8ypk"],
+ ["R2.1","How much? The amount of chemical change","1vGbDQZ-b5-9wGLjcnaQ2cvHMZu0469a4vEPhniDM1-w","1-8Zv2BLdNz3EBzxKpvuhAvn14LyCv871yM1tl-EWCvU","10VLpBZhEgFJ8hqSSmQ6GOve_zCE7kEfJ3CJGAsGTSGk","12zbr07ogfXP9NTu465etDVi9gDEJ3G6kSVQln6Jq9_U"],
+ ["S3.1","The periodic table: classification of elements","1MctCK7QqwvoYk0GPL0xQ6QrYFuXJtPM3lOPUtNo3dak","11Ou9SegURI2ycT6_FDZsau_-jwEQw_9Mk7w3otPXZmo","1hQ2w7ZeLSiaZpM_i6EnSVUz25DOdXhHuKwNQ7WjKzc4","1fBz98-n9D8944JA7_srumbQC6BLA99nRkCwKFxVhufA"],
+ ["S2.1","The ionic model","1Sgehf5kVeM_S-P1vd3PFK4bQ6kU8CQPaF7jxgSpjqhU","1qd3-wrclcFLo47QzEkrNSCypVQtpLNO4k-lTt_AtwmI","1pV5Y04oeWnrSthXKmpJxpS-Co11vjWTi1o9W2fXniuU","1kn4E3q3xwSsYVZViK4t8IIKj1u_QZqNQP5xcacb5HBw"],
+ ["S2.2","The covalent model","1IUVuDQtKT5fUpPyiTqR5IYPlWNyZT-QXXY9SqWqvoT4","1f8bg_YYYX0l1Mg-RaPoYiVOiFiwyNG_iuwXD8w5wSpY","1pM65E-p8vLdat-yTbzDwI-8E06x-eBIjD2B6NIXHI5s","13QQStzfgJOogeWYf3FopcTUSrorcG3gTEhh2D0F5G6k"],
+ ["S2.3","The metallic model","1BKHzE1Gg5MeyBMca5h1pMQpAh1y70kM_4j38nkcwQHI","1ZtJm9Volg9Pj6_kelxssFKa_90zFWsR8f_1U71bVQ0k","1WQ_E5xS6qqQ7BX3JOX3RzLV9Ds-T2gQIyp_uTcUXB8g","1jRAcp2GqraFujKHd_osnImWuIwB8Ionpt_7_OOJ75go"],
+ ["S2.4","From models to materials","1qzOoXVA-sLQs8GJafiormQIjtWTDINaE9oqJjUrMjN4","1PVylIgRQ-s-VNs0r30rmW1ryFuSO3QhDtx5v-fTek2E","1ljY397Dp_XisLUQ8JVceYJJ1c_bKOYee7PbhWznYwrM","1nHAtTBTsbi2m4NEYBAcDDZJSXMmByBQ_aYyM_0nVqW4"],
+ ["S3.2","Functional groups: classification of organic compounds","1erc3JzCLSWpFgCZA7ZS77-Jz01Gyfzf8R9RPetVbHcM","1PT_C5iwYie4SzwAv8lGt4jOSITwtFNeJt9KKDEI-Pkw","1HLtTLEFKkWdwLz09AxidPRdg6PQBUBTjsGjYvol9OSg","1BCp5lwV7btEsLH0AOZQvfafYwN4h7qYdvFTuNmLcyMI"],
+ ["R1.1","Measuring enthalpy changes","13HbG3FPfYTlf-mAdXq_8n8vUDnQyKm1m-GcwCIDNlUM","1n3ECi49JfhMXkk2ELdIirhSWomr6tCCaHwGtdse88bk","1gwtsQFlUSvyK4pfHfjXmqXExpPC44-k4hAwTcoxnagA","12bmiJF_A6DOUlqraaOicocLNLplbc2ySvtcZ8xnHpdQ"],
+ ["R1.2","Energy cycles in reactions","1G-CdGbV1USwhADYLhd7-jd7MZzMrdzRCezUpvVhWGcs","1d9aOsHavjBeMD4_wHvqDO09TTKobJHYatfVttzqYvJc","1s92_cr0dDWKscIaSyTVgT2DEARcEwo0lWeleEIdoLpc","14bW6itnEIcOc6q1lJLRWiGxr-LirnLcRdzFw-7SASgw"],
+ ["R1.4","Entropy and spontaneity (HL only)","-","-","1GADfN_JEOx8lE0redqLSFg6y-4-oPeC6hhBbWBYCAIA","1V8wRnO0iPqCSuesdyP44O778loptq2ot4HI34lppi0s"],
+ ["R1.3","Energy from fuels","1Ou3prJvwee1mD2IRmA4F_JV9_qSB1p0F-fuUqluoOKA","1J_b-4jgghQoPEU81-Y9Qs3CEnNVkkIF4Mckmfp38InU","1hGAlvx3PBNOmfCL2FGKNe-gEIJF3jz35_4E1DeiSnvw","1i6QuNPPlK8VeyNEpAFkV03pBK4adamSgrF4Up01EhNA"],
+ ["R2.3","How far? The extent of chemical change","121YySuc35_iUBjzBA2nsrs7padwNSbcmCzC4NJ5n87M","1FKy3hZ0olZ7JL9wn-GyzG2U54j847-gMupJL9MaMWpU","1qsyQwS5mrr0ARGqgdi_pD1YQmHcd9WoX9O6JEw3glTc","1bqbXOEEnveKJ_UaSU31iXy1I6uQYa_B73iOPbqGZyw4"],
+ ["R2.2","How fast? The rate of chemical change","16sKRJntU642kVzlxGpktvkPgmg4YQryw3OZtw3hdeco","1qVys4bwrcozlvjg5UodPSKCs2dMoFP7XFeeTdmAciS8","1OuF98oS_k1lVgMl8sh8TeeQ5JIzR-_N2RZ_qb5cqqTs","1ZBGCUVXGzkvYr2B3vUw4BeWlbtz6_tAWMKDTVcL2zfI"],
+ ["R3.1","Proton transfer reactions","1xKEB33FZuMWDwxQxhYzFh41Tk0Nx0kgWaZ8lfib7-3A","1zlhVBdyPRtjtBTIyqhJwj5nydTQFn4lONTr3cXAZJik","1y99uzuBcCgUtMPDvzLQtyQWDW-e79l3zQ3onHyIoYLA","16DapE1KJmZGfgy3NAzFWXnGDAEc9qYc1YbDVvPo-F7g"],
+ ["R3.2","Electron transfer reactions","1wi3IchZrSHf4vdCgMgVHFk5qxDTPe-OryCO05IYEeu8","1YOYhkuKQbUASTzG_42-srvT-dnP2xATrpwKPWeQJpBo","1pQxFVSrJEf5gkYSJRoyNkvtk4Ci2gb4a-Luz69PZ4qw","1PD1E3apu352vlbiqlfVitf7m0cviLetE2DylCnxelGQ"],
+ ["R3.3","Electron sharing reactions","","","",""],
+ ["R3.4","Electron-pair sharing reactions","","","",""]
+];
+const FOLDERS = {
+  sl: "https://drive.google.com/drive/folders/1J1NQNBAnH3wZ5py_1v5jGqcTSzjLo0X3",
+  hl: "https://drive.google.com/drive/folders/1mhkj8xmBDGJG_NcniL4Uu_1Y7fVcu7XY",
+  mocks: "https://drive.google.com/drive/folders/1DfJXtyDoqoNsql_DupQ_UT4iGX5mRVnn"
+};
+const D = id => "https://docs.google.com/document/d/" + id + "/edit?usp=sharing";
+/* ---------- UNIT NOTES & CHECKLISTS ----------
+   {code, name, items: [["Title", link, "Type"]]}   Type: Checklist, Notes, Worksheet or Practical */
+const NOTES = [
+ {code:"Skills", name:"Practical skills and exam preparation", items:[
+   ["Practical toolkit and skills", D("1DRtB6sbpmdcSUqmEnE9Vu36WrslJkMxUqIopn8vKo58"), "Notes"],
+   ["IB DP Chemistry practical programme (UWCT)", D("1XM-Nv0le8v0zB9PCNSYRF8gLicR5OfLO5IMxF4C_WNI"), "Notes"],
+   ["Measurement uncertainties: making and diluting a KMnO₄ solution", D("16n1WPj-cKCRyEhu-jWgndV6g34ZQdxJGiXrT04oMfJ0"), "Worksheet"],
+   ["Uncertainties: KMnO₄ stock solution and serial dilutions", D("17nDD9Ru7uGUh5ZI6KAjL55ytfmOP2aXWvKuHaV5QJxk"), "Worksheet"],
+   ["G11 end-of-year exam checklist", D("1O6VcqrOeH-G0h3C4j8vhPRfmTrBd_4i6Rg0uDkE4aUU"), "Checklist"]]},
+ {code:"S1", name:"Models of the particulate nature of matter", items:[
+   ["Structure 1 learning checklist (S1.1–S1.5)", D("1VQzzl2NHPqy0Evy72FQcOfiymvloLGowlB-3n4Z0AxQ"), "Checklist"],
+   ["S1.3 Electron configurations checklist", D("13w7fEgSiYyitn8iv0dLBT7d6j0CeLwdK8jmCufIVNaA"), "Checklist"],
+   ["S1.3 Emission spectra and energy calculations", D("18_pNntXwmYfsq_Mjz7THxuThuw4NPv-dROrph7IPYr4"), "Worksheet"],
+   ["S1.3 Electron configuration questions (HL)", D("1-736Dtp5dzV0GE0_iMMdlF0ccAc0PzIo-1NwXwgqNZU"), "Worksheet"],
+   ["S1.5 Ideal Gas Box: exploring p, V, n and T", D("1D1okkYJ1HyHYWdBX7Ic4xRfs-s394MQE7Cf1dUZQOlg"), "Worksheet"]]},
+ {code:"R2.1", name:"How much? The amount of chemical change", items:[
+   ["Reactivity 2.1 mole calculations notes", D("1CDw9Cl8aTrFoYgommRYBYgHJv7ovVR-DNw3o434e490"), "Notes"],
+   ["Stoichiometry revision notes", D("1Bs34K_BBmenWg5bVC_5-vax7QHzdxXZBTrLDqO7rP1E"), "Notes"],
+   ["Percentage yield of hydrogen from Mg and HCl", D("1z3hBBd2fS4wVCgXi0TLP71m-tzqPUHa91ZG_AQGg2UU"), "Practical"]]},
+ {code:"S3.1", name:"The periodic table", items:[
+   ["Notes on S3.1 HL", D("11WK5QMkPPntIY1EQeC5dfQyVgBprQ48vbWb8MfJ144Q"), "Notes"],
+   ["S3.1.7 HL cloze notes", D("1fkmcjp5NLWweEsqOtOq_Wh9aHKso_waqmn-8MtEEWD4"), "Notes"]]},
+ {code:"S2", name:"Models of bonding and structure", items:[
+   ["Structure 2 bonding checklist", D("1kUBiVaOTJgwG14AAwGlGM_38H8grJTgeuWugMRqwugo"), "Checklist"],
+   ["Unit S2 bonding summary", D("1Zjh1qyOKCUKuEefbP0VfbtJyXtj50ks7USF2Ow_L8hg"), "Notes"],
+   ["Ionic bonding summary sheet", D("14_qdQoueV1uRDRq-2oZTkbNRj14rLxR2ujNpijUoIV0"), "Notes"],
+   ["Covalent bonding summary", D("1ga3Sg-rw9aUSUlj5YP1etH6iBYWAM-ZmFxEEAbIGn6w"), "Notes"],
+   ["Covalent network structures notes", D("1NpBwjxFIBksbUq-qOyORhaQbIRqTjBzQkQsGIbQSF6Y"), "Notes"],
+   ["VSEPR worksheet", D("1iQovGGc2PNdQFg_DaWslhF7uUi6Qob7ukIL3rZwhRm4"), "Worksheet"],
+   ["Practice questions: formal charge (HL)", D("1qioDLG2vcI-B9juOJ6EWhUi8cfPHk9VE6pH_AGUSKy8"), "Worksheet"]]},
+ {code:"S3.2", name:"Functional groups", items:[
+   ["Organic chemistry worksheet", D("11dJzb7I4X6luMB8n9vWLvsZcpVUCt1_PQErBewiklxc"), "Worksheet"],
+   ["Oxidation of alcohols with acidified potassium dichromate", D("1pBPIq2D5ek92KEW9ih-leYQmArvaFRgJDh-XbqtQ8BA"), "Practical"]]},
+ {code:"R1", name:"What drives chemical reactions?", items:[
+   ["Born–Haber cycles worksheet (HL)", D("1152HllP1iv39Y5yK2Jt_22XFvZr8o800GPeg8_XsaHI"), "Worksheet"]]},
+ {code:"R2.3", name:"How far? The extent of chemical change", items:[
+   ["R2.3 Equilibrium notes", D("1gTbcWrMrLbvXvRPMbpBV6rL54BKUptksv9EH199SVls"), "Notes"],
+   ["Equilibria and Gibbs energy notes (HL)", D("1iKhKTLKVXKSASuP5CHqLy9C03Vqm1eurMHxphNDlc4c"), "Notes"],
+   ["R2.3 Equilibrium exam pack", D("185aChXNGdoKOGTI3cAQ6gzjQKCbUJe7D9454-49kamg"), "Worksheet"]]},
+ {code:"R2.2", name:"How fast? The rate of chemical change", items:[
+   ["Reactivity 2.2 rate notes", D("1OE6ijOe_WP4ai8CknxxFZj7WobUP1PfWSVs6ZSVYOgU"), "Notes"]]},
+ {code:"R3.1", name:"Proton transfer reactions", items:[
+   ["R3.1 SL checklist", D("12YoXMUVXocU3-8dHQ_O_yCnBiXRPzSA4p-83hM7U9bI"), "Checklist"],
+   ["R3.1 HL checklist", D("1EGOBhHY7EFlU2yYMTM7EKyjARZwZ_8_lw1GmYezkNZI"), "Checklist"],
+   ["Conjugate acids and bases", D("12KyGZOxIa73KznVeslOgxPwYp0ZQ9yep32ZySpEEPhY"), "Worksheet"],
+   ["pOH, Ka, Kb, pKa and pKb (HL)", D("1xihuvo4JTZ-TYNpQVmfoJX2cBhMJsAtbvqbl0Ba0kUg"), "Worksheet"],
+   ["R3.1 HL test preparation", D("12ahfRfJ8tMYTFBNWqLJc9IQOTjbMwqfQKHWKB3HIHWE"), "Worksheet"]]},
+ {code:"R3.2", name:"Electron transfer reactions", items:[
+   ["Primary electrochemical cells", D("17JToqQvC5oTNGhwp9gJyD4iP90povVJ1KI52T_XDbpk"), "Worksheet"],
+   ["Electrolysis", D("1WwXmc45YVqvwnJPhopmtzBr7i3d5Z4PrmVUt3Bt4fAQ"), "Worksheet"]]},
+ {code:"R3.4", name:"Electron-pair sharing reactions", items:[
+   ["R3.4 Summary notes", D("1ZBojvRd---sh4aKUC4vaXLgwFKdzd8m0X6BD8rquIbc"), "Notes"]]}
+];
+
+/* ---------- MOCK PAPERS ---------- ["Paper name", "question paper link", "markscheme link"] */
+const MOCKS = [
+  ["SL Paper 1 (1A + 1B) · 1 h 30 min", "", ""],
+  ["SL Paper 2 · 1 h 30 min", "", ""],
+  ["HL Paper 1 (1A + 1B) · 2 h", "", ""],
+  ["HL Paper 2 · 2 h 30 min", "", ""]
+];
+
+/* ---------- SIMULATORS ---------- ["Title", "link", "Topic", "Description"] */
+const SIMS = [
+  ["Ideal Gas Box", "simulators/ideal-gas-box.html", "S1.5 Ideal gases", "Squeeze, heat and fill a box of gas particles. Test pV = nRT and p₁V₁/T₁ = p₂V₂/T₂, plot your own graphs and watch the Maxwell–Boltzmann speed distribution."],
+  ["Bonding Triangle Explorer", "simulators/bonding-triangle.html", "S2.4 From models to materials", "Pick any two elements and see where they land on the van Arkel–Ketelaar triangle, with mean electronegativity, Δχ and % ionic character."],
+  ["Neutralization Lab", "simulators/neutralization-lab.html", "R3.1 Proton transfer reactions", "Watch acids and bases swap partners to form salts, read the full, ionic and net ionic equations, then practise predicting the products."],
+  ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature, pressure or adding a catalyst."]
+];
+/* =====================================================================
+   END OF EDIT AREA. You don't need to change anything below this line.
+   ===================================================================== */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+$("#siteTitle").textContent = SITE.title; $("#siteSub").textContent = SITE.subtitle;
+$("#foot").textContent = SITE.footer; document.title = SITE.title;
+
+/* tabs */
+const tabs = ["schedule","notes","slides","practice","mocks","simulators"];
+function showTab(){
+  const t = tabs.includes(location.hash.slice(1)) ? location.hash.slice(1) : "schedule";
+  tabs.forEach(id => $("#"+id).classList.toggle("active", id===t));
+  document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href")==="#"+t));
+}
+addEventListener("hashchange", showTab); showTab();
+
+/* schedule */
+const fmtDate = s => new Date(s+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+function renderSchedule(g){
+  const rows = g==="g11" ? G11 : G12, today = new Date(); let wk = 0, html = "";
+  rows.forEach(r => {
+    if (typeof r === "string") { html += `<tr class="brk"><td colspan="3">${esc(r)}</td></tr>`; return; }
+    wk++;
+    const start = new Date(r[0]+"T00:00:00"), end = new Date(start.getTime()+7*864e5);
+    const now = today >= start && today < end, asm = r[2] === "A";
+    const topic = r[1] ? esc(r[1]) : `<span class="tbc">To be confirmed</span>`;
+    html += `<tr class="${asm?"asm ":""}${now?"now":""}"><td class="wk">${wk}</td><td class="dt">${fmtDate(r[0])}</td><td>${topic}${asm?'<span class="badge b-asm">Assessment</span>':""}${now?'<span class="badge b-now">This week</span>':""}</td></tr>`;
+  });
+  $("#schedBody").innerHTML = html;
+  document.querySelectorAll("#gradeSeg button").forEach(b => b.classList.toggle("on", b.dataset.g===g));
+}
+document.querySelectorAll("#gradeSeg button").forEach(b => b.onclick = () => renderSchedule(b.dataset.g));
+renderSchedule("g11");
+
+/* slides */
+function renderSlides(q=""){
+  q = q.toLowerCase(); let html = "", lastGrade = "";
+  SLIDES.forEach(t => {
+    const decks = t.decks.filter(d => !q || (t.code+" "+t.name+" "+d[0]).toLowerCase().includes(q));
+    if (!decks.length) return;
+    if (t.grade !== lastGrade) { html += `<h3 class="grade-h">${t.grade}</h3>`; lastGrade = t.grade; }
+    html += `<div class="card topic"><h3><span class="code">${t.code}</span>${esc(t.name)}${t.hl?'<span class="badge b-hl">HL</span>':""}</h3><ul>${
+      decks.map(d => `<li><a href="${d[1]}" target="_blank" rel="noopener">${esc(d[0])}</a>${d[2]==="HL"?'<span class="badge b-hl">HL</span>':""}</li>`).join("")}</ul></div>`;
+  });
+  $("#slideList").innerHTML = html || `<p class="small">No decks match.</p>`;
+}
+$("#slideSearch").addEventListener("input", e => renderSlides(e.target.value)); renderSlides();
+
+/* practice */
+const pk = (id, label, hl) => id === "-" ? "" : id
+  ? `<a class="pk${hl?" hl":""}" href="${D(id)}" target="_blank" rel="noopener">${label}</a>`
+  : `<span class="pk soon">${label}: coming soon</span>`;
+$("#folderLinks").innerHTML = `All packs in Google Drive: <a href="${FOLDERS.sl}" target="_blank" rel="noopener">SL folder</a> · <a href="${FOLDERS.hl}" target="_blank" rel="noopener">HL folder</a>`;
+$("#packList").innerHTML = `<div class="grid">${PACKS.map(p => `<div class="card topic"><h3><span class="code">${p[0]}</span>${esc(p[1])}</h3><div class="packs">${
+  pk(p[2],"SL questions")+pk(p[3],"SL markscheme")+pk(p[4],"HL questions",1)+pk(p[5],"HL markscheme",1)}</div></div>`).join("")}</div>`;
+/* notes */
+function renderNotes(t){
+  $("#noteList").innerHTML = NOTES.map(u => {
+    const items = u.items.filter(i => !t || i[2]===t);
+    return items.length ? `<div class="card topic"><h3><span class="code">${u.code}</span>${esc(u.name)}</h3><ul>${items.map(i => `<li><a href="${i[1]}" target="_blank" rel="noopener">${esc(i[0])}</a> <span class="small">· ${i[2]}</span></li>`).join("")}</ul></div>` : "";
+  }).join("");
+  document.querySelectorAll("#noteFilter button").forEach(b => b.classList.toggle("on", b.dataset.t===t));
+}
+document.querySelectorAll("#noteFilter button").forEach(b => b.onclick = () => renderNotes(b.dataset.t));
+renderNotes("");
+
+/* mocks */
+$("#mockList").innerHTML = MOCKS.map(m => `<div class="card sim"><h3>${esc(m[0])}</h3>${
+  m[1] ? `<a class="btn" href="${m[1]}" target="_blank" rel="noopener">Question paper</a>` : `<span class="btn off">Coming soon</span>`}${
+  m[2] ? `<a href="${m[2]}" target="_blank" rel="noopener">Markscheme</a>` : ""}</div>`).join("");
+$("#mockFolder").innerHTML = `All mock papers are also in the <a href="${FOLDERS.mocks}" target="_blank" rel="noopener">Mock exams folder</a> in Google Drive.`;
+
+/* simulators */
+$("#simList").innerHTML = SIMS.map(s => `<div class="card sim"><span class="tag">${esc(s[2])}</span><h3>${esc(s[0])}</h3><p class="small" style="margin:0">${esc(s[3])}</p><a class="btn" href="${s[1]}">Open simulator</a></div>`).join("");
+</script>
+</body>
+</html>
