@@ -1,4 +1,301 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Le Chatelier's Principle</title>
-<style>body{font-family:system-ui,sans-serif;background:#f6f7fb;color:#1d2433;display:grid;place-items:center;min-height:100vh;margin:0}div{max-width:480px;text-align:center;padding:24px}a{color:#0f766e}</style></head>
-<body><div><h1>Le Chatelier's Principle</h1><p>This simulator is coming soon.</p><p><a href="../index.html#simulators">← Back to the Chemistry Hub</a></p></div>
-<!-- TEACHER: replace this file with your lechatelier.html (keep the same file name). --></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le Chatelier's Principle Simulator</title>
+<style>
+:root{
+  --bg:#f3f6f8; --card:#fff; --ink:#18222d; --muted:#5a6772; --line:#dde3e8;
+  --accent:#0f766e; --accent-soft:#e2f3f1; --fwd:#15803d; --fwd-soft:#e5f5ea; --rev:#b91c1c; --rev-soft:#fde8e8;
+  --none:#64748b; --none-soft:#eef1f4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.back{display:inline-block;margin:12px 16px 0;font-weight:600;font-size:13px;color:var(--muted)}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 16px 40px;display:grid;gap:16px}
+h1{margin:0;font-size:clamp(1.6rem,3.4vw,2.2rem)}
+.sub{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{font:inherit;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 14px;cursor:pointer;text-align:left}
+.tab small{display:block;color:var(--muted);font-size:12px}
+.tab[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.eqline{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.eq{font-size:1.35rem;font-weight:700}
+.badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--none-soft);color:var(--muted)}
+.badge.exo{background:#fff1e6;color:#b45309}.badge.endo{background:#e8f0fe;color:#1d4ed8}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+h2{margin:0 0 10px;font-size:1.05rem}
+.controls{display:grid;gap:14px}
+.grp .lbl{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.verdict{border-radius:12px;padding:12px 14px;border:1px solid var(--line)}
+.verdict.fwd{background:var(--fwd-soft);border-color:#b7e3c4}.verdict.rev{background:var(--rev-soft);border-color:#f3c0c0}.verdict.none{background:var(--none-soft)}
+.verdict .head{font-weight:800;font-size:1.05rem}
+.verdict.fwd .head{color:var(--fwd)}.verdict.rev .head{color:var(--rev)}.verdict.none .head{color:var(--none)}
+.verdict p{margin:6px 0 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 10px}
+.stat .k{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.05em}
+.stat .v{font:600 1.1rem ui-monospace,Menlo,Consolas,monospace}
+.kexpr{margin-top:8px;font-size:.95rem;color:var(--muted)}
+canvas{display:block;width:100%}
+#graph{height:300px}
+#jar{height:230px;border-radius:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:6px;margin-right:5px;vertical-align:-1px}
+.bars{display:grid;gap:8px;margin-top:10px}
+.bar{display:grid;grid-template-columns:70px 1fr 64px;gap:8px;align-items:center;font-size:14px}
+.track{height:14px;background:var(--bg);border-radius:7px;overflow:hidden}
+.fill{height:100%;border-radius:7px;transition:width .2s}
+.num{font-family:ui-monospace,Menlo,Consolas,monospace;text-align:right}
+.log{max-height:260px;overflow:auto;display:grid;gap:8px}
+.entry{font-size:14px;border-left:4px solid var(--line);padding:4px 10px}
+.entry.fwd{border-color:var(--fwd)}.entry.rev{border-color:var(--rev)}.entry.none{border-color:var(--none)}
+.entry b{display:block}
+.note{font-size:13px;color:var(--muted);margin:0}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+<div class="wrap">
+  <header>
+    <h1>Le Chatelier's Principle</h1>
+    <p class="sub">Disturb a system at equilibrium and watch it respond. Predict the shift first, then make the change and check your prediction against the graph and the explanation.</p>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="card">
+    <div class="eqline">
+      <span class="eq" id="eq"></span>
+      <span class="badge" id="dh"></span>
+      <span class="badge" id="moles"></span>
+    </div>
+    <div class="kexpr" id="kexpr"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Concentration against time</h2>
+      <canvas id="graph"></canvas>
+      <div class="legend" id="legend"></div>
+      <div class="toolbar">
+        <button class="btn" id="pause">Pause</button>
+        <button class="btn" id="reset">Reset system</button>
+      </div>
+      <p class="note" style="margin-top:8px">Vertical dashed lines mark each change you make. A sudden jump in a line shows something you added, removed or compressed. A gradual change shows the system shifting back towards equilibrium.</p>
+    </div>
+
+    <div class="controls">
+      <div class="card">
+        <h2>Make a change</h2>
+        <div class="grp"><div class="lbl">Concentration</div><div class="btns" id="concBtns"></div></div>
+        <div class="grp" style="margin-top:12px"><div class="lbl">Temperature</div><div class="btns">
+          <button class="btn" data-act="T+">Increase T (+20 K)</button><button class="btn" data-act="T-">Decrease T (−20 K)</button></div></div>
+        <div class="grp" style="margin-top:12px"><div class="lbl">Pressure (by changing the volume)</div><div class="btns">
+          <button class="btn" data-act="P+">Increase P (halve V)</button><button class="btn" data-act="P-">Decrease P (double V)</button></div></div>
+        <div class="grp" style="margin-top:12px"><div class="lbl">Catalyst</div><div class="btns">
+          <button class="btn" data-act="cat" id="catBtn">Add catalyst</button></div></div>
+      </div>
+      <div class="verdict none" id="verdict"><div class="head">At equilibrium</div><p>Choose a change to see how the position of equilibrium responds.</p></div>
+      <div class="card">
+        <div class="stats">
+          <div class="stat"><div class="k">Temperature</div><div class="v" id="sT"></div></div>
+          <div class="stat"><div class="k">K<sub>c</sub></div><div class="v" id="sK"></div></div>
+          <div class="stat"><div class="k">Q<sub>c</sub></div><div class="v" id="sQ"></div></div>
+        </div>
+        <div class="bars" id="bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Particle view</h2>
+      <canvas id="jar"></canvas>
+      <p class="note" id="jarNote" style="margin-top:6px"></p>
+    </div>
+    <div class="card">
+      <h2>Your changes</h2>
+      <div class="log" id="log"><p class="note">Nothing yet. Each change you make is explained here.</p></div>
+    </div>
+  </div>
+
+  <p class="note">The concentrations and K<sub>c</sub> values are illustrative, chosen so the changes are easy to see. The ΔH values are real (kJ per mole of reaction as written), and K<sub>c</sub> changes with temperature according to the sign of ΔH. Only gaseous species are shown.</p>
+</div>
+
+<script>
+/* ---------- chemistry ---------- */
+const R = 8.31;
+const SYSTEMS = [
+  {name:"Haber process", eq:"N₂(g) + 3H₂(g) ⇌ 2NH₃(g)", dH:-92, T0:700,
+   sp:[{f:"N₂",n:-1,c0:0.50,col:"#2563eb"},{f:"H₂",n:-3,c0:1.50,col:"#94a3b8"},{f:"NH₃",n:2,c0:0.60,col:"#16a34a"}],
+   kx:"K<sub>c</sub> = [NH₃]² / ([N₂][H₂]³)", use:"Making ammonia for fertilisers."},
+  {name:"Contact process", eq:"2SO₂(g) + O₂(g) ⇌ 2SO₃(g)", dH:-198, T0:700,
+   sp:[{f:"SO₂",n:-2,c0:0.40,col:"#ca8a04"},{f:"O₂",n:-1,c0:0.20,col:"#dc2626"},{f:"SO₃",n:2,c0:0.80,col:"#7c3aed"}],
+   kx:"K<sub>c</sub> = [SO₃]² / ([SO₂]²[O₂])", use:"Making sulfuric acid."},
+  {name:"N₂O₄ ⇌ 2NO₂", eq:"N₂O₄(g) ⇌ 2NO₂(g)", dH:57, T0:330, colour:true,
+   sp:[{f:"N₂O₄",n:-1,c0:0.40,col:"#cbd5e1"},{f:"NO₂",n:2,c0:0.30,col:"#b45309"}],
+   kx:"K<sub>c</sub> = [NO₂]² / [N₂O₄]", use:"N₂O₄ is colourless and NO₂ is brown, so you can see the shift."}
+];
+const Qof = (S,c) => S.sp.reduce((q,s,i)=>q*Math.pow(c[i],s.n),1);
+const Kof = (S,T) => S.K0*Math.exp(-S.dH*1000/R*(1/T-1/S.T0));
+SYSTEMS.forEach(S=>S.K0=Qof(S,S.sp.map(s=>s.c0)));
+/* extent of reaction that brings Q to K (Q rises monotonically with extent) */
+function extentToEq(S,c,K){
+  let lo=-Infinity, hi=Infinity;
+  S.sp.forEach((s,i)=>{ const lim=-c[i]/s.n; if(s.n<0) hi=Math.min(hi,lim); else lo=Math.max(lo,lim); });
+  lo+=1e-12; hi-=1e-12;
+  const f=x=>S.sp.reduce((a,s,i)=>a+s.n*Math.log(Math.max(c[i]+s.n*x,1e-300)),0)-Math.log(K);
+  for(let k=0;k<200;k++){ const m=(lo+hi)/2; if(f(m)>0) hi=m; else lo=m; }
+  return (lo+hi)/2;
+}
+
+/* ---------- state ---------- */
+let S, c, T, cat, t, hist, marks, log, paused=false;
+const RATE=0.9, CATF=4, WINDOW=40;
+function load(i){
+  S=SYSTEMS[i]; c=S.sp.map(s=>s.c0); T=S.T0; cat=false; t=0; hist=[]; marks=[]; log=[];
+  document.querySelectorAll("#tabs .tab").forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
+  $("eq").textContent=S.eq;
+  const dh=$("dh"); dh.textContent=`ΔH = ${S.dH>0?"+":"−"}${Math.abs(S.dH)} kJ · ${S.dH<0?"forward exothermic":"forward endothermic"}`; dh.className="badge "+(S.dH<0?"exo":"endo");
+  const nl=-S.sp.filter(s=>s.n<0).reduce((a,s)=>a+s.n,0), nr=S.sp.filter(s=>s.n>0).reduce((a,s)=>a+s.n,0);
+  $("moles").textContent=`${nl} mol gas → ${nr} mol gas`;
+  $("kexpr").innerHTML=S.kx+" · "+S.use;
+  $("concBtns").innerHTML=S.sp.map((s,j)=>`<button class="btn" data-act="add" data-i="${j}">Add ${s.f}</button><button class="btn" data-act="rem" data-i="${j}">Remove some ${s.f}</button>`).join("");
+  $("legend").innerHTML=S.sp.map(s=>`<span><i style="background:${s.col}"></i>[${s.f}]</span>`).join("");
+  $("catBtn").disabled=false; $("catBtn").textContent="Add catalyst";
+  setVerdict("none","At equilibrium","Choose a change to see how the position of equilibrium responds.");
+  renderLog(); initParticles();
+}
+
+/* ---------- perturbations ---------- */
+function perturb(act,i){
+  const K=Kof(S,T), before=Qof(S,c);
+  let label, why, dir;
+  const names=S.sp.map(s=>s.f);
+  const side=j=>S.sp[j].n<0?"reactant":"product";
+  if(act==="add"||act==="rem"){
+    const s=S.sp[i];
+    if(act==="add"){ c[i]+=Math.max(0.3,c[i]*0.6); label=`Added ${s.f}`; }
+    else { c[i]*=0.5; label=`Removed half of the ${s.f}`; }
+    const up=act==="add";
+    dir=(side(i)==="reactant")===up?"fwd":"rev";
+    why=`${up?"Adding":"Removing"} a ${side(i)} makes Q<sub>c</sub> ${dir==="fwd"?"smaller":"larger"} than K<sub>c</sub>. The system ${up?"uses up some of the added":"replaces some of the removed"} ${s.f} by shifting to the ${dir==="fwd"?"right":"left"} until Q<sub>c</sub> = K<sub>c</sub> again. K<sub>c</sub> does not change because the temperature has not changed.`;
+  } else if(act==="T+"||act==="T-"){
+    const up=act==="T+"; T+=up?20:-20;
+    const endoDir=S.dH>0?"fwd":"rev";
+    dir=up?endoDir:(endoDir==="fwd"?"rev":"fwd");
+    label=`${up?"Increased":"Decreased"} the temperature to ${T} K`;
+    why=`The forward reaction is ${S.dH<0?"exothermic":"endothermic"}. ${up?"Raising":"Lowering"} the temperature favours the ${up?"endothermic":"exothermic"} direction, so equilibrium shifts to the ${dir==="fwd"?"right":"left"}. Temperature is the only change that alters K<sub>c</sub>: here K<sub>c</sub> ${dir==="fwd"?"increases":"decreases"} from ${fmt(K)} to ${fmt(Kof(S,T))}.`;
+  } else if(act==="P+"||act==="P-"){
+    const up=act==="P+"; c=c.map(x=>x*(up?2:0.5));
+    const nl=-S.sp.filter(s=>s.n<0).reduce((a,s)=>a+s.n,0), nr=S.sp.filter(s=>s.n>0).reduce((a,s)=>a+s.n,0);
+    const fewer=nl>nr?"fwd":"rev";
+    dir=up?fewer:(fewer==="fwd"?"rev":"fwd");
+    label=`${up?"Increased":"Decreased"} the pressure (${up?"halved":"doubled"} the volume)`;
+    why=`Every concentration ${up?"doubles":"halves"} at once. The system ${up?"reduces":"increases"} the pressure by shifting towards the side with ${up?"fewer":"more"} moles of gas (${nl} mol on the left, ${nr} mol on the right), so it shifts to the ${dir==="fwd"?"right":"left"}. K<sub>c</sub> does not change.`;
+    if(S.colour) why+=up?" The colour first darkens because [NO₂] doubles, then fades slightly as some NO₂ turns into N₂O₄.":" The colour first fades because [NO₂] halves, then darkens slightly as some N₂O₄ turns into NO₂.";
+  } else if(act==="cat"){
+    cat=true; $("catBtn").disabled=true; $("catBtn").textContent="Catalyst added";
+    dir="none"; label="Added a catalyst";
+    why="A catalyst provides an alternative pathway with a lower activation energy. It increases the rates of the forward and reverse reactions equally, so the position of equilibrium and K<sub>c</sub> do not change. Equilibrium is reached faster after any later change: watch how quickly the lines level off now.";
+  }
+  const head=dir==="fwd"?"Shifts to the right →":dir==="rev"?"← Shifts to the left":"No shift";
+  setVerdict(dir,head,why);
+  marks.push(t); log.unshift({dir,label,why}); renderLog();
+}
+
+/* ---------- loop ---------- */
+function step(dt){
+  const K=Kof(S,T), x=extentToEq(S,c,K), k=RATE*(cat?CATF:1);
+  const dx=x*(1-Math.exp(-k*dt));
+  c=c.map((v,i)=>Math.max(v+S.sp[i].n*dx,1e-9));
+  t+=dt; hist.push({t,c:c.slice()});
+  while(hist.length&&hist[0].t<t-WINDOW) hist.shift();
+}
+let last=performance.now(), uiTimer=0;
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if(!paused) step(dt);
+  drawGraph(); drawJar(dt);
+  uiTimer+=dt; if(uiTimer>0.1){uiTimer=0; renderStats();}
+  requestAnimationFrame(frame);
+}
+
+/* ---------- rendering ---------- */
+const $=id=>document.getElementById(id);
+const fmt=v=>v>=1000||v<0.01?v.toExponential(2).replace("e","×10^").replace(/\^\+?(-?\d+)/,(m,e)=>sup(e)):v.toPrecision(3);
+function sup(e){const m={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};return [...String(e)].map(ch=>m[ch]).join("");}
+function setVerdict(cls,head,body){ const v=$("verdict"); v.className="verdict "+cls; v.innerHTML=`<div class="head">${head}</div><p>${body}</p>`; }
+function renderLog(){
+  $("log").innerHTML=log.length?log.map(e=>`<div class="entry ${e.dir}"><b>${e.label}: ${e.dir==="fwd"?"shifts right":e.dir==="rev"?"shifts left":"no shift"}</b>${e.why}</div>`).join(""):'<p class="note">Nothing yet. Each change you make is explained here.</p>';
+}
+function renderStats(){
+  const K=Kof(S,T), Q=Qof(S,c);
+  $("sT").textContent=T+" K"; $("sK").textContent=fmt(K); $("sQ").textContent=fmt(Q);
+  const max=Math.max(2,...c);
+  $("bars").innerHTML=S.sp.map((s,i)=>`<div class="bar"><span>[${s.f}]</span><div class="track"><div class="fill" style="width:${c[i]/max*100}%;background:${s.col}"></div></div><span class="num">${c[i].toFixed(2)}</span></div>`).join("");
+  const near=Math.abs(Math.log(Q/K))<0.01;
+  $("jarNote").textContent=(near?"At equilibrium: Q = K. ":"Not yet at equilibrium: the system is still shifting. ")+(S.colour?"The background colour shows how brown the mixture looks.":"Each dot represents a fixed amount of that substance.");
+}
+function sizeCanvas(cv){const dpr=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return [x,w,h];}
+function drawGraph(){
+  const [g,w,h]=sizeCanvas($("graph")); if(!w) return; g.clearRect(0,0,w,h);
+  const pl=46,pr=10,pt=10,pb=30,W=w-pl-pr,H=h-pt-pb;
+  const t0=Math.max(0,t-WINDOW), t1=Math.max(WINDOW,t);
+  const ymax=Math.max(1,...hist.flatMap(p=>p.c))*1.15;
+  const X=v=>pl+(v-t0)/(t1-t0)*W, Y=v=>pt+H-v/ymax*H;
+  g.font="12px system-ui"; g.fillStyle="#5a6772"; g.strokeStyle="#e6ebef"; g.lineWidth=1;
+  for(let i=0;i<=4;i++){const v=ymax*i/4; g.beginPath(); g.moveTo(pl,Y(v)); g.lineTo(pl+W,Y(v)); g.stroke(); g.textAlign="right"; g.fillText(v.toFixed(1),pl-6,Y(v)+4);}
+  g.textAlign="center"; g.fillText("time",pl+W/2,h-6);
+  g.save(); g.translate(12,pt+H/2); g.rotate(-Math.PI/2); g.fillText("concentration / mol dm⁻³",0,0); g.restore();
+  g.setLineDash([4,4]); g.strokeStyle="#94a3b8";
+  marks.forEach(m=>{ if(m>=t0){ g.beginPath(); g.moveTo(X(m),pt); g.lineTo(X(m),pt+H); g.stroke(); } });
+  g.setLineDash([]); g.lineWidth=2.5;
+  S.sp.forEach((s,i)=>{ g.strokeStyle=s.col; g.beginPath();
+    hist.forEach((p,j)=>{ const x=X(p.t), y=Y(p.c[i]); j?g.lineTo(x,y):g.moveTo(x,y); }); g.stroke(); });
+}
+let parts=[];
+function initParticles(){ parts=[]; }
+function drawJar(dt){
+  const cv=$("jar"); const [g,w,h]=sizeCanvas(cv); if(!w) return;
+  if(S.colour){ const a=Math.min(0.6,c[1]*0.55); g.fillStyle="#fff7ed"; g.fillRect(0,0,w,h); g.fillStyle=`rgba(180,83,9,${a})`; } else g.fillStyle="#f1f5f9";
+  g.fillRect(0,0,w,h);
+  const per=0.05; // mol dm-3 per dot
+  S.sp.forEach((s,i)=>{
+    const want=Math.min(160,Math.round(c[i]/per));
+    let have=parts.filter(p=>p.i===i);
+    while(have.length<want){ const p={i,x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*60,vy:(Math.random()-.5)*60}; parts.push(p); have.push(p); }
+    if(have.length>want){ const drop=new Set(have.slice(want)); parts=parts.filter(p=>!drop.has(p)); }
+  });
+  parts.forEach(p=>{
+    if(!paused){ p.x+=p.vx*dt; p.y+=p.vy*dt; }
+    if(p.x<4||p.x>w-4) p.vx*=-1; if(p.y<4||p.y>h-4) p.vy*=-1;
+    p.x=Math.min(Math.max(p.x,4),w-4); p.y=Math.min(Math.max(p.y,4),h-4);
+    g.fillStyle=S.colour&&S.sp[p.i].n>0?"#7c2d12":S.sp[p.i].col; g.strokeStyle=S.colour?"#fff":"rgba(0,0,0,.35)"; g.beginPath(); g.arc(p.x,p.y,S.sp[p.i].n>0?5:4,0,7); g.fill(); g.stroke();
+  });
+  g.font="600 12px system-ui"; let x=8;
+  S.sp.forEach(s=>{ g.fillStyle=S.colour&&s.n>0?"#7c2d12":s.col; g.beginPath(); g.arc(x+5,h-12,5,0,7); g.fill(); g.fillStyle="#1f2937"; g.textAlign="left"; g.fillText(s.f,x+14,h-8); x+=70; });
+}
+
+/* ---------- wiring ---------- */
+$("tabs").innerHTML=SYSTEMS.map((S,i)=>`<button class="tab" data-i="${i}">${S.name}<small>${S.eq}</small></button>`).join("");
+$("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab"); if(b) load(+b.dataset.i);});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]"); if(b&&!b.disabled) perturb(b.dataset.act,+b.dataset.i);});
+$("pause").onclick=()=>{paused=!paused; $("pause").textContent=paused?"Play":"Pause";};
+$("reset").onclick=()=>load(SYSTEMS.indexOf(S));
+load(0); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
