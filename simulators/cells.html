@@ -40,6 +40,12 @@ svg{width:100%;height:auto;display:block}
 .dot{width:12px;height:12px;border-radius:6px;display:inline-block}
 table{border-collapse:collapse;width:100%;font-size:14px}
 td,th{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
+.steps{counter-reset:st;display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:st;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.steps li::before{content:counter(st);width:28px;height:28px;border-radius:14px;background:var(--accent);color:#fff;font-weight:800;display:grid;place-items:center}
+.big{font:700 1.15rem ui-monospace,Menlo,Consolas,monospace;background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-top:4px;display:inline-block}
+.warn{background:#fff7e6;border:1px solid #fcd34d;border-radius:10px;padding:8px 12px;font-size:14px;margin-top:10px}
+.hide #calc{filter:blur(6px);user-select:none}
 </style>
 </head>
 <body>
@@ -76,6 +82,14 @@ td,th{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
       <label class="chk" style="margin-top:8px"><input type="checkbox" id="slow"> Slow motion</label>
     </div>
     <div class="facts" id="facts"></div>
+  </div>
+
+  <div class="card" id="calcCard">
+    <h2>How the cell potential is calculated <span class="small">(HL, R3.2)</span></h2>
+    <div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)">
+      <svg id="scale" viewBox="0 0 360 420" aria-label="Electrode potential scale"></svg>
+      <div id="calc" class="answer"></div>
+    </div>
   </div>
 
   <div class="card" id="tableCard">
@@ -180,7 +194,7 @@ function setup(){
     for(let i=0;i<10;i++){ const cat=i%2===0; const sp=cat?e.cations[0]:e.anions[0];
       ions.push({cat,label:sp[0],col:sp[1],x:300+Math.random()*160,y:200+Math.random()*150}); }
   }
-  renderFacts();
+  renderFacts(); renderCalc();
 }
 function renderFacts(){
   const hl=$("hl").checked; let html="";
@@ -211,7 +225,50 @@ function renderFacts(){
   $("facts").innerHTML=html;
   const r=$("reveal"); if(r) r.onclick=()=>{$("predict").checked=false; applyPredict();};
 }
-function applyPredict(){ $("main").classList.toggle("hide",$("predict").checked); }
+
+/* ---------- E°cell calculation panel ---------- */
+function renderCalc(){
+  const card=$("calcCard"); if(mode!=="volt"){card.style.display="none";return;} card.style.display="";
+  const a=METALS[+$("L").value], b=METALS[+$("R").value];
+  // scale
+  const top=1.2, bot=-2.6, Y=v=>30+(top-v)/(top-bot)*360;
+  let g=`<rect width="360" height="420" fill="#fff"/>`;
+  g+=`<line x1="120" y1="${Y(top)}" x2="120" y2="${Y(bot)}" stroke="#334155" stroke-width="3"/>`;
+  for(let v=1;v>=-2.5;v-=0.5){ g+=`<line x1="114" y1="${Y(v)}" x2="126" y2="${Y(v)}" stroke="#334155"/><text x="106" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="#5a6772">${sign(v).replace(".00","")}</text>`; }
+  g+=`<text x="120" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#5a6772">E⦵ / V</text>`;
+  g+=`<text x="16" y="${Y(0.9)}" font-size="11" fill="#1d4ed8" transform="rotate(-90 16 ${Y(0.9)})" text-anchor="end">more easily reduced ↑</text>`;
+  g+=`<text x="16" y="${Y(-1.6)}" font-size="11" fill="#b91c1c" transform="rotate(-90 16 ${Y(-1.6)})" text-anchor="middle">more easily oxidized ↓</text>`;
+  METALS.forEach(m=>{ const on=m===a||m===b; g+=`<circle cx="120" cy="${Y(m.E)}" r="${on?6:3.5}" fill="${on?"#0f766e":"#cbd5e1"}"/>${on?"":`<text x="134" y="${Y(m.E)+4}" font-size="11" fill="#94a3b8">${m.ion}/${m.m}</text>`}`; });
+  if(a!==b){
+    const v=voltaic(a,b), yc=Y(v.ca.E), ya=Y(v.an.E);
+    g+=`<g class="answer"><text x="134" y="${yc+4}" font-size="13" font-weight="800" fill="#1d4ed8">${v.ca.ion}/${v.ca.m}  ${sign(v.ca.E)} V  cathode</text>
+        <text x="134" y="${ya+4}" font-size="13" font-weight="800" fill="#b91c1c">${v.an.ion}/${v.an.m}  ${sign(v.an.E)} V  anode</text>
+        <line x1="300" y1="${ya}" x2="300" y2="${yc+8}" stroke="#0f766e" stroke-width="3"/><path d="M300 ${yc} l-6 10 l12 0 z" fill="#0f766e"/>
+        <line x1="290" y1="${ya}" x2="310" y2="${ya}" stroke="#0f766e" stroke-width="2"/>
+        <text x="296" y="${(ya+yc)/2}" text-anchor="end" font-size="13" font-weight="800" fill="#0f766e">E⦵cell</text>
+        <text x="296" y="${(ya+yc)/2+16}" text-anchor="end" font-size="13" font-weight="800" fill="#0f766e">${v.Ecell.toFixed(2)} V</text></g>`;
+    const twice=v.n/v.ca.z>1||v.n/v.an.z>1;
+    $("calc").innerHTML=`<ol class="steps">
+      <li><div><b>Look up both standard electrode potentials</b> in the data booklet. They are always written as reductions.
+        <div class="eqn">${v.ca.ion}(aq) + ${coef(v.ca.z,"e⁻")} ⇌ ${v.ca.m}(s)   E⦵ = ${sign(v.ca.E)} V</div>
+        <div class="eqn">${v.an.ion}(aq) + ${coef(v.an.z,"e⁻")} ⇌ ${v.an.m}(s)   E⦵ = ${sign(v.an.E)} V</div></div></li>
+      <li><div><b>Decide which is the cathode.</b> The half-cell with the more positive E⦵ (${v.ca.ion}/${v.ca.m}, ${sign(v.ca.E)} V) is reduced, so it is the <span style="color:#1d4ed8;font-weight:700">cathode</span>. The more negative one (${v.an.ion}/${v.an.m}, ${sign(v.an.E)} V) is oxidized, so it is the <span style="color:#b91c1c;font-weight:700">anode</span>.</div></li>
+      <li><div><b>Subtract:</b> E⦵cell = E⦵cathode − E⦵anode<br>
+        <span class="big">E⦵cell = (${sign(v.ca.E)}) − (${sign(v.an.E)}) = ${sign(v.Ecell)} V</span><br>
+        <span class="small">On the scale this is the distance between the two points, so E⦵cell for a working voltaic cell is always positive.</span></div></li>
+      <li><div><b>Interpret:</b> E⦵cell is positive, so the reaction is spontaneous.
+        <div class="eqn">ΔG⦵ = −nFE⦵cell = −${v.n} × 96 500 × ${v.Ecell.toFixed(2)} = −${Math.round(-v.dG*1000).toLocaleString("en-US").replace(/,/g," ")} J = −${Math.round(-v.dG)} kJ</div>
+        <span class="small">F = 96 500 C mol⁻¹ (data booklet). n = ${v.n} mol of electrons transferred in the overall equation.</span></div></li>
+    </ol>
+    ${twice?`<div class="warn"><b>Common mistake:</b> to balance electrons, the overall equation uses ${v.n/v.an.z>1?`${v.n/v.an.z} ${v.an.m}`:""}${v.n/v.an.z>1&&v.n/v.ca.z>1?" and ":""}${v.n/v.ca.z>1?`${v.n/v.ca.z} ${v.ca.ion}`:""}. Do <b>not</b> multiply the E⦵ values by these numbers. E⦵ is a property of the half-cell and does not depend on how many moles react. The multiple only appears in n when you calculate ΔG⦵.</div>`
+      :`<div class="warn"><b>Common mistake:</b> do not reverse the sign of the anode's E⦵ and then subtract it as well. Use E⦵cathode − E⦵anode with both values exactly as written in the data booklet.</div>`}`;
+  } else {
+    $("calc").innerHTML=`<p>Choose two different half-cells. With identical half-cells, E⦵cell = 0 V and no current flows.</p>`;
+  }
+  $("scale").innerHTML=g;
+}
+
+function applyPredict(){ document.body.classList.toggle("hide",$("predict").checked); }
 
 
 /* ---------- electrode-surface events ---------- */
