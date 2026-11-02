@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bonding Lab: electrons, the bonding triangle and structure</title>
+<style>
+:root{
+  --bg:#f3f5fa;--card:#ffffff;--ink:#18202e;--muted:#5b687d;--line:#e1e6ef;
+  --a:#1d4ed8;--b:#c2410c;--accent:#6d28d9;
+  --ionic:#f59e0b;--cov:#10b981;--met:#3b82f6;--mid:#8b5cf6;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{padding:18px 22px 6px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+header h1{font-size:22px;margin:0;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);font-size:13.5px}
+.app{display:grid;gap:14px;padding:12px 18px 22px;
+  grid-template-columns:300px minmax(0,1fr) 380px;
+  grid-template-areas:"picker stage tri" "picker struct struct";}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.card-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.card-head h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:700}
+.card-head .sub{font-weight:600;font-size:15px}
+.picker{grid-area:picker;align-self:start;position:sticky;top:10px}
+.stage{grid-area:stage;min-width:0}
+.tri{grid-area:tri}
+.struct{grid-area:struct;min-width:0}
+@media (max-width:1180px){
+  .app{grid-template-columns:290px minmax(0,1fr);grid-template-areas:"picker stage" "picker tri" "struct struct"}
+}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;grid-template-areas:"picker" "stage" "tri" "struct"}
+  .picker{position:static}
+}
+.slots{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.slot{flex:1;border:2px solid var(--line);border-radius:12px;background:#fafbfd;padding:8px 6px;cursor:pointer;text-align:center;font:inherit;color:inherit;transition:.15s}
+.slot .tag{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.slot .sym{display:block;font-size:24px;font-weight:700;line-height:1.2;min-height:29px}
+.slot .en{display:block;font-size:12px;color:var(--muted);min-height:16px}
+#slotA.active{border-color:var(--a);box-shadow:0 0 0 3px rgba(29,78,216,.15)}
+#slotB.active{border-color:var(--b);box-shadow:0 0 0 3px rgba(194,65,12,.15)}
+#slotA .sym{color:var(--a)} #slotB .sym{color:var(--b)}
+.plus{font-size:22px;color:var(--muted);font-weight:300}
+.hint{font-size:12.5px;color:var(--muted);margin:2px 0 10px}
+.group-title{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:10px 0 5px;font-weight:700}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:5px}
+.tile{position:relative;border:1px solid var(--line);border-radius:9px;background:#fff;padding:5px 2px 4px;cursor:pointer;text-align:center;font:inherit;color:inherit;transition:transform .08s,box-shadow .15s}
+.tile:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(16,24,40,.08)}
+.tile .s{display:block;font-weight:700;font-size:16px;line-height:1.15}
+.tile .e{display:block;font-size:10.5px;color:var(--muted)}
+.tile .bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:9px 0 0 9px}
+.tile.selA{outline:2.5px solid var(--a);outline-offset:-1px}
+.tile.selB{outline:2.5px solid var(--b);outline-offset:-1px}
+.tile.selA.selB{outline:2.5px dashed var(--accent)}
+.tiles.poly{grid-template-columns:repeat(3,1fr)}
+.actions{display:flex;gap:6px;margin:12px 0 8px;flex-wrap:wrap}
+button.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;cursor:pointer;color:var(--ink)}
+button.btn:hover{background:#f6f7fb}
+button.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.btn.primary:hover{background:#5b21b6}
+button.btn.on{background:#ede9fe;border-color:#c4b5fd}
+.ctrl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:5px 0}
+.ctrl input[type=range]{flex:1}
+canvas{display:block;width:100%}
+#anim{aspect-ratio:760/420;background:linear-gradient(#fbfcfe,#f5f7fb);border-radius:10px;border:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:8px 2px 4px}
+.legend b{font-weight:700}
+.step{min-height:48px;background:#f7f5ff;border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;font-size:14.5px;margin-top:6px}
+#triangle{width:100%;height:auto;display:block}
+.data{margin-top:6px}
+.data table{width:100%;border-collapse:collapse;font-size:13.5px}
+.data td{padding:4px 2px;border-bottom:1px solid var(--line)}
+.data td:first-child{color:var(--muted)}
+.data td:last-child{text-align:right;font-weight:600}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff}
+.why{font-size:13.5px;margin:10px 0 0}
+.notes{margin:8px 0 0;padding:0;list-style:none}
+.notes li{font-size:13px;background:#fff8eb;border:1px solid #fde7b6;border-radius:8px;padding:6px 9px;margin-top:6px}
+.struct-body{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px}
+@media (max-width:900px){.struct-body{grid-template-columns:1fr}}
+#view3d{height:400px;background:radial-gradient(ellipse at 50% 40%,#ffffff,#eef1f7);border-radius:10px;border:1px solid var(--line);cursor:grab;touch-action:none}
+#view3d:active{cursor:grabbing}
+#structInfo h3{margin:2px 0 6px;font-size:16px}
+#structInfo p{margin:6px 0;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:2px 10px 2px 4px;background:#fff}
+.chip i{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.15)}
+.props{font-size:13.5px;background:#f2fbf7;border:1px solid #c9eedf;border-radius:8px;padding:7px 10px}
+.toggles{display:flex;gap:6px;margin-left:auto}
+.small{font-size:12px;color:var(--muted)}
+footer{padding:0 22px 24px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<a href="../index.html#simulators" style="display:inline-block;margin:12px 16px 0;font:600 13px system-ui,sans-serif;color:#5b687d">← Back to the Chemistry Hub</a>
+<header>
+  <h1>Bonding Lab</h1>
+  <p>Pick two species, watch where the electrons go, locate the pair on the bonding triangle, then see how the particles are arranged.</p>
+</header>
+
+<div class="app">
+  <aside class="card picker">
+    <div class="slots">
+      <button class="slot active" id="slotA" data-slot="A"><span class="tag">Species 1</span><span class="sym" id="symA">—</span><span class="en" id="enA"></span></button>
+      <span class="plus">+</span>
+      <button class="slot" id="slotB" data-slot="B"><span class="tag">Species 2</span><span class="sym" id="symB">—</span><span class="en" id="enB"></span></button>
+    </div>
+    <p class="hint">Click a slot, then a tile. You can choose the same element twice (e.g. Cl + Cl, Cu + Cu, C + C). χ = Pauling electronegativity.</p>
+    <div class="group-title">Metals</div>
+    <div class="tiles" id="tMetals"></div>
+    <div class="group-title">Non-metals</div>
+    <div class="tiles" id="tNon"></div>
+    <div class="group-title">Polyatomic ions</div>
+    <div class="tiles poly" id="tPoly"></div>
+    <div class="actions">
+      <button class="btn primary" id="bondBtn">▶ Bond!</button>
+      <button class="btn" id="swapBtn" title="Swap species">⇄ Swap</button>
+      <button class="btn" id="randBtn">🎲 Surprise me</button>
+    </div>
+    <div class="ctrl">Speed <input type="range" id="speed" min="0.3" max="2.5" step="0.1" value="1"><span id="speedV">1.0×</span></div>
+    <label class="ctrl"><input type="checkbox" id="chkDensity" checked> Show electron density in bonds</label>
+    <label class="ctrl"><input type="checkbox" id="chkRefs" checked> Reference compounds on triangle</label>
+  </aside>
+
+  <section class="card stage">
+    <div class="card-head"><h2>Electron movement</h2><span class="sub" id="stageTitle"></span></div>
+    <canvas id="anim"></canvas>
+    <div class="legend" id="legend"></div>
+    <div class="step" id="step"></div>
+  </section>
+
+  <section class="card tri">
+    <div class="card-head"><h2>Bonding triangle</h2></div>
+    <svg id="triangle" viewBox="0 0 400 340" role="img" aria-label="Bonding triangle"></svg>
+    <div class="data" id="data"></div>
+  </section>
+
+  <section class="card struct">
+    <div class="card-head"><h2>Arrangement once bonded</h2><span class="sub" id="structTitle"></span>
+      <div class="toggles" id="structToggles"></div></div>
+    <div class="struct-body">
+      <canvas id="view3d"></canvas>
+      <div id="structInfo"></div>
+    </div>
+  </section>
+</div>
+<footer>Simplified teaching model: only outer-shell (valence) electrons are shown; d-electrons of transition metals are ignored and Fe is treated as Fe³⁺, Cu as Cu²⁺. Electronegativities are Pauling values to 1 d.p. Region boundaries on the triangle are approximate – bonding is a continuum. Drag the 3D view to rotate it.</footer>
+
+<script>
+"use strict";
+/* ================= DATA ================= */
+const EL={
+  Li:{n:'lithium',t:'metal',en:1.0,ch:1,r:152,ir:76,lat:'bcc',col:'#a77bd6'},
+  Na:{n:'sodium',t:'metal',en:0.9,ch:1,r:186,ir:102,lat:'bcc',col:'#9b5de5'},
+  K:{n:'potassium',t:'metal',en:0.8,ch:1,r:227,ir:138,lat:'bcc',col:'#7b3fc4'},
+  Cs:{n:'caesium',t:'metal',en:0.8,ch:1,r:265,ir:167,lat:'bcc',col:'#4c1d95'},
+  Mg:{n:'magnesium',t:'metal',en:1.3,ch:2,r:160,ir:72,lat:'hcp',col:'#65a30d'},
+  Ca:{n:'calcium',t:'metal',en:1.0,ch:2,r:197,ir:100,lat:'fcc',col:'#14b8a6'},
+  Al:{n:'aluminium',t:'metal',en:1.6,ch:3,r:143,ir:54,lat:'fcc',col:'#94a3b8'},
+  Fe:{n:'iron',t:'metal',en:1.8,ch:3,r:126,ir:65,lat:'bcc',col:'#c2551f'},
+  Cu:{n:'copper',t:'metal',en:1.9,ch:2,r:128,ir:73,lat:'fcc',col:'#c87533'},
+  Zn:{n:'zinc',t:'metal',en:1.7,ch:2,r:134,ir:74,lat:'hcp',col:'#6b7fa8'},
+  Ag:{n:'silver',t:'metal',en:1.9,ch:1,r:144,ir:115,lat:'fcc',col:'#a3abb8'},
+  H:{n:'hydrogen',t:'nonmetal',en:2.2,ve:1,val:1,ach:1,r:32,ir:140,col:'#eef2f7'},
+  B:{n:'boron',t:'nonmetal',en:2.0,ve:3,val:3,ach:null,r:85,col:'#f4a6a6'},
+  C:{n:'carbon',t:'nonmetal',en:2.6,ve:4,val:4,ach:null,r:77,col:'#3f4652'},
+  N:{n:'nitrogen',t:'nonmetal',en:3.0,ve:5,val:3,ach:3,r:75,ir:146,col:'#3756e8'},
+  O:{n:'oxygen',t:'nonmetal',en:3.4,ve:6,val:2,ach:2,r:73,ir:140,col:'#e3342f'},
+  F:{n:'fluorine',t:'nonmetal',en:4.0,ve:7,val:1,ach:1,r:71,ir:133,col:'#84cc16'},
+  Si:{n:'silicon',t:'nonmetal',en:1.9,ve:4,val:4,ach:null,r:117,col:'#c9a66b'},
+  P:{n:'phosphorus',t:'nonmetal',en:2.2,ve:5,val:3,ach:3,r:110,ir:212,col:'#f97316'},
+  S:{n:'sulfur',t:'nonmetal',en:2.6,ve:6,val:2,ach:2,r:104,ir:184,col:'#eab308'},
+  Cl:{n:'chlorine',t:'nonmetal',en:3.2,ve:7,val:1,ach:1,r:99,ir:181,col:'#16a34a'},
+  Br:{n:'bromine',t:'nonmetal',en:3.0,ve:7,val:1,ach:1,r:114,ir:196,col:'#9f1d1d'},
+  I:{n:'iodine',t:'nonmetal',en:2.7,ve:7,val:1,ach:1,r:133,ir:220,col:'#7e22ce'},
+};
+const POLY={
+  NH4:{n:'ammonium',f:'NH4',ch:1,ir:148,c:'N',t:'H',k:4,geo:'tet',col:'#4f6df5'},
+  OH:{n:'hydroxide',f:'OH',ch:-1,ir:137,c:'O',t:'H',k:1,geo:'lin',col:'#ef4444'},
+  NO3:{n:'nitrate',f:'NO3',ch:-1,ir:179,c:'N',t:'O',k:3,geo:'tri',col:'#2563eb'},
+  CO3:{n:'carbonate',f:'CO3',ch:-2,ir:178,c:'C',t:'O',k:3,geo:'tri',col:'#475569'},
+  SO4:{n:'sulfate',f:'SO4',ch:-2,ir:258,c:'S',t:'O',k:4,geo:'tet',col:'#ca8a04'},
+  PO4:{n:'phosphate',f:'PO4',ch:-3,ir:238,c:'P',t:'O',k:4,geo:'tet',col:'#ea580c'},
+};
+const METALS=['Li','Na','K','Cs','Mg','Ca','Al','Fe','Cu','Zn','Ag'];
+const NONMETALS=['H','B','C','N','O','F','Si','P','S','Cl','Br','I'];
+const POLYS=['NH4','OH','NO3','CO3','SO4','PO4'];
+
+const NOTES={
+  'H+Na':'Real NaH is an ionic solid containing H⁻ ions (rock-salt lattice). Δχ alone underestimates its ionic character – a limitation of the model.',
+  'H+K':'Real KH is an ionic solid containing H⁻ ions. Δχ alone underestimates its ionic character.',
+  'H+Li':'Real LiH is an ionic solid containing H⁻ ions. Δχ alone underestimates its ionic character.',
+  'Cs+H':'Real CsH is an ionic solid containing H⁻ ions. Δχ alone underestimates its ionic character.',
+  'Ca+H':'Real CaH₂ is a largely ionic solid containing H⁻ ions.',
+  'Al+Cl':'AlCl₃ sublimes at about 180 °C and exists as Al₂Cl₆ dimers in the vapour – classic evidence of covalent character in a metal compound.',
+  'Al+Br':'AlBr₃ exists as Al₂Br₆ molecules – covalent character despite containing a metal.',
+  'Al+I':'AlI₃ exists as Al₂I₆ molecules – covalent character despite containing a metal.',
+  'Ag+Cl':'AgCl has a rock-salt lattice but significant covalent character – one reason it is insoluble in water, unlike NaCl.',
+  'Ag+Br':'AgBr has a rock-salt lattice with significant covalent character (insoluble in water).',
+  'Ag+I':'AgI has significant covalent character; its common form has 4:4 coordination like zinc blende/wurtzite.',
+  'Al+N':'Real AlN is a giant covalent solid (wurtzite structure, 4:4 coordination).',
+  'O+Zn':'Real ZnO adopts the wurtzite structure (4:4 coordination), reflecting covalent character.',
+  'C+O':'Carbon also forms CO, which contains a triple bond (one of them a coordination bond).',
+  'Cl+P':'Phosphorus also forms PCl₅ – an expanded octet (HL).',
+  'F+P':'Phosphorus also forms PF₅ – an expanded octet (HL).',
+  'B+F':'Boron has only 6 electrons in its outer shell here – an incomplete octet.',
+  'B+Cl':'Boron has only 6 electrons in its outer shell here – an incomplete octet.',
+  'B+Br':'Boron has only 6 electrons in its outer shell here – an incomplete octet.',
+  'B+I':'Boron has only 6 electrons in its outer shell here – an incomplete octet.',
+  'B+H':'BH₃ is unstable on its own; it dimerises to diborane, B₂H₆.',
+  'O+S':'One of the resonance structures of SO₂ is shown (S has an expanded octet in this form).',
+  'F+S':'SF₆: sulfur has 12 electrons in its outer shell – an expanded octet (HL).',
+  'C+C':'Carbon allotropes include diamond, graphite, graphene and fullerenes (C₆₀). Use the toggle under the 3D view.',
+  'B+B':'Real boron is built from B₁₂ icosahedra; the network here is schematic.',
+  'N+N':'The N≡N triple bond is very strong, which is why N₂ is so unreactive.',
+  'Cs+F':'CsF sits at the top vertex of the triangle: the most ionic combination in this model.',
+  'F+H':'HF molecules also form hydrogen bonds with each other.',
+  'H+O':'H₂O molecules also form hydrogen bonds with each other.',
+  'H+N':'NH₃ molecules also form hydrogen bonds with each other.',
+  'Cu+Zn':'Copper + zinc = brass.',
+  'C+Fe':'Steel is an interstitial alloy: small C atoms sit in the gaps of the iron lattice.',
+  'H+P':'With equal χ values the P–H bond counts as non-polar here; PH₃ is in fact very slightly polar.',
+};
+const FALLBACK_NOTES={
+  'N+O':'Nitrogen forms several oxides (NO, NO₂, N₂O, N₂O₄…). A single N–O bond is shown to illustrate its polarity.',
+  'O+P':'Phosphorus oxides are cage molecules (P₄O₆, P₄O₁₀). A single P–O bond is shown.',
+  'C+N':'C and N alone give cyanogen, (CN)₂, or the cyanide ion CN⁻. A single C–N bond is shown.',
+  'B+N':'Boron nitride is a giant covalent solid (graphite-like or diamond-like). A single B–N bond is shown.',
+  'B+O':'Boron oxide, B₂O₃, is a glassy giant covalent solid. A single B–O bond is shown.',
+  'I+O':'Iodine’s common oxide is I₂O₅. A single I–O bond is shown.',
+  'S+Si':'SiS₂ is a polymeric solid. A single Si–S bond is shown.',
+};
+const COV_SPECIAL={
+  'O+Si':{giant:'sio2',formula:'SiO2'},
+  'C+Si':{giant:'sic',formula:'SiC'},
+  'O+S':{c:'S',t:'O',n:2,o:2,formula:'SO2'},
+  'F+S':{c:'S',t:'F',n:6,o:1,formula:'SF6'},
+};
+const REFS=[['Cs',0.8,0],['F₂',4.0,0],['CsF',2.4,3.2],['NaCl',2.05,2.3],['MgO',2.35,2.1],['HCl',2.7,1.0],['CH₄',2.4,0.4],['Cl₂',3.2,0],['Si',1.9,0],['Al',1.6,0],['SiO₂',2.65,1.5],['AlCl₃',2.4,1.6]];
+const SURPRISE=[['Na','Cl'],['Mg','O'],['H','O'],['C','O'],['Cu','Zn'],['Al','Cl'],['Si','O'],['C','C'],['N','H'],['Ca','CO3'],['NH4','NO3'],['Fe','Fe'],['S','F'],['Al','O'],['Ag','Cl'],['Cs','F'],['P','P'],['H','F'],['B','F'],['Ca','F'],['Na','O'],['Cl','Cl'],['N','N'],['Al','SO4'],['C','H'],['Mg','N'],['K','OH'],['S','S'],['Na','Na']];
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s);
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const SUBS='₀₁₂₃₄₅₆₇₈₉';
+const SUPS={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const fmtF=f=>String(f).replace(/([A-Za-z)])(\d+)/g,(m,a,d)=>a+d.replace(/\d/g,x=>SUBS[x]));
+const chg=c=>{const n=Math.abs(c);return (n>1?SUPS[n]:'')+(c>0?'⁺':'⁻')};
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const lcm=(a,b)=>a*b/gcd(a,b);
+const f1=x=>x.toFixed(1);
+function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
+function hexRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function shade(h,f){const c=hexRgb(h);return 'rgb('+c.map(v=>Math.round(f>0?v+(255-v)*f:v*(1+f))).join(',')+')';}
+function lum(h){const [r,g,b]=hexRgb(h);return (0.299*r+0.587*g+0.114*b)/255;}
+function sp(k){
+  if(EL[k]) return Object.assign({key:k,kind:EL[k].t,label:k},EL[k]);
+  const p=POLY[k];return Object.assign({key:k,kind:p.ch>0?'polycat':'polyan',label:fmtF(p.f)+chg(p.ch),en:null},p);
+}
+function ionLabel(S){ if(S.kind==='polycat'||S.kind==='polyan') return S.label;
+  if(S.kind==='metal') return S.key+chg(S.ch); return S.key+chg(-S.ach); }
+const ECOL=['#1d4ed8','#c2410c'];
+
+/* ================= ANALYSIS ================= */
+function analyse(ka,kb){
+  const A=sp(ka),B=sp(kb);
+  const R={A,B,ka,kb,notes:[],pair:[ka,kb].sort().join('+'),tri2:[]};
+  if(A.en!=null&&B.en!=null){R.d=Math.round(Math.abs(A.en-B.en)*10)/10;R.avg=Math.round((A.en+B.en)/2*100)/100;R.pct=100*(1-Math.exp(-R.d*R.d/4));}
+  if(NOTES[R.pair]) R.notes.push(NOTES[R.pair]);
+  const has=x=>A.kind===x||B.kind===x, pick=x=>A.kind===x?A:B;
+  if(A.kind==='metal'&&B.kind==='metal') return metallicR(R);
+  if(has('metal')&&has('nonmetal')) return metalNonmetal(R,pick('metal'),pick('nonmetal'));
+  if(has('metal')&&has('polyan')) return ionicR(R,pick('metal'),pick('polyan'));
+  if(has('polycat')&&has('polyan')){
+    if(R.pair==='NH4+OH') return invalid(R,'NH₄⁺ + OH⁻ does not give an isolable ionic solid: the ions react to form NH₃ + H₂O ("ammonium hydroxide" is just aqueous ammonia).');
+    return ionicR(R,pick('polycat'),pick('polyan'));
+  }
+  if(has('polycat')&&has('nonmetal')){
+    const X=pick('nonmetal');
+    if(['F','Cl','Br','I','S'].includes(X.key)) return ionicR(R,pick('polycat'),X);
+    return invalid(R,'In this model ammonium pairs with an anion-forming species: try F, Cl, Br, I, S or a polyatomic anion.');
+  }
+  if(A.kind==='nonmetal'&&B.kind==='nonmetal') return covalentR(R);
+  if(has('metal')&&has('polycat')) return invalid(R,'A metal and NH₄⁺ would both be positive ions. Like charges repel, so no ionic compound forms.');
+  if(A.kind==='polycat'&&B.kind==='polycat') return invalid(R,'Two positive ions repel – there is nothing to accept electrons.');
+  if(A.kind==='polyan'&&B.kind==='polyan') return invalid(R,'Two negative ions repel – there is nothing to donate electrons.');
+  return invalid(R,'A non-metal atom does not give electrons to a polyatomic anion. Combinations such as H with NO₃ form covalent molecules (HNO₃) instead.');
+}
+function invalid(R,msg){Object.assign(R,{type:'invalid',mode:'message',msg,formula:'—',struct:{kind:'none',msg:'No stable compound in this model.'}});return R;}
+function part(S,k){ if(S.kind==='polycat'||S.kind==='polyan') return k>1?'('+S.f+')'+k:S.f; return S.key+(k>1?k:''); }
+function polyBond(P){const c=EL[P.c],t=EL[P.t];return {x:(c.en+t.en)/2,y:Math.round(Math.abs(c.en-t.en)*10)/10,label:P.c+'–'+P.t+' in '+fmtF(P.f)};}
+
+function metallicR(R){
+  const same=R.ka===R.kb;
+  Object.assign(R,{type:'metallic',mode:'metallic',formula:same?R.ka:R.ka+' + '+R.kb+' alloy',
+    struct:{kind:'metal',main:R.A,alloy:same?null:R.B}});
+  if(!same) R.notes.push('Alloy shown as a substitutional mixture on the '+R.ka+' lattice; real alloy structure depends on composition.');
+  return R;
+}
+function ionicR(R,C,X){
+  const cc=C.ch, ac=X.kind==='polyan'?-X.ch:X.ach, L=lcm(cc,ac), m=L/cc, n=L/ac;
+  Object.assign(R,{type:'ionic',mode:'ionic',ions:{cat:C,an:X,m,n},formula:part(C,m)+part(X,n),struct:{kind:'ionic',cat:C,an:X,m,n}});
+  if(C.kind==='polycat') R.tri2.push(polyBond(C));
+  if(X.kind==='polyan') R.tri2.push(polyBond(X));
+  return R;
+}
+function metalNonmetal(R,M,X){
+  if(X.ach==null){
+    Object.assign(R,{type:'unmodelled',mode:'message',formula:'—',
+      msg:`Metal + ${X.n}: compounds such as ${X.key==='C'?'carbides':X.key==='B'?'borides':'silicides'} exist but have complex structures that this simple model doesn't animate. The triangle still shows where the pair sits.`,
+      struct:{kind:'none',msg:'Structure not modelled for this pair.'}});
+    return R;
+  }
+  const cc=M.ch, ac=X.ach, L=lcm(cc,ac), m=L/cc, n=L/ac;
+  R.formula=part(M,m)+part(X,n);
+  if(R.d>=1.7){ return ionicR(R,M,X); }
+  R.type='intermediate'; R.mode='graph';
+  if(m===1){ R.graph=gCentral(M.key,X.key,n,ac,0,R); }
+  else { R.graph=gPair(M.key,X.key,1,true,R); R.fallback=true; R.notes.push(`Only one ${M.key}–${X.key} bond is shown; the full ${fmtF(R.formula)} unit is more complex.`); }
+  if(M.key==='Al'&&['Cl','Br','I'].includes(X.key)) R.struct={kind:'molecular',graph:R.graph,formula:R.formula};
+  else R.struct={kind:'ionic',cat:M,an:X,m,n,covalentChar:true};
+  return R;
+}
+function ruleCentral(a,b){
+  const A=EL[a],B=EL[b]; let c,t;
+  if(a==='H'){c=b;t=a}else if(b==='H'){c=a;t=b}
+  else if(A.val!==B.val){c=A.val>B.val?a:b;t=c===a?b:a}
+  else{c=A.en<=B.en?a:b;t=c===a?b:a}
+  const C=EL[c],T=EL[t];
+  if(C.val%T.val) return null;
+  const n=C.val/T.val,o=T.val; if(o>3) return null;
+  if(C.ve-n*o<0) return null;
+  return {c,t,n,o};
+}
+function covFormula(c,t,n){
+  const N=n>1?n:'';
+  if(t==='H'&&['O','S','F','Cl','Br','I'].includes(c)) return 'H'+N+c;
+  const cFirst=['N','C','Si','B','P'].includes(c)||EL[c].en<=EL[t].en;
+  return cFirst?c+t+N:t+N+c;
+}
+function covalentR(R){
+  const a=R.ka,b=R.kb; R.type='covalent'; R.mode='graph';
+  if(a===b){
+    if(['H','N','O','F','Cl','Br','I'].includes(a)){
+      const o={H:1,N:3,O:2}[a]||1; R.graph=gPair(a,a,o,false,R); R.formula=a+'2';
+      R.struct={kind:'molecular',graph:R.graph,formula:R.formula};
+    } else if(a==='P'){R.graph=gP4();R.formula='P4';R.struct={kind:'molecular',graph:R.graph,formula:'P4'};}
+    else if(a==='S'){R.graph=gS8();R.formula='S8';R.struct={kind:'molecular',graph:R.graph,formula:'S8'};}
+    else {R.graph=gGrid(a,a,R);R.formula=a;R.giant=true;R.struct={kind:'giant',g:a==='C'?'diamond':'diamond',el:a};}
+    return R;
+  }
+  const sp_=COV_SPECIAL[R.pair];
+  if(sp_&&sp_.giant){R.giant=true;R.formula=sp_.formula;R.graph=sp_.giant==='sio2'?gSiO2(R):gGrid('Si','C',R);R.struct={kind:'giant',g:sp_.giant};return R;}
+  let rule=sp_&&sp_.c?{c:sp_.c,t:sp_.t,n:sp_.n,o:sp_.o}:null;
+  if(!rule&&!FALLBACK_NOTES[R.pair]) rule=ruleCentral(a,b);
+  if(!rule){
+    R.fallback=true; R.graph=gPair(a,b,1,true,R); R.formula=a+'–'+b+' bond';
+    R.notes.push(FALLBACK_NOTES[R.pair]||`No single simple molecule follows from these two in this model, so one ${a}–${b} bond is shown to illustrate its polarity.`);
+    R.struct={kind:'none',msg:'Depends on which compound forms – see the note.'};
+    return R;
+  }
+  R.graph=gCentral(rule.c,rule.t,rule.n,rule.o,null,R);
+  R.formula=sp_&&sp_.formula?sp_.formula:covFormula(rule.c,rule.t,rule.n);
+  R.struct={kind:'molecular',graph:R.graph,formula:R.formula};
+  return R;
+}
+
+/* ================= 2D GRAPH BUILDERS ================= */
+function shellR(k){return 24+0.11*EL[k].r;}
+function lpAround(dir,L){const a=[];for(let k=1;k<=L;k++)a.push(dir+k*2*Math.PI/(L+1));return a;}
+function grp(k,R,fallback){ if(R&&R.ka!==R.kb) return k===R.ka?0:1; return fallback; }
+function gCentral(c,t,n,o,cLP,R){
+  const C=EL[c],T=EL[t];
+  if(cLP==null) cLP=Math.max(0,Math.round((C.ve-n*o)/2));
+  const tLP=Math.max(0,Math.round((T.ve-o)/2));
+  const D=n+cLP, st=2*Math.PI/D;
+  let ang=[...Array(D)].map((_,k)=>k*st), off;
+  if(n===1||cLP===0) off=Math.PI;
+  else{let sx=0,sy=0;for(let k=n;k<D;k++){sx+=Math.cos(ang[k]);sy+=Math.sin(ang[k]);}off=-Math.PI/2-Math.atan2(sy,sx);}
+  ang=ang.map(x=>x+off);
+  const Rc=shellR(c),Rt=shellR(t);
+  let dE=(Rc+Rt)*0.7; if(D>1&&n>1) dE=Math.max(dE,0.95*Rt/Math.sin(st/2));
+  const dS=dE+78;
+  const atoms=[{k:c,sx:0,sy:0,ex:0,ey:0,lp:ang.slice(n),grp:grp(c,R,0)}],bonds=[];
+  for(let i=0;i<n;i++){const a=ang[i];
+    atoms.push({k:t,sx:Math.cos(a)*dS,sy:Math.sin(a)*dS,ex:Math.cos(a)*dE,ey:Math.sin(a)*dE,lp:lpAround(a+Math.PI,tLP),grp:grp(t,R,1)});
+    bonds.push({i:0,j:i+1,o});}
+  return {atoms,bonds,meta:{type:'central',c,t,n,o,D,cLP}};
+}
+function gPair(a,b,o,noLP,R){
+  const Ra=shellR(a),Rb=shellR(b),d=(Ra+Rb)*0.7;
+  const La=noLP?0:Math.round((EL[a].ve-o)/2),Lb=noLP?0:Math.round((EL[b].ve-o)/2);
+  return {atoms:[{k:a,sx:-d/2-60,sy:0,ex:-d/2,ey:0,lp:lpAround(0,La),grp:grp(a,R,0)},
+                 {k:b,sx:d/2+60,sy:0,ex:d/2,ey:0,lp:lpAround(Math.PI,Lb),grp:grp(b,R,1)}],
+          bonds:[{i:0,j:1,o}],meta:{type:'pair',a,b,o}};
+}
+function gP4(){
+  const rr=66,atoms=[],bonds=[];
+  [-90,30,150].forEach((d,i)=>{const a=d*Math.PI/180;atoms.push({k:'P',sx:Math.cos(a)*rr*1.7,sy:Math.sin(a)*rr*1.7,ex:Math.cos(a)*rr,ey:Math.sin(a)*rr,lp:[a],grp:i%2});});
+  atoms.push({k:'P',sx:0,sy:0,ex:0,ey:0,lp:[Math.PI/2],grp:1});
+  bonds.push({i:0,j:1,o:1},{i:1,j:2,o:1},{i:2,j:0,o:1},{i:3,j:0,o:1},{i:3,j:1,o:1},{i:3,j:2,o:1});
+  return {atoms,bonds,noShell:true,meta:{type:'P4'}};
+}
+function gS8(){
+  const rr=96,atoms=[],bonds=[];
+  for(let i=0;i<8;i++){const a=i*Math.PI/4-Math.PI/2;
+    atoms.push({k:'S',sx:Math.cos(a)*rr*1.6,sy:Math.sin(a)*rr*1.6,ex:Math.cos(a)*rr,ey:Math.sin(a)*rr,lp:[a-0.45,a+0.45],grp:i%2});
+    bonds.push({i,j:(i+1)%8,o:1});}
+  return {atoms,bonds,noShell:true,meta:{type:'S8'}};
+}
+function gGrid(k1,k2,R){
+  const cols=5,rows=3,sx=84,sy=84,atoms=[],bonds=[],stubs=[],idx=(c,r)=>r*cols+c;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const k=(c+r)%2?k2:k1, x=(c-(cols-1)/2)*sx, y=(r-(rows-1)/2)*sy;
+    atoms.push({k,sx:x*1.45,sy:y*1.45,ex:x,ey:y,lp:[],grp:k1===k2?(c+r)%2:grp(k,R,0)});}
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    if(c<cols-1)bonds.push({i:idx(c,r),j:idx(c+1,r),o:1});
+    if(r<rows-1)bonds.push({i:idx(c,r),j:idx(c,r+1),o:1});
+    if(c===0)stubs.push({i:idx(c,r),a:Math.PI}); if(c===cols-1)stubs.push({i:idx(c,r),a:0});
+    if(r===0)stubs.push({i:idx(c,r),a:-Math.PI/2}); if(r===rows-1)stubs.push({i:idx(c,r),a:Math.PI/2});}
+  return {atoms,bonds,stubs,noShell:true,meta:{type:'grid'}};
+}
+function gSiO2(R){
+  const cols=4,rows=3,s=118,atoms=[],bonds=[],stubs=[],si={};
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const x=(c-(cols-1)/2)*s,y=(r-(rows-1)/2)*s;
+    si[c+','+r]=atoms.length;atoms.push({k:'Si',sx:x*1.4,sy:y*1.4,ex:x,ey:y,lp:[],grp:grp('Si',R,0)});}
+  const addO=(c1,r1,c2,r2,lpA)=>{const A=atoms[si[c1+','+r1]],B=atoms[si[c2+','+r2]];
+    const o=atoms.length;atoms.push({k:'O',sx:(A.sx+B.sx)/2,sy:(A.sy+B.sy)/2,ex:(A.ex+B.ex)/2,ey:(A.ey+B.ey)/2,lp:lpA,grp:grp('O',R,1)});
+    bonds.push({i:si[c1+','+r1],j:o,o:1},{i:o,j:si[c2+','+r2],o:1});};
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    if(c<cols-1)addO(c,r,c+1,r,[-Math.PI/2,Math.PI/2]);
+    if(r<rows-1)addO(c,r,c,r+1,[0,Math.PI]);
+    const i=si[c+','+r];
+    if(c===0)stubs.push({i,a:Math.PI}); if(c===cols-1)stubs.push({i,a:0});
+    if(r===0)stubs.push({i,a:-Math.PI/2}); if(r===rows-1)stubs.push({i,a:Math.PI/2});}
+  return {atoms,bonds,stubs,noShell:true,meta:{type:'grid'}};
+}
+
+/* ================= ANIMATION ================= */
+const W=760,H=420;
+const cv=$('#anim'), ctx=cv.getContext('2d');
+const S={R:null,t:0,playing:false,dur:3,mode:null,g:null,ion:null,met:null};
+let selA='Na',selB='Cl',active='A';
+
+function prepGraph(g){
+  g.atoms.forEach(a=>{const e=EL[a.k];a.R=shellR(a.k);a.er=g.noShell?19:a.R;a.col=e.col;a.en=e.en;a.q=0;});
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  g.atoms.forEach(a=>{[[a.sx,a.sy],[a.ex,a.ey]].forEach(([x,y])=>{x0=Math.min(x0,x-a.er-10);x1=Math.max(x1,x+a.er+10);y0=Math.min(y0,y-a.er-10);y1=Math.max(y1,y+a.er+10);});});
+  if(g.stubs){x0-=30;x1+=30;y0-=30;y1+=30;}
+  let e0=1e9,e1=-1e9,f0=1e9,f1_=-1e9;g.atoms.forEach(a=>{e0=Math.min(e0,a.ex-a.er-10);e1=Math.max(e1,a.ex+a.er+10);f0=Math.min(f0,a.ey-a.er-10);f1_=Math.max(f1_,a.ey+a.er+10);});
+  if(g.stubs){e0-=30;e1+=30;f0-=30;f1_+=30;}
+  const fitS=Math.min((W-30)/(x1-x0),(H-40)/(y1-y0)),fitE=Math.min((W-40)/(e1-e0),(H-60)/(f1_-f0));
+  g.s=Math.min(2.1,fitE*0.82,fitS*1.35);x0=e0;x1=e1;y0=f0;y1=f1_;
+  g.ox=W/2-(x0+x1)/2*g.s; g.oy=H/2-(y0+y1)/2*g.s;
+  g.es=[];
+  g.bonds.forEach((b,bi)=>{const ai=g.atoms[b.i],aj=g.atoms[b.j];b.f=0.5+clamp((aj.en-ai.en)*0.13,-0.3,0.3);
+    for(let k=0;k<b.o;k++){g.es.push({type:'b',bi,k,own:b.i,oth:b.j,side:0});g.es.push({type:'b',bi,k,own:b.j,oth:b.i,side:1});}
+    const d=aj.en-ai.en; if(Math.abs(d)>=0.45){ai.q+=d;aj.q-=d;}});
+  const sp=g.noShell?0.34:0.22;
+  g.atoms.forEach((a,ai)=>a.lp.forEach(ang=>{g.es.push({type:'l',own:ai,ang:ang-sp});g.es.push({type:'l',own:ai,ang:ang+sp});}));
+}
+function graphState(g,t){
+  const u=ease(clamp((t-0.05)/0.5)), v=ease(clamp((t-0.36)/0.44));
+  const P=g.atoms.map(a=>({x:g.ox+lerp(a.sx,a.ex,u)*g.s,y:g.oy+lerp(a.sy,a.ey,u)*g.s}));
+  const sc=clamp(g.s,0.72,1.6);
+  const es=g.es.map(e=>{
+    const a=g.atoms[e.own],p=P[e.own],er=a.er*g.s;
+    if(e.type==='l') return {x:p.x+Math.cos(e.ang)*er*0.95,y:p.y+Math.sin(e.ang)*er*0.95,grp:a.grp};
+    const b=g.bonds[e.bi],q=P[e.oth],off=e.k-(b.o-1)/2;
+    const sa=Math.atan2(q.y-p.y,q.x-p.x)+off*0.45;
+    const sx=p.x+Math.cos(sa)*er*0.95, sy=p.y+Math.sin(sa)*er*0.95;
+    const pi=P[b.i],pj=P[b.j],bx=pi.x+(pj.x-pi.x)*b.f,by=pi.y+(pj.y-pi.y)*b.f;
+    const BL=Math.hypot(pj.x-pi.x,pj.y-pi.y)||1,vx=(pj.x-pi.x)/BL,vy=(pj.y-pi.y)/BL;
+    const al=(e.side===0?-1:1)*4.8*sc, pe=off*11*sc;
+    return {x:lerp(sx,bx+vx*al-vy*pe,v),y:lerp(sy,by+vy*al+vx*pe,v),grp:a.grp};
+  });
+  return {P,es,u,v,sc};
+}
+function drawCore(x,y,r,k,label){
+  const col=EL[k]?EL[k].col:'#888';
+  const gr=ctx.createRadialGradient(x-r*.35,y-r*.35,r*.15,x,y,r);
+  gr.addColorStop(0,shade(col,.45));gr.addColorStop(1,col);
+  ctx.fillStyle=gr;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  ctx.strokeStyle=shade(col,-.35);ctx.lineWidth=1.2;ctx.stroke();
+  ctx.fillStyle=lum(col)>0.62?'#18202e':'#fff';
+  ctx.font=`700 ${Math.round(r*0.95)}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(label||k,x,y+0.5);
+}
+function drawE(x,y,g,sc){
+  const c=ECOL[g];ctx.strokeStyle=c;ctx.fillStyle=c;
+  if(g===0){const s=4.3*sc;ctx.lineWidth=2.1*sc;ctx.beginPath();ctx.moveTo(x-s,y-s);ctx.lineTo(x+s,y+s);ctx.moveTo(x+s,y-s);ctx.lineTo(x-s,y+s);ctx.stroke();}
+  else{ctx.beginPath();ctx.arc(x,y,3.9*sc,0,7);ctx.fill();}
+}
+function shell(x,y,r,col,alpha,dashed){
+  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.setLineDash(dashed?[5,4]:[]);
+  ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.stroke();ctx.restore();
+}
+function drawGraph(t){
+  const g=S.g,{P,es,v,sc}=graphState(g,t),w=clamp((t-0.82)/0.15);
+  // stubs
+  if(g.stubs){ctx.save();g.stubs.forEach(s=>{const p=P[s.i];const L=34*g.s;
+    const gr=ctx.createLinearGradient(p.x,p.y,p.x+Math.cos(s.a)*L,p.y+Math.sin(s.a)*L);gr.addColorStop(0,'rgba(100,116,139,.7)');gr.addColorStop(1,'rgba(100,116,139,0)');
+    ctx.strokeStyle=gr;ctx.globalAlpha=v;ctx.lineWidth=2.4;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+Math.cos(s.a)*L,p.y+Math.sin(s.a)*L);ctx.stroke();});ctx.restore();}
+  // density
+  if($('#chkDensity').checked&&v>0){g.bonds.forEach(b=>{const pi=P[b.i],pj=P[b.j];const x=pi.x+(pj.x-pi.x)*b.f,y=pi.y+(pj.y-pi.y)*b.f;
+    const r=(15+6*b.o)*g.s;const gr=ctx.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(109,40,217,${0.30*v})`);gr.addColorStop(1,'rgba(109,40,217,0)');
+    ctx.fillStyle=gr;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();});}
+  if(g.noShell){ctx.save();ctx.globalAlpha=0.55*v;ctx.strokeStyle='#64748b';ctx.lineWidth=2;g.bonds.forEach(b=>{ctx.beginPath();ctx.moveTo(P[b.i].x,P[b.i].y);ctx.lineTo(P[b.j].x,P[b.j].y);ctx.stroke();});ctx.restore();}
+  else g.atoms.forEach((a,i)=>shell(P[i].x,P[i].y,a.R*g.s,shade(a.col,-.25),0.75,true));
+  const coreR=(g.noShell?15:14)*sc;
+  g.atoms.forEach((a,i)=>drawCore(P[i].x,P[i].y,coreR,a.k));
+  es.forEach(e=>drawE(e.x,e.y,e.grp,sc));
+  if(w>0&&!g.stubs){ctx.save();ctx.globalAlpha=w;ctx.font=`700 ${Math.round(15*sc)}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    g.atoms.forEach((a,i)=>{if(Math.abs(a.q)<0.44)return;const r=(g.noShell?24:a.R*0.62)*g.s;
+      const x=P[i].x+r*0.75,y=P[i].y-r*0.85;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,10*sc,0,7);ctx.fill();
+      ctx.fillStyle=a.q>0?'#0f766e':'#be123c';ctx.fillText(a.q>0?'δ+':'δ−',x,y);});ctx.restore();}
+  if(S.R.fallback){ctx.fillStyle='#5b687d';ctx.font='13px system-ui,sans-serif';ctx.textAlign='left';ctx.fillText('Only the shared bonding pair is shown',14,22);}
+  if(g.meta.type==='P4'){ctx.fillStyle='#5b687d';ctx.font='13px system-ui,sans-serif';ctx.textAlign='left';ctx.fillText('2D view of the tetrahedral P₄ molecule',14,22);}
+  if(g.stubs){ctx.fillStyle='#5b687d';ctx.font='13px system-ui,sans-serif';ctx.textAlign='left';ctx.fillText('2D slice – the network continues in all directions',14,22);}
+}
+
+/* ---- ionic ---- */
+function prepIonic(R){
+  const {cat,an,m,n}=R.ions;
+  const spc=c=>Math.min(175,(H-60)/c);
+  const cs=spc(m),as=spc(n);
+  const catPoly=cat.kind==='polycat',anPoly=an.kind==='polyan';
+  const Rc0=catPoly?44:shellR(cat.key),Ra0=anPoly?46:shellR(an.key);
+  const fc=Math.min(1.5,cs*0.43/Rc0),fa=Math.min(1.5,as*(anPoly?0.37:0.4)/Ra0);
+  const cats=[...Array(m)].map((_,i)=>({x:225,y:H/2+(i-(m-1)/2)*cs,R:Rc0*fc}));
+  const ans=[...Array(n)].map((_,i)=>({x:535,y:H/2+(i-(n-1)/2)*as,R:Ra0*fa}));
+  const cc=cat.ch;
+  cats.forEach(c=>c.slots=[...Array(cc)].map((_,k)=>(k-(cc-1)/2)*0.55));
+  const need=anPoly?-an.ch:an.ach;
+  ans.forEach(a=>{
+    if(anPoly){a.own=[];a.empty=[...Array(need)].map((_,k)=>Math.PI+(k-(need-1)/2)*0.5);}
+    else if(an.key==='H'){a.own=[Math.PI-0.4];a.empty=[Math.PI+0.4];}
+    else{const ord=[0,-Math.PI/2,Math.PI/2,Math.PI],sl=[];[-0.24,0.24].forEach(d=>ord.forEach(o=>sl.push(o+d)));a.own=sl.slice(0,an.ve);a.empty=sl.slice(an.ve);}
+  });
+  const tr=[];let ci=0,ck=0;
+  ans.forEach((a,ai)=>a.empty.forEach(ang=>{tr.push({c:ci,ck,a:ai,ang});ck++;if(ck>=cc){ck=0;ci++;}}));
+  const N=tr.length,seg=0.66/N;
+  tr.forEach((x,i)=>{x.t0=0.12+i*seg;x.t1=x.t0+seg*0.95;x.bend=(i%2?1:-1)*(28+8*(i%3));});
+  S.ion={cats,ans,tr,cat,an,catPoly,anPoly,gc:R.ka===cat.key?0:1,ga:R.ka===an.key?0:1};
+  return 1.6+0.6*N;
+}
+function drawMini(P,x,y,R){
+  const C=EL[P.c],T=EL[P.t],k=P.k,rr=R*0.42;
+  const pts=[];for(let i=0;i<k;i++){const a=(k===1?0:i*2*Math.PI/k)-Math.PI/2;pts.push([x+Math.cos(a)*rr,y+Math.sin(a)*rr]);}
+  ctx.strokeStyle='#64748b';ctx.lineWidth=2;pts.forEach(p=>{ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(p[0],p[1]);ctx.stroke();});
+  pts.forEach(p=>{ctx.fillStyle=T.col;ctx.beginPath();ctx.arc(p[0],p[1],R*(P.t==='H'?0.13:0.17),0,7);ctx.fill();ctx.strokeStyle=shade(T.col,-.35);ctx.lineWidth=1;ctx.stroke();});
+  ctx.fillStyle=C.col;ctx.beginPath();ctx.arc(x,y,R*0.22,0,7);ctx.fill();ctx.strokeStyle=shade(C.col,-.35);ctx.stroke();
+}
+function drawIonic(t){
+  const I=S.ion,w=clamp((t-0.82)/0.15),sc=1;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  // attraction hint
+  if(w>0){ctx.save();ctx.globalAlpha=w*0.6;ctx.strokeStyle='#a78bfa';ctx.lineWidth=2;ctx.setLineDash([6,5]);
+    I.cats.forEach(c=>I.ans.forEach(a=>{ctx.beginPath();ctx.moveTo(c.x+c.R*0.7,c.y);ctx.lineTo(a.x-a.R-10,a.y);ctx.stroke();}));ctx.restore();}
+  I.cats.forEach(c=>{
+    if(I.catPoly){shell(c.x,c.y,c.R,'#64748b',1-w*0.6,true);drawMini(I.cat,c.x,c.y,c.R);}
+    else{shell(c.x,c.y,c.R,shade(I.cat.col,-.25),1-w,true);drawCore(c.x,c.y,clamp(c.R*0.3,13,20),I.cat.key);
+      if(w>0)shell(c.x,c.y,c.R*0.6,shade(I.cat.col,-.3),w,false);}
+    if(w>0){ctx.save();ctx.globalAlpha=w;ctx.fillStyle='#0f766e';ctx.font='700 17px system-ui,sans-serif';
+      const r=I.catPoly?c.R:c.R*0.6;ctx.fillText(ionLabel(I.cat),c.x,c.y-r-13);ctx.restore();}
+  });
+  I.ans.forEach(a=>{
+    if(I.anPoly){shell(a.x,a.y,a.R,'#64748b',1,true);drawMini(I.an,a.x,a.y,a.R);}
+    else{shell(a.x,a.y,a.R,shade(I.an.col,-.25),1-w,true);if(w>0)shell(a.x,a.y,a.R,shade(I.an.col,-.25),w,false);drawCore(a.x,a.y,clamp(a.R*0.3,13,20),I.an.key);}
+    a.own.forEach(ang=>drawE(a.x+Math.cos(ang)*a.R,a.y+Math.sin(ang)*a.R,I.ga,sc));
+    // empty slots
+    a.empty.forEach(ang=>{ctx.strokeStyle='rgba(91,104,125,.5)';ctx.lineWidth=1.3;ctx.setLineDash([2,2]);ctx.beginPath();ctx.arc(a.x+Math.cos(ang)*a.R,a.y+Math.sin(ang)*a.R,5,0,7);ctx.stroke();ctx.setLineDash([]);});
+    if(w>0){ctx.save();ctx.globalAlpha=w;ctx.strokeStyle='#be123c';ctx.lineWidth=2.2;const r=a.R+9;
+      ctx.beginPath();ctx.moveTo(a.x-r+8,a.y-r);ctx.lineTo(a.x-r,a.y-r);ctx.lineTo(a.x-r,a.y+r);ctx.lineTo(a.x-r+8,a.y+r);
+      ctx.moveTo(a.x+r-8,a.y-r);ctx.lineTo(a.x+r,a.y-r);ctx.lineTo(a.x+r,a.y+r);ctx.lineTo(a.x+r-8,a.y+r);ctx.stroke();
+      ctx.fillStyle='#be123c';ctx.font='700 17px system-ui,sans-serif';ctx.textAlign='left';ctx.fillText(chg(I.anPoly?I.an.ch:-I.an.ach),a.x+r+3,a.y-r+2);ctx.textAlign='center';ctx.restore();}
+    if(I.anPoly&&I.ans.length===1){ctx.fillStyle='#334155';ctx.font='600 13px system-ui,sans-serif';ctx.fillText(fmtF(I.an.f)+' group',a.x,a.y+a.R+(w>0?24:14));}
+  });
+  if(I.catPoly&&I.cats.length===1){I.cats.forEach(c=>{ctx.fillStyle='#334155';ctx.font='600 13px system-ui,sans-serif';ctx.fillText(fmtF(I.cat.f)+' group',c.x,c.y+c.R+14);});}
+  // transferring electrons
+  I.tr.forEach(x=>{
+    const c=I.cats[x.c],a=I.ans[x.a],sa=c.slots[x.ck];
+    const s={x:c.x+Math.cos(sa)*c.R,y:c.y+Math.sin(sa)*c.R},e={x:a.x+Math.cos(x.ang)*a.R,y:a.y+Math.sin(x.ang)*a.R};
+    const p=ease(clamp((t-x.t0)/(x.t1-x.t0)));
+    const mx=(s.x+e.x)/2,my=(s.y+e.y)/2+x.bend;
+    const X=(1-p)*(1-p)*s.x+2*(1-p)*p*mx+p*p*e.x,Y=(1-p)*(1-p)*s.y+2*(1-p)*p*my+p*p*e.y;
+    if(p>0&&p<1){ctx.save();ctx.strokeStyle='rgba(29,78,216,.18)';ctx.lineWidth=2;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.quadraticCurveTo(mx,my,e.x,e.y);ctx.stroke();ctx.restore();}
+    drawE(X,Y,I.gc,sc);
+  });
+}
+
+/* ---- metallic ---- */
+function prepMetal(R){
+  const A=R.A,B=R.kb!==R.ka?R.B:null,cols=7,rows=4,sx=96,sy=88,r=rng(42);
+  const atoms=[];
+  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+    const k=B&&r()<0.35?B.key:A.key;const E=EL[k];
+    atoms.push({k,x:W/2+(i-(cols-1)/2)*sx+(j%2?sx*0.0:0),y:H/2+(j-(rows-1)/2)*sy,R:Math.min(38,shellR(k)*0.82)*(B?Math.sqrt(E.r/A.r):1),ch:E.ch,gr:k===R.ka?0:1});}
+  const es=[];
+  atoms.forEach((a,ai)=>{const n=Math.min(3,a.ch);for(let q=0;q<n;q++){const ang=-Math.PI/2+q*2*Math.PI/n+0.4;
+    es.push({ai,ang,tr:0.3+r()*0.3,rel:false,x:0,y:0,vx:0,vy:0,gr:a.gr});}});
+  const bx0=W/2-(cols-1)/2*sx-44,bx1=W/2+(cols-1)/2*sx+44,by0=H/2-(rows-1)/2*sy-40,by1=H/2+(rows-1)/2*sy+40;
+  S.met={atoms,es,box:[bx0,by0,bx1,by1],rand:rng(7)};
+  return 3.2;
+}
+function updMetal(dt){
+  const M=S.met;if(!M)return;const [x0,y0,x1,y1]=M.box,r=M.rand;
+  M.es.forEach(e=>{const a=M.atoms[e.ai];
+    if(!e.rel){if(S.t>=e.tr){e.rel=true;e.x=a.x+Math.cos(e.ang)*a.R;e.y=a.y+Math.sin(e.ang)*a.R;const an=r()*7;e.vx=Math.cos(an)*70;e.vy=Math.sin(an)*70;}return;}
+    e.vx+=(r()-.5)*420*dt;e.vy+=(r()-.5)*420*dt;const sp=Math.hypot(e.vx,e.vy),mx=110,mn=45;
+    if(sp>mx){e.vx*=mx/sp;e.vy*=mx/sp}else if(sp<mn){e.vx*=mn/sp;e.vy*=mn/sp}
+    e.x+=e.vx*dt;e.y+=e.vy*dt;
+    if(e.x<x0){e.x=x0;e.vx=Math.abs(e.vx)}if(e.x>x1){e.x=x1;e.vx=-Math.abs(e.vx)}
+    if(e.y<y0){e.y=y0;e.vy=Math.abs(e.vy)}if(e.y>y1){e.y=y1;e.vy=-Math.abs(e.vy)}});
+}
+function drawMetal(t){
+  const M=S.met,sea=clamp((t-0.35)/0.4);
+  if(sea>0){const [x0,y0,x1,y1]=M.box;ctx.save();ctx.globalAlpha=sea*0.5;ctx.fillStyle='#dbeafe';
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x0-8,y0-8,x1-x0+16,y1-y0+16,26);else ctx.rect(x0-8,y0-8,x1-x0+16,y1-y0+16);ctx.fill();ctx.restore();}
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  M.atoms.forEach((a,ai)=>{
+    const mine=M.es.filter(e=>e.ai===ai),rel=mine.length?mine.filter(e=>e.rel).length/mine.length:1;
+    shell(a.x,a.y,a.R,shade(EL[a.k].col,-.25),0.85*(1-rel),true);
+    drawCore(a.x,a.y,15*Math.min(1.15,a.R/34),a.k);
+    if(rel>=1){ctx.save();ctx.globalAlpha=clamp((t-0.55)/0.2);ctx.fillStyle='#0f766e';ctx.font='700 13px system-ui,sans-serif';ctx.fillText(chg(Math.min(3,a.ch)),a.x+18,a.y-17);ctx.restore();}
+  });
+  M.es.forEach(e=>{const a=M.atoms[e.ai];const x=e.rel?e.x:a.x+Math.cos(e.ang)*a.R,y=e.rel?e.y:a.y+Math.sin(e.ang)*a.R;drawE(x,y,e.gr,0.9);});
+}
+function drawMessage(msg){
+  ctx.fillStyle='#5b687d';ctx.font='16px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  const words=msg.split(' '),lines=[];let cur='';
+  words.forEach(w=>{const tst=cur?cur+' '+w:w;if(ctx.measureText(tst).width>W-140){lines.push(cur);cur=w}else cur=tst;});lines.push(cur);
+  lines.forEach((l,i)=>ctx.fillText(l,W/2,H/2+(i-(lines.length-1)/2)*24));
+}
+
+/* ---- step text ---- */
+function steps(R){
+  const A=R.A,B=R.B,out=[];
+  if(R.mode==='message'){out.push([0,R.msg]);return out;}
+  if(R.mode==='ionic'){
+    const I=R.ions,C=I.cat,X=I.an,cc=C.ch,need=X.kind==='polyan'?-X.ch:X.ach;
+    const cName=C.kind==='metal'?`Each ${C.key} atom (χ ${f1(C.en)})`:`Each ${fmtF(C.f)} group`;
+    const xName=X.kind==='polyan'?`each ${fmtF(X.f)} group`:`each ${X.key} atom (χ ${f1(X.en)})`;
+    out.push([0,`${cName} has ${cc} electron${cc>1?'s':''} it can lose; ${xName} needs ${need} more for a full outer shell.`]);
+    out.push([0.12,R.d!=null?`Δχ = ${f1(R.d)}: the difference is large, so electrons are transferred, not shared. ${C.key} loses ${cc>1?'electrons':'an electron'} easily.`:`Electrons transfer from the ${C.kind==='metal'?'metal':'ammonium group'} to the ${X.kind==='polyan'?'polyatomic group':'non-metal'}. (Simplified picture of how the ions form.)`]);
+    out.push([0.82,`${ionLabel(C)} and ${ionLabel(X)} ions form in a ${I.m}:${I.n} ratio → ${fmtF(R.formula)}. Oppositely charged ions attract in all directions, building a giant ionic lattice.`]);
+    return out;
+  }
+  if(R.mode==='metallic'){
+    const same=R.ka===R.kb;
+    out.push([0,same?`Each ${A.key} atom (χ ${f1(A.en)}) holds its ${Math.min(3,A.ch)} valence electron${A.ch>1?'s':''} only loosely.`:`${A.key} (χ ${f1(A.en)}) and ${B.key} (χ ${f1(B.en)}) both have low electronegativity – neither attracts electrons strongly.`]);
+    out.push([0.32,'The valence electrons leave their atoms and become delocalised: free to move through the whole structure.']);
+    out.push([0.78,`Result: a lattice of positive ions in a “sea” of delocalised electrons. Metallic bonding = electrostatic attraction between the cations and the delocalised electrons.`]);
+    return out;
+  }
+  if(R.type==='intermediate'){
+    const M=A.kind==='metal'?A:B,X=M===A?B:A;
+    out.push([0,`${M.key} (χ ${f1(M.en)}) + ${X.key} (χ ${f1(X.en)}): Δχ = ${f1(R.d)} – a metal is involved, but the difference is not large enough for complete transfer.`]);
+    out.push([0.36,`The electrons end up shared but pulled strongly towards ${X.key}: partway between sharing and transfer.`]);
+    out.push([0.82,`Intermediate bonding: ${f1(R.pct)}% ionic character by Pauling’s estimate – polar covalent with significant ionic character.`]);
+    return out;
+  }
+  if(R.giant){
+    out.push([0,`${A.key}${R.ka!==R.kb?' and '+B.key:''}: non-metals with ${R.ka==='O'||R.kb==='O'?'4 (Si) and 6 (O)':'4'} valence electrons – they share rather than transfer.`]);
+    out.push([0.36,R.pair==='O+Si'?'Each Si shares one pair with each of 4 O atoms; each O shares with 2 Si atoms.':'Each atom shares one pair of electrons with each of its 4 neighbours.']);
+    out.push([0.82,'The bonding repeats in every direction: a giant covalent network with no separate molecules.']);
+    return out;
+  }
+  const g=R.graph,bo=g.bonds[0].o;
+  out.push([0,R.ka===R.kb?`Two ${A.n} atoms (χ ${f1(A.en)}): identical pull on electrons, and neither can remove electrons from the other.`:`${A.key} (χ ${f1(A.en)}) and ${B.key} (χ ${f1(B.en)}): both non-metals with fairly high χ – neither can pull electrons fully off the other.`]);
+  out.push([0.36,`Unpaired electrons pair up between the nuclei: ${bo===1?'one shared pair (single bond)':bo===2?'two shared pairs (double bond)':'three shared pairs (triple bond)'} per bond${g.meta.type==='central'&&g.meta.cLP?`; ${g.meta.c} keeps ${g.meta.cLP} lone pair${g.meta.cLP>1?'s':''}`:''}.`]);
+  out.push([0.82,polarityText(R)]);
+  return out;
+}
+function molPolar(R){
+  const g=R.graph;if(!g)return null;
+  if(g.meta.type==='central'){let vx=0,vy=0;const c=g.atoms[0];g.atoms.slice(1).forEach(a=>{const L=Math.hypot(a.ex,a.ey)||1;const d=EL[a.k].en-EL[c.k].en;vx+=a.ex/L*d;vy+=a.ey/L*d;});return Math.hypot(vx,vy)>0.05;}
+  if(g.meta.type==='pair') return EL[g.meta.a].en!==EL[g.meta.b].en;
+  return false;
+}
+function polarityText(R){
+  const d=R.d;if(d==null)return '';
+  const X=R.A.en>R.B.en?R.A:R.B;
+  let s=d===0?'Δχ = 0: electrons shared equally – a non-polar covalent bond.':d<0.5?`Δχ = ${f1(d)}: very nearly equal sharing – essentially non-polar bonds.`:`Δχ = ${f1(d)}: unequal sharing – polar covalent bonds; the shared pairs sit closer to ${X.key} (δ−).`;
+  if(R.fallback) return s;
+  const p=molPolar(R);
+  if(R.graph&&R.graph.meta.type==='central'&&R.graph.meta.n>1){
+    s+=p?` The molecule is polar: its shape is not symmetrical${R.graph.meta.cLP?' (lone pairs on '+R.graph.meta.c+')':''}.`:(d>=0.5?' But the molecule is non-polar: its symmetrical shape cancels the bond dipoles.':' The molecule is non-polar.');
+  }
+  return s;
+}
+
+/* ---- legend ---- */
+function legendHTML(R){
+  if(R.mode==='message') return '';
+  const a=R.A,b=R.B;
+  const cross=`<b style="color:${ECOL[0]}">×</b>`,dot=`<b style="color:${ECOL[1]}">●</b>`;
+  if(R.ka===R.kb) return `<span>${cross} / ${dot} electrons from neighbouring ${a.n} atoms (dot-and-cross convention)</span>`;
+  const nm=s=>s.kind==='metal'||s.kind==='nonmetal'?s.key:fmtF(s.f);
+  return `<span>${cross} electrons originally on ${nm(a)}</span><span>${dot} electrons originally on ${nm(b)}</span>`+(R.mode==='graph'&&$('#chkDensity').checked?'<span><b style="color:#6d28d9">◉</b> shared electron density</span>':'');
+}
+
+/* ================= TRIANGLE ================= */
+const svg=$('#triangle'),X0=0.6,X1=4.2,Y0=0,Y1=3.45;
+const tx=x=>46+(x-X0)/(X1-X0)*340, ty=y=>292-(y-Y0)/(Y1-Y0)*270;
+function pts(a){return a.map(([x,y])=>tx(x).toFixed(1)+','+ty(y).toFixed(1)).join(' ');}
+function buildTriangle(){
+  let h=`<defs>
+   <linearGradient id="band" x1="0" x2="1"><stop offset="0" stop-color="#bfdbfe"/><stop offset="1" stop-color="#bbf7d0"/></linearGradient>
+   <clipPath id="clipT"><polygon points="${pts([[0.8,0],[4,0],[2.4,3.2]])}"/></clipPath></defs>`;
+  for(let x=1;x<=4.001;x+=0.5){h+=`<line x1="${tx(x)}" y1="${ty(0)}" x2="${tx(x)}" y2="${ty(0)+5}" stroke="#94a3b8"/><text x="${tx(x)}" y="${ty(0)+17}" font-size="10.5" text-anchor="middle" fill="#5b687d">${x.toFixed(1)}</text>`;}
+  for(let y=0;y<=3.001;y+=0.5){h+=`<line x1="${tx(X0)-5}" y1="${ty(y)}" x2="${tx(X0)}" y2="${ty(y)}" stroke="#94a3b8"/><text x="${tx(X0)-8}" y="${ty(y)+3.5}" font-size="10.5" text-anchor="end" fill="#5b687d">${y.toFixed(1)}</text>`;
+    if(y>0)h+=`<line x1="${tx(X0)}" y1="${ty(y)}" x2="${tx(X1)}" y2="${ty(y)}" stroke="#eef1f6"/>`;}
+  h+=`<line x1="${tx(X0)}" y1="${ty(0)}" x2="${tx(X1)}" y2="${ty(0)}" stroke="#94a3b8"/><line x1="${tx(X0)}" y1="${ty(0)}" x2="${tx(X0)}" y2="${ty(Y1)}" stroke="#94a3b8"/>`;
+  h+=`<g clip-path="url(#clipT)">
+    <polygon points="${pts([[1.65,1.7],[3.15,1.7],[2.4,3.2]])}" fill="#fde68a" opacity=".85"/>
+    <polygon points="${pts([[0.8,0],[1.95,0],[1.95,1.7],[1.65,1.7]])}" fill="#bfdbfe" opacity=".9"/>
+    <polygon points="${pts([[1.95,0],[4,0],[3.15,1.7],[1.95,1.7]])}" fill="#bbf7d0" opacity=".9"/>
+    <rect x="${tx(1.8)}" y="${ty(1.7)}" width="${tx(2.1)-tx(1.8)}" height="${ty(0)-ty(1.7)}" fill="url(#band)"/>
+    <line x1="${tx(1.95)}" y1="${ty(0.5)}" x2="${tx(4)}" y2="${ty(0.5)}" stroke="#059669" stroke-dasharray="3 3" opacity=".6"/>
+  </g>
+  <polygon points="${pts([[0.8,0],[4,0],[2.4,3.2]])}" fill="none" stroke="#475569" stroke-width="1.5"/>
+  <text x="${tx(2.4)}" y="${ty(2.62)}" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">IONIC</text>
+  <text x="${tx(1.35)}" y="${ty(0.32)}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e40af">METALLIC</text>
+  <text x="${tx(3.05)}" y="${ty(1.05)}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#065f46">POLAR COVALENT</text>
+  <text x="${tx(3.0)}" y="${ty(0.18)}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#065f46">COVALENT</text>
+  <text x="${tx(1.95)}" y="${ty(1.78)}" text-anchor="middle" font-size="9" fill="#475569">metalloids</text>
+  <text x="${(tx(X0)+tx(X1))/2}" y="332" text-anchor="middle" font-size="12" fill="#18202e">Average electronegativity  Σχ/2</text>
+  <text transform="translate(12,${ty(1.6)}) rotate(-90)" text-anchor="middle" font-size="12" fill="#18202e">Electronegativity difference  Δχ</text>
+  <g id="refs"></g><g id="pt"></g>`;
+  svg.innerHTML=h;
+  $('#refs').innerHTML=REFS.map(([l,x,y])=>`<circle cx="${tx(x)}" cy="${ty(y)}" r="2.6" fill="#64748b"/><text x="${tx(x)+(x>3.5?-4:4)}" y="${ty(y)-(y===0?5:4)}" font-size="9.5" fill="#64748b" text-anchor="${x>3.5?'end':'start'}">${l}</text>`).join('');
+}
+function updateTriangle(R){
+  $('#refs').style.display=$('#chkRefs').checked?'':'none';
+  let h='';
+  R.tri2.forEach(p=>{const x=tx(p.x),y=ty(p.y);
+    h+=`<rect x="${x-6}" y="${y-6}" width="12" height="12" transform="rotate(45 ${x} ${y})" fill="#fff" stroke="#6d28d9" stroke-width="2.2"/>
+        <text x="${x+10}" y="${y-8}" font-size="11" font-weight="700" fill="#6d28d9">${p.label}</text>`;});
+  if(R.d!=null){const x=tx(R.avg),y=ty(R.d);
+    h+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${ty(0)}" stroke="#6d28d9" stroke-dasharray="3 3"/>
+        <line x1="${tx(X0)}" y1="${y}" x2="${x}" y2="${y}" stroke="#6d28d9" stroke-dasharray="3 3"/>
+        <circle cx="${x}" cy="${y}" r="13" fill="#6d28d9" opacity=".18"><animate attributeName="r" values="8;16;8" dur="1.8s" repeatCount="indefinite"/></circle>
+        <circle cx="${x}" cy="${y}" r="6.5" fill="#6d28d9" stroke="#fff" stroke-width="2"/>`;
+    const lab=R.type==='invalid'||R.mode==='message'?R.ka+'–'+R.kb:(R.fallback?R.ka+'–'+R.kb:fmtF(R.formula.replace(' alloy','').replace(' + ','–')));
+    const right=R.avg<3.2;
+    h+=`<text x="${x+(right?11:-11)}" y="${y-9}" font-size="13" font-weight="800" fill="#4c1d95" text-anchor="${right?'start':'end'}" paint-order="stroke" stroke="#fff" stroke-width="3">${lab}</text>`;}
+  $('#pt').innerHTML=h;
+}
+
+/* ================= DATA PANEL ================= */
+const TYPES={ionic:['Ionic','var(--ionic)'],covalent:['Covalent','var(--cov)'],metallic:['Metallic','var(--met)'],intermediate:['Intermediate / polar covalent','var(--mid)'],invalid:['No compound','#94a3b8'],unmodelled:['Not modelled','#94a3b8']};
+function structName(R){
+  const s=R.struct;if(!s)return '—';
+  if(s.kind==='ionic')return s.covalentChar?'Ionic lattice (covalent character)':'Giant ionic lattice';
+  if(s.kind==='metal')return R.ka===R.kb?'Metallic lattice':'Metallic lattice (alloy)';
+  if(s.kind==='molecular')return 'Simple molecular';
+  if(s.kind==='giant')return 'Giant covalent';
+  return '—';
+}
+function renderData(R){
+  const A=R.A,B=R.B,[tn,tc]=TYPES[R.type];
+  const enCell=s=>s.en!=null?f1(s.en):'— (ion)';
+  let rows=`<tr><td>χ ${A.label}</td><td>${enCell(A)}</td></tr><tr><td>χ ${B.label}</td><td>${enCell(B)}</td></tr>`;
+  if(R.d!=null){rows+=`<tr><td>Δχ (difference)</td><td>${f1(R.d)}</td></tr><tr><td>Σχ/2 (average)</td><td>${R.avg.toFixed(2)}</td></tr>`;
+    if(R.type!=='metallic'&&R.type!=='invalid')rows+=`<tr><td>Ionic character (Pauling estimate)</td><td>≈ ${Math.round(R.pct)}%</td></tr>`;}
+  rows+=`<tr><td>Predicted bonding</td><td><span class="badge" style="background:${tc}">${tn}</span></td></tr>`;
+  rows+=`<tr><td>Formula</td><td>${R.formula==='—'?'—':fmtF(R.formula)}</td></tr><tr><td>Structure</td><td>${structName(R)}</td></tr>`;
+  let why='';
+  if(R.type==='ionic')why=R.d!=null?`Δχ ≥ about 1.7 (≈ 50% ionic character) puts this pair in the ionic region. <b>Ionic bonding</b> is the electrostatic attraction between oppositely charged ions.`:`Ions with opposite charges attract. The triangle is for binary compounds, so only the covalent bonds <i>inside</i> the polyatomic ion are plotted (◇). <b>Ionic bonding</b> is the electrostatic attraction between oppositely charged ions.`;
+  if(R.type==='covalent')why=`Both are non-metals with fairly high χ, so electrons are shared. A <b>covalent bond</b> is the electrostatic attraction between a shared pair of electrons and the positively charged nuclei.`;
+  if(R.type==='metallic')why=`Low average χ and small Δχ: both atoms hold valence electrons loosely. <b>Metallic bonding</b> is the electrostatic attraction between a lattice of cations and delocalised electrons.`;
+  if(R.type==='intermediate')why=`Δχ = ${f1(R.d)} is below about 1.7, so the triangle places this metal compound in the polar-covalent region. Real compounds here show a mix of ionic and covalent character – bonding is a continuum, not three boxes.`;
+  if(R.type==='invalid'||R.type==='unmodelled')why=R.msg;
+  if(R.d!=null&&R.avg>1.75&&R.avg<2.15&&R.d<1.7&&!['invalid','metallic'].includes(R.type))R.notes.push('This point lies in the metalloid zone, where the boundary between metallic and covalent behaviour blurs.');
+  $('#data').innerHTML=`<table>${rows}</table><p class="why">${why}</p><ul class="notes">${[...new Set(R.notes)].map(n=>`<li>${n}</li>`).join('')}</ul>`;
+}
+
+/* ================= 3D STRUCTURES ================= */
+const v3=$('#view3d'),c3=v3.getContext('2d');
+const V={yaw:0.6,pitch:-0.38,drag:null,spin:true,scene:null,variant:null};
+const TET=[[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]].map(v=>v.map(x=>x/Math.sqrt(3)));
+const OCT=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+const TRI=[0,1,2].map(i=>[Math.cos(i*2*Math.PI/3),0,Math.sin(i*2*Math.PI/3)]);
+function randRot(r){const a=r()*7,b=r()*7,c=r()*7;const ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),cc=Math.cos(c),sc=Math.sin(c);
+  return p=>{let [x,y,z]=p;[x,y]=[x*ca-y*sa,x*sa+y*ca];[x,z]=[x*cb-z*sb,x*sb+z*cb];[y,z]=[y*cc-z*sc,y*sc+z*cc];return [x,y,z];};}
+function domains(D){if(D===1)return [[-1,0,0]];if(D===2)return [[-1,0,0],[1,0,0]];if(D===3)return TRI;if(D===4)return TET;if(D===6)return OCT;
+  return [...Array(D)].map((_,i)=>[Math.cos(i*2*Math.PI/D),0,Math.sin(i*2*Math.PI/D)]);}
+function molecule3D(g){
+  const atoms=[],bonds=[],cr=k=>EL[k].r/100;
+  const m=g.meta;
+  if(m.type==='central'){
+    let D=m.D;const dirs=domains(D),bl=cr(m.c)+cr(m.t);
+    atoms.push({p:[0,0,0],k:m.c});
+    for(let i=0;i<m.n;i++){const d=dirs[i];atoms.push({p:d.map(x=>x*bl),k:m.t});bonds.push([0,i+1,m.o]);}
+  } else if(m.type==='pair'){const bl=cr(m.a)+cr(m.b);atoms.push({p:[-bl/2,0,0],k:m.a},{p:[bl/2,0,0],k:m.b});bonds.push([0,1,m.o]);}
+  else if(m.type==='P4'){const e=2.2/Math.sqrt(8)*Math.sqrt(2);TET.forEach(d=>atoms.push({p:d.map(x=>x*1.35),k:'P'}));for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)bonds.push([i,j,1]);}
+  else if(m.type==='S8'){for(let i=0;i<8;i++){const a=i*Math.PI/4;atoms.push({p:[Math.cos(a)*1.75,(i%2?0.5:-0.5),Math.sin(a)*1.75],k:'S'});bonds.push([i,(i+1)%8,1]);}}
+  return {atoms,bonds};
+}
+function sceneMolecular(st){
+  const mol=molecule3D(st.graph),r=rng(11);
+  let rad=0;mol.atoms.forEach(a=>rad=Math.max(rad,Math.hypot(...a.p)+EL[a.k].r/100*0.55));
+  const sp=rad*2+1.3,atoms=[],bonds=[];
+  for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++){
+    const rot=randRot(r),c=[(i-.5)*sp+(r()-.5)*0.5,(j-.5)*sp+(r()-.5)*0.5,(k-.5)*sp+(r()-.5)*0.5],base=atoms.length;
+    mol.atoms.forEach(a=>{const p=rot(a.p);atoms.push({x:p[0]+c[0],y:p[1]+c[1],z:p[2]+c[2],r:EL[a.k].r/100*0.55,col:EL[a.k].col});});
+    mol.bonds.forEach(b=>bonds.push({a:base+b[0],b:base+b[1],o:b[2]}));}
+  const f=fmtF(st.formula);
+  return {atoms,bonds,title:`Simple molecular: discrete ${f} molecules`,
+    desc:`Each ${f} molecule is held together by <b>strong covalent bonds</b>. Between molecules there are only <b>weak intermolecular forces</b> (no bonds drawn in the gaps).${st.formula==='AlCl3'?' Shown as AlCl₃ monomers; in the vapour they pair up as Al₂Cl₆.':''}`,
+    props:'Low melting and boiling points (only weak intermolecular forces to overcome); do not conduct electricity – no mobile charged particles.',
+    legend:uniqLegend(mol.atoms.map(a=>a.k))};
+}
+function uniqLegend(keys){return [...new Set(keys)].map(k=>({col:EL[k].col,label:k}));}
+function addPolyAt(S_,c,R,atoms,bonds,r){
+  const rot=randRot(r),C=EL[S_.c],T=EL[S_.t];
+  const dirs=S_.geo==='tet'?TET:S_.geo==='tri'?TRI:[[1,0,0]];
+  const ci=atoms.length;atoms.push({x:c[0],y:c[1],z:c[2],r:R*0.36,col:C.col});
+  dirs.forEach(d=>{const p=rot(d);atoms.push({x:c[0]+p[0]*R*0.66,y:c[1]+p[1]*R*0.66,z:c[2]+p[2]*R*0.66,r:R*(S_.t==='H'?0.22:0.3),col:T.col});bonds.push({a:ci,b:atoms.length-1,o:1,thin:true});});
+}
+function sceneIonic(st){
+  const {cat:C,an:X,m,n}=st,poly=C.kind==='polycat'||X.kind==='polyan';
+  let sites=[],d=1,type,title,coord='';
+  if(m===1&&n===1&&C.key==='Cs'&&['Cl','Br','I'].includes(X.key)){
+    type='CsCl';const a=1.16;for(let i=0;i<3;i++)for(let j=0;j<3;j++)for(let k=0;k<3;k++)sites.push({p:[i*a,j*a,k*a],c:1});
+    for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++)sites.push({p:[(i+.5)*a,(j+.5)*a,(k+.5)*a],c:0});d=a*Math.sqrt(3)/2;
+    title='Caesium chloride-type lattice';coord='Each ion is surrounded by 8 oppositely charged ions (8:8 coordination).';
+  } else if(m===1&&n===1){
+    type='rock';const N=poly?3:4;for(let i=0;i<N;i++)for(let j=0;j<N;j++)for(let k=0;k<N;k++)sites.push({p:[i,j,k],c:(i+j+k)%2?0:1});
+    title=poly?'Schematic 1:1 ionic lattice (rock-salt arrangement)':'Rock-salt (NaCl-type) lattice';coord=poly?'':'Each ion is surrounded by 6 oppositely charged ions (6:6 coordination).';
+  } else if((m===1&&n===2)||(m===2&&n===1)){
+    const a=2.31;// cations FCC (fluorite) / anions FCC (antifluorite)
+    const fccC=m===1;
+    for(let x=0;x<=2;x++)for(let y=0;y<=2;y++)for(let z=0;z<=2;z++)if((x+y+z)%2===0)sites.push({p:[x*a/2,y*a/2,z*a/2],c:fccC?1:0});
+    for(let x of[1,3])for(let y of[1,3])for(let z of[1,3])sites.push({p:[x*a/4,y*a/4,z*a/4],c:fccC?0:1});
+    d=a*Math.sqrt(3)/4;
+    title=fccC?'Fluorite (CaF₂-type) lattice':'Antifluorite (Na₂O-type) lattice';
+    coord=fccC?'Each cation is surrounded by 8 anions; each anion by 4 cations (8:4).':'Each anion is surrounded by 8 cations; each cation by 4 anions (4:8).';
+  } else {
+    const N=4,tot=m+n,pat=[];for(let k=0;k<tot;k++)pat.push(Math.floor((k+1)*m/tot)>Math.floor(k*m/tot)?1:0);
+    let idx=0;for(let k=0;k<3;k++)for(let j=0;j<N;j++)for(let i=0;i<N;i++){sites.push({p:[i,j,k],c:pat[(idx+j+k)%tot]});idx++;}
+    title=`Schematic ${m}:${n} ionic lattice`;coord=`Real ${fmtF(part(C,m)+part(X,n))} has a more complex arrangement; what matters here is the ${m}:${n} ratio of ions.`;
+  }
+  const k=(poly?0.72:0.62)*d/(C.ir+X.ir),atoms=[],bonds=[],r=rng(5);
+  sites.forEach(s=>{const S_=s.c?C:X,R=S_.ir*k;
+    if(POLY[S_.key])addPolyAt(S_,s.p,R,atoms,bonds,r);
+    else atoms.push({x:s.p[0],y:s.p[1],z:s.p[2],r:R,col:S_.col,label:ionLabel(S_)});});
+  const f=fmtF(part(C,m)+part(X,n));
+  const real={'1:2':['CaF2','SrF2','BaF2'],'2:1':['Li2O','Na2O','K2O','Li2S','Na2S','K2S']};
+  let caveat='';
+  const key=m+':'+n,form=part(C,m)+part(X,n);
+  if(real[key]&&!real[key].includes(form)&&!poly)caveat=` Real ${f} adopts a different ${key} structure; this lattice illustrates the ratio and coordination idea.`;
+  if(poly)caveat+=' Polyatomic ions are shown as their covalently bonded groups; real crystal packing is less regular.';
+  if(st.covalentChar)caveat+=' <b>Covalent character:</b> the cation polarises (distorts) the anion’s electron cloud, so bonding is not purely ionic.';
+  const leg=[];[C,X].forEach(S_=>{if(POLY[S_.key]){leg.push({col:EL[S_.c].col,label:S_.c+' (in '+fmtF(S_.f)+')'});leg.push({col:EL[S_.t].col,label:S_.t+' (in '+fmtF(S_.f)+')'});}else leg.push({col:S_.col,label:ionLabel(S_)});});
+  return {atoms,bonds,labels:!poly,title:title+' – '+f,
+    desc:`A giant lattice of ${ionLabel(C)} and ${ionLabel(X)} ions held by strong electrostatic attraction in all directions. ${coord}${caveat}`,
+    props:'High melting point; brittle; conducts electricity only when molten or dissolved (ions free to move).',legend:leg};
+}
+function sceneMetal(st){
+  const A=st.main,B=st.alloy,lat=A.lat,pos=[];let nn;
+  if(lat==='bcc'){for(let i=0;i<=2;i++)for(let j=0;j<=2;j++)for(let k=0;k<=2;k++)pos.push([i,j,k]);for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++)pos.push([i+.5,j+.5,k+.5]);nn=Math.sqrt(3)/2;}
+  else if(lat==='fcc'){for(let x=0;x<=4;x++)for(let y=0;y<=4;y++)for(let z=0;z<=4;z++)if((x+y+z)%2===0)pos.push([x/2,y/2,z/2]);nn=Math.SQRT1_2;}
+  else{const c=Math.sqrt(2/3);for(let L=0;L<4;L++)for(let i=-3;i<=3;i++)for(let j=-3;j<=3;j++){let x=i+j*0.5,z=j*Math.sqrt(3)/2;if(L%2){x+=0.5;z+=Math.sqrt(3)/6;}if(Math.hypot(x,z)<2.05)pos.push([x,L*c,z]);}nn=1;}
+  const r=rng(3),rad=nn/2*0.96,atoms=[];
+  pos.forEach(p=>{const isB=B&&r()<0.32,S_=isB?B:A;atoms.push({x:p[0],y:p[1],z:p[2],r:rad*(B?Math.pow(S_.r/A.r,0.9):1),col:S_.col,label:S_.key+'⁺'.repeat(0)+chg(Math.min(3,S_.ch))});});
+  const names={bcc:['Body-centred cubic (BCC)','coordination number 8'],fcc:['Face-centred cubic (cubic close-packed)','coordination number 12'],hcp:['Hexagonal close-packed (HCP)','coordination number 12']}[lat];
+  return {atoms,bonds:[],sea:true,labels:true,title:(B?'Substitutional alloy on a ':'')+names[0]+' lattice',
+    desc:`Positive ${A.key} ions${B?' and '+B.key+' ions':''} in a regular lattice (${names[1]}), surrounded by a sea of delocalised electrons (yellow dots).${B?' Ions of a different size distort the layers, making them harder to slide – alloys are usually harder and stronger than the pure metal.':''}`,
+    props:'Good conductors of electricity and heat (mobile electrons); malleable and ductile (layers of ions can slide while the electron sea holds them together).',
+    legend:[{col:A.col,label:A.key+' ion'}].concat(B?[{col:B.col,label:B.key+' ion'}]:[]).concat([{col:'#facc15',label:'delocalised electron'}])};
+}
+function sceneGiant(st,variant){
+  const atoms=[],bonds=[];
+  if(st.g==='diamond'&&st.el==='C'&&variant==='graphite'){
+    const lay=3,cpos=[];
+    for(let L=0;L<lay;L++){const pts=[];for(let i=-4;i<=4;i++)for(let j=-4;j<=4;j++){const ax=i*Math.sqrt(3)+j*Math.sqrt(3)/2,az=j*1.5;
+      [[ax,az],[ax,az+1]].forEach(([x,z])=>{const zz=z+(L%2?1:0);if(Math.hypot(x,zz-0.5)<3.4)pts.push([x,L*2.36,zz]);});}
+      const base=atoms.length;pts.forEach(p=>atoms.push({x:p[0],y:p[1],z:p[2],r:0.22,col:EL.C.col}));
+      for(let a=base;a<atoms.length;a++)for(let b=a+1;b<atoms.length;b++){const A=atoms[a],B=atoms[b];if(Math.abs(Math.hypot(A.x-B.x,A.z-B.z)-1)<0.02)bonds.push({a,b,o:1});}}
+    return {atoms,bonds,title:'Graphite – layers of hexagonal rings',desc:'Each C is covalently bonded to <b>3</b> others in flat hexagonal layers. The fourth electron of each C is delocalised across the layer. Layers are held by weak intermolecular forces, so they slide over each other.',
+      props:'Very high melting point; conducts electricity along the layers (delocalised electrons); soft and slippery.',legend:[{col:EL.C.col,label:'C'}]};
+  }
+  const pts=[];
+  for(let x=0;x<=6;x++)for(let y=0;y<=6;y++)for(let z=0;z<=6;z++){
+    const ev=x%2===0&&y%2===0&&z%2===0&&((x+y+z)/2)%2===0;
+    const od=x%2===1&&y%2===1&&z%2===1&&((x-1+y-1+z-1)/2)%2===0;
+    if(ev||od)pts.push({p:[x/4*2.2,y/4*2.2,z/4*2.2],sub:ev?0:1});}
+  const bl=Math.sqrt(3)/4*2.2,pairs=[];
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const a=pts[i].p,b=pts[j].p;if(Math.abs(Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])-bl)<0.01)pairs.push([i,j]);}
+  const deg=pts.map(()=>0);pairs.forEach(([i,j])=>{deg[i]++;deg[j]++;});
+  const map={};pts.forEach((p,i)=>{if(deg[i]<1)return;let k,col,r;
+    if(st.g==='sic'){k=p.sub?'C':'Si';}else if(st.g==='sio2'){k='Si';}else k=st.el;
+    col=EL[k].col;r=st.g==='sio2'?0.24:0.3;map[i]=atoms.length;atoms.push({x:p.p[0],y:p.p[1],z:p.p[2],r,col});});
+  pairs.forEach(([i,j])=>{if(map[i]==null||map[j]==null)return;
+    if(st.g==='sio2'){const A=atoms[map[i]],B=atoms[map[j]],o=atoms.length;atoms.push({x:(A.x+B.x)/2,y:(A.y+B.y)/2,z:(A.z+B.z)/2,r:0.2,col:EL.O.col});bonds.push({a:map[i],b:o,o:1},{a:o,b:map[j],o:1});}
+    else bonds.push({a:map[i],b:map[j],o:1});});
+  const T={diamond:{C:['Diamond – giant covalent','Each C is covalently bonded to 4 others in a tetrahedral arrangement, repeating in 3D.','Very high melting point; extremely hard; does not conduct electricity (no delocalised electrons).'],
+      Si:['Silicon – giant covalent (diamond structure)','Each Si is covalently bonded to 4 others tetrahedrally, like diamond.','Very high melting point; hard; a semiconductor.'],
+      B:['Boron – giant covalent (schematic)','Shown as a diamond-type network to illustrate a giant covalent element; real boron is built from B₁₂ icosahedra.','Very high melting point; very hard; semiconductor.']},
+    sio2:['Silicon dioxide – giant covalent','Each Si bonds to 4 O atoms and each O to 2 Si atoms: an idealised SiO₂ network (like cristobalite/quartz). No SiO₂ molecules exist.','Very high melting point; hard; does not conduct electricity.'],
+    sic:['Silicon carbide – giant covalent','A diamond-like network in which Si and C alternate, each bonded to 4 of the other.','Extremely hard (used as an abrasive); very high melting point.']};
+  const t=st.g==='diamond'?T.diamond[st.el]:T[st.g];
+  return {atoms,bonds,title:t[0],desc:t[1]+' Strong covalent bonds extend throughout the structure, so there are no separate molecules.',props:t[2],
+    legend:st.g==='sio2'?[{col:EL.Si.col,label:'Si'},{col:EL.O.col,label:'O'}]:st.g==='sic'?[{col:EL.Si.col,label:'Si'},{col:EL.C.col,label:'C'}]:[{col:EL[st.el].col,label:st.el}]};
+}
+function buildScene(R){
+  const st=R.struct;let sc;
+  if(!st||st.kind==='none')sc={msg:st?st.msg:'—',title:'',desc:R.mode==='message'?'':st.msg};
+  else if(st.kind==='ionic')sc=sceneIonic(st);
+  else if(st.kind==='metal')sc=sceneMetal(st);
+  else if(st.kind==='molecular')sc=sceneMolecular(st);
+  else sc=sceneGiant(st,V.variant);
+  if(sc.atoms){
+    let cx=0,cy=0,cz=0;sc.atoms.forEach(a=>{cx+=a.x;cy+=a.y;cz+=a.z;});const n=sc.atoms.length;cx/=n;cy/=n;cz/=n;
+    let rad=0;sc.atoms.forEach(a=>{a.x-=cx;a.y-=cy;a.z-=cz;rad=Math.max(rad,Math.hypot(a.x,a.y,a.z)+a.r);});sc.rad=rad;
+    if(sc.sea){const r=rng(9);sc.sea=[...Array(110)].map(()=>({x:(r()-.5)*rad*1.3,y:(r()-.5)*rad*1.3,z:(r()-.5)*rad*1.3,vx:(r()-.5),vy:(r()-.5),vz:(r()-.5)}));sc.box=rad*0.65;}
+  }
+  return sc;
+}
+function renderStructPanel(R){
+  const sc=V.scene;
+  $('#structTitle').textContent=sc.title||'';
+  const tg=$('#structToggles');tg.innerHTML='';
+  if(R.struct&&R.struct.kind==='giant'&&R.struct.el==='C'){
+    [['diamond','Diamond'],['graphite','Graphite']].forEach(([v,l])=>{const b=document.createElement('button');b.className='btn'+((V.variant||'diamond')===v?' on':'');b.textContent=l;
+      b.onclick=()=>{V.variant=v;V.scene=buildScene(R);renderStructPanel(R);};tg.appendChild(b);});}
+  if(sc.atoms){const b=document.createElement('button');b.className='btn'+(V.spin?' on':'');b.textContent=V.spin?'⏸ Spin':'▶ Spin';b.onclick=()=>{V.spin=!V.spin;renderStructPanel(R);};tg.appendChild(b);}
+  $('#structInfo').innerHTML=sc.atoms?`<h3>${sc.title}</h3><p>${sc.desc}</p><div class="chips">${(sc.legend||[]).map(l=>`<span class="chip"><i style="background:${l.col}"></i>${l.label}</span>`).join('')}</div><div class="props"><b>Typical properties:</b> ${sc.props}</div><p class="small">Drag to rotate. Particles are drawn smaller than real so you can see inside${R.struct.kind==='ionic'?'; in a real lattice the ions touch':''}.</p>`
+    :`<p class="small">${sc.desc||'Choose a valid pair to see a structure.'}</p>`;
+}
+function draw3D(dt){
+  const w=v3.clientWidth,h=v3.clientHeight,dpr=window.devicePixelRatio||1;
+  if(v3.width!==Math.round(w*dpr)||v3.height!==Math.round(h*dpr)){v3.width=Math.round(w*dpr);v3.height=Math.round(h*dpr);}
+  c3.setTransform(dpr,0,0,dpr,0,0);c3.clearRect(0,0,w,h);
+  const sc=V.scene;if(!sc)return;
+  if(!sc.atoms){c3.fillStyle='#5b687d';c3.font='15px system-ui,sans-serif';c3.textAlign='center';c3.fillText(sc.msg||'',w/2,h/2);return;}
+  if(V.spin&&!V.drag)V.yaw+=dt*0.28;
+  const cy=Math.cos(V.yaw),sy=Math.sin(V.yaw),cp=Math.cos(V.pitch),spi=Math.sin(V.pitch);
+  const f=Math.min(w,h)*0.46/sc.rad,D=sc.rad*4.2;
+  const pr=(x,y,z)=>{const x1=x*cy+z*sy,z1=-x*sy+z*cy,y1=y*cp-z1*spi,z2=y*spi+z1*cp,k=D/(D-z2);return {X:w/2+x1*f*k,Y:h/2+y1*f*k,Z:z2,k};};
+  const P=sc.atoms.map(a=>pr(a.x,a.y,a.z)),items=[];
+  sc.atoms.forEach((a,i)=>items.push({z:P[i].Z,t:0,i}));
+  sc.bonds.forEach((b,i)=>items.push({z:(P[b.a].Z+P[b.b].Z)/2-0.001,t:1,i}));
+  if(sc.sea){const B=sc.box;sc.sea.forEach((e,i)=>{e.x+=e.vx*dt*1.4;e.y+=e.vy*dt*1.4;e.z+=e.vz*dt*1.4;
+    ['x','y','z'].forEach(ax=>{const v='v'+ax;if(e[ax]>B){e[ax]=B;e[v]=-Math.abs(e[v])}if(e[ax]<-B){e[ax]=-B;e[v]=Math.abs(e[v])}e[v]+=(Math.random()-.5)*dt*2;e[v]=clamp(e[v],-1,1);});
+    const p=pr(e.x,e.y,e.z);items.push({z:p.Z,t:2,p});});}
+  items.sort((a,b)=>a.z-b.z);
+  const zr=sc.rad;
+  items.forEach(it=>{
+    const depth=clamp(0.55+0.45*(it.z+zr)/(2*zr),0.5,1);
+    if(it.t===1){const b=sc.bonds[it.i],A=P[b.a],B=P[b.b];c3.globalAlpha=depth;c3.strokeStyle='#7c879a';
+      c3.lineWidth=Math.max(1.5,(b.thin?0.07:0.11)*f*(A.k+B.k)/2)*(b.o>1?1.35:1);c3.lineCap='round';c3.beginPath();c3.moveTo(A.X,A.Y);c3.lineTo(B.X,B.Y);c3.stroke();}
+    else if(it.t===0){const a=sc.atoms[it.i],p=P[it.i],r=a.r*f*p.k;c3.globalAlpha=depth;
+      const g=c3.createRadialGradient(p.X-r*.35,p.Y-r*.4,r*.1,p.X,p.Y,r);g.addColorStop(0,shade(a.col,.55));g.addColorStop(.55,a.col);g.addColorStop(1,shade(a.col,-.4));
+      c3.fillStyle=g;c3.beginPath();c3.arc(p.X,p.Y,r,0,7);c3.fill();
+      if(sc.labels&&a.label&&r>12){c3.fillStyle=lum(a.col)>0.62?'#18202e':'#fff';c3.font=`700 ${Math.round(Math.min(r*0.62,15))}px system-ui,sans-serif`;c3.textAlign='center';c3.textBaseline='middle';c3.fillText(a.label,p.X,p.Y);}}
+    else{c3.globalAlpha=0.9*depth;c3.fillStyle='#facc15';c3.strokeStyle='#a16207';c3.lineWidth=0.8;c3.beginPath();c3.arc(it.p.X,it.p.Y,Math.max(2,0.05*f*it.p.k),0,7);c3.fill();c3.stroke();}
+  });
+  c3.globalAlpha=1;
+}
+v3.addEventListener('pointerdown',e=>{V.drag={x:e.clientX,y:e.clientY};v3.setPointerCapture(e.pointerId);});
+v3.addEventListener('pointermove',e=>{if(!V.drag)return;V.yaw+=(e.clientX-V.drag.x)*0.01;V.pitch=clamp(V.pitch+(e.clientY-V.drag.y)*0.01,-1.45,1.45);V.drag={x:e.clientX,y:e.clientY};});
+['pointerup','pointercancel'].forEach(t=>v3.addEventListener(t,()=>V.drag=null));
+
+/* ================= UI ================= */
+function tileHTML(k){
+  const s=sp(k),col=s.col;
+  return `<button class="tile" data-k="${k}" title="${s.n}${s.en!=null?' – χ = '+f1(s.en):' ion'}"><span class="bar" style="background:${col}"></span><span class="s">${s.label}</span><span class="e">${s.en!=null?'χ '+f1(s.en):'ion'}</span></button>`;
+}
+$('#tMetals').innerHTML=METALS.map(tileHTML).join('');
+$('#tNon').innerHTML=NONMETALS.map(tileHTML).join('');
+$('#tPoly').innerHTML=POLYS.map(tileHTML).join('');
+document.querySelectorAll('.tile').forEach(t=>t.addEventListener('click',()=>{
+  const k=t.dataset.k;
+  if(active==='A'){selA=k;setActive('B');}else{selB=k;setActive('A');}
+  run();
+}));
+function setActive(s){active=s;$('#slotA').classList.toggle('active',s==='A');$('#slotB').classList.toggle('active',s==='B');}
+$('#slotA').onclick=()=>setActive('A');$('#slotB').onclick=()=>setActive('B');
+$('#bondBtn').onclick=()=>run();
+$('#swapBtn').onclick=()=>{[selA,selB]=[selB,selA];run();};
+$('#randBtn').onclick=()=>{let p;do{p=SURPRISE[Math.floor(Math.random()*SURPRISE.length)];}while(p[0]===selA&&p[1]===selB);[selA,selB]=Math.random()<.5?p:[p[1],p[0]];run();};
+$('#speed').oninput=e=>$('#speedV').textContent=(+e.target.value).toFixed(1)+'×';
+$('#chkRefs').onchange=()=>updateTriangle(S.R);
+$('#chkDensity').onchange=()=>{$('#legend').innerHTML=legendHTML(S.R);};
+
+function updateSlots(){
+  const a=sp(selA),b=sp(selB);
+  $('#symA').textContent=a.label;$('#enA').textContent=a.en!=null?'χ = '+f1(a.en):'polyatomic ion';
+  $('#symB').textContent=b.label;$('#enB').textContent=b.en!=null?'χ = '+f1(b.en):'polyatomic ion';
+  document.querySelectorAll('.tile').forEach(t=>{t.classList.toggle('selA',t.dataset.k===selA);t.classList.toggle('selB',t.dataset.k===selB);});
+}
+function run(){
+  updateSlots();
+  const R=analyse(selA,selB);S.R=R;S.mode=R.mode;S.t=0;S.playing=true;S.met=null;
+  if(R.mode==='graph'){S.g=R.graph;prepGraph(S.g);S.dur=3.6;}
+  else if(R.mode==='ionic')S.dur=prepIonic(R);
+  else if(R.mode==='metallic')S.dur=prepMetal(R);
+  else S.dur=1;
+  S.steps=steps(R);
+  const ttl=R.mode==='message'?(R.type==='invalid'?'No compound forms':'Not modelled'):(R.fallback?R.ka+'–'+R.kb+' bond':fmtF(R.formula));
+  $('#stageTitle').textContent=ttl;
+  $('#legend').innerHTML=legendHTML(R);
+  updateTriangle(R);renderData(R);
+  if(!(R.struct&&R.struct.kind==='giant'&&R.struct.el==='C'))V.variant=null;
+  V.scene=buildScene(R);renderStructPanel(R);
+}
+
+/* ================= LOOP ================= */
+function resizeAnim(){const dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  ctx.setTransform(dpr*w/W,0,0,dpr*h/H,0,0);}
+let last=performance.now(),lastStep='';
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  const speed=+$('#speed').value;
+  if(S.playing){S.t+=dt*speed/S.dur;if(S.t>=1){S.t=1;S.playing=false;}}
+  resizeAnim();ctx.clearRect(0,0,W,H);
+  if(S.R){
+    try{
+      if(S.mode==='graph')drawGraph(S.t);
+      else if(S.mode==='ionic')drawIonic(S.t);
+      else if(S.mode==='metallic'){updMetal(dt*speed);drawMetal(S.t);}
+      else drawMessage(S.R.msg);
+    }catch(err){console.error(err);}
+    let st='';(S.steps||[]).forEach(([t0,txt])=>{if(S.t>=t0)st=txt;});
+    if(st!==lastStep){$('#step').textContent=st;lastStep=st;}
+  }
+  try{draw3D(dt);}catch(err){console.error(err);}
+  requestAnimationFrame(frame);
+}
+buildTriangle();
+run();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -150,7 +150,7 @@
 const SITE = {
   title: "DP Chemistry Hub",
   subtitle: "IB Diploma Chemistry, SL & HL · UWC Thailand",
-  footer: "DP Chemistry Hub · updated October 2026"
+  footer: "DP Chemistry Hub · updated November 2026"
 };
 
 /* ---------- COURSE SCHEDULE ---------- */
@@ -345,8 +345,8 @@ const PACKS = [
  ["R2.2","How fast? The rate of chemical change","16sKRJntU642kVzlxGpktvkPgmg4YQryw3OZtw3hdeco","1qVys4bwrcozlvjg5UodPSKCs2dMoFP7XFeeTdmAciS8","1OuF98oS_k1lVgMl8sh8TeeQ5JIzR-_N2RZ_qb5cqqTs","1ZBGCUVXGzkvYr2B3vUw4BeWlbtz6_tAWMKDTVcL2zfI"],
  ["R3.1","Proton transfer reactions","1xKEB33FZuMWDwxQxhYzFh41Tk0Nx0kgWaZ8lfib7-3A","1zlhVBdyPRtjtBTIyqhJwj5nydTQFn4lONTr3cXAZJik","1y99uzuBcCgUtMPDvzLQtyQWDW-e79l3zQ3onHyIoYLA","16DapE1KJmZGfgy3NAzFWXnGDAEc9qYc1YbDVvPo-F7g"],
  ["R3.2","Electron transfer reactions","1wi3IchZrSHf4vdCgMgVHFk5qxDTPe-OryCO05IYEeu8","1YOYhkuKQbUASTzG_42-srvT-dnP2xATrpwKPWeQJpBo","1pQxFVSrJEf5gkYSJRoyNkvtk4Ci2gb4a-Luz69PZ4qw","1PD1E3apu352vlbiqlfVitf7m0cviLetE2DylCnxelGQ"],
- ["R3.3","Electron sharing reactions","","","",""],
- ["R3.4","Electron-pair sharing reactions","","","",""]
+ ["R3.3","Electron sharing reactions","1yz2eV05jnVQ7apa1B0YuUMBeZ9GSuFqoDDrkmXkKNiE","1QySG3L5FiJw2RQcWwh5gJTdkbrKEk-yGI2AV1c6H5tM","1MbULZcpVxR6DMfkRpARQRtYGtTntH7hmuqaX9e0JS3w","1dXnFCAWe8RQeT_zHqslMTG35349HUDV0n_4Ly_gXNqI"],
+ ["R3.4","Electron-pair sharing reactions","1qTZjrxCNkQUeOsTDRvfxnX6Jkh-WcSfBUphXIv0NxjY","1DycGEVYN2YM8qhtK-sp7mhGpUcAikaSbgfxdnwIQFzg","1L9Q992a0AeyqeHlQfwDQffibWyuaAh_Nv2ZvIJw48yg","1huYcoqT7TkP7cn9cG-X0OY_vgfgHxQAPLjklWDHXD64"]
 ];
 const FOLDERS = {
   sl: "https://drive.google.com/drive/folders/1J1NQNBAnH3wZ5py_1v5jGqcTSzjLo0X3",
@@ -409,16 +409,22 @@ const NOTES = [
 ];
 
 /* ---------- MOCK PAPERS ---------- ["Paper name", "question paper link", "markscheme link"] */
+/* Markschemes are left blank so students can't see them before a mock.
+   To release one, paste it in, e.g. D("1hcvk_1h6G9Y5FX79PRz2vMGdLNdVpmo2o2_SIEWmvV0")
+   HL Mock 1 markscheme IDs: Paper 1 = 1hcvk_1h6G9Y5FX79PRz2vMGdLNdVpmo2o2_SIEWmvV0
+                             Paper 2 = 1R6ifOLtpF8WhgX1cl1Qiir4IZ3sUZE8FMUx-ZL7_gGA */
 const MOCKS = [
-  ["SL Paper 1 (1A + 1B) · 1 h 30 min", "", ""],
-  ["SL Paper 2 · 1 h 30 min", "", ""],
-  ["HL Paper 1 (1A + 1B) · 2 h", "", ""],
-  ["HL Paper 2 · 2 h 30 min", "", ""]
+  ["HL Mock 1 · Paper 1A (multiple choice) · Paper 1 is 2 h in total", D("1VQTNqJlBMrPIz9_IWMufZtOctDJv0OpLv9OYi_9hJ3E"), ""],
+  ["HL Mock 1 · Paper 1B (data-based questions)", D("1LzuItkQ0yw7rg85pmmFZFo6T7T8HSAvDrQB9L5gX9to"), ""],
+  ["HL Mock 1 · Paper 2 · 2 h 30 min", D("1yhcahq0IsNeaq3PjpxPhyvwH24MstviamiBGCep2VQA"), ""],
+  ["SL Mock 1 · Paper 1 (1A + 1B) · 1 h 30 min", "", ""],
+  ["SL Mock 1 · Paper 2 · 1 h 30 min", "", ""]
 ];
 
 /* ---------- SIMULATORS ---------- ["Title", "link", "Topic", "Description"] */
 const SIMS = [
   ["Ideal Gas Box", "simulators/ideal-gas-box.html", "S1.5 Ideal gases", "Squeeze, heat and fill a box of gas particles. Test pV = nRT and p₁V₁/T₁ = p₂V₂/T₂, plot your own graphs and watch the Maxwell–Boltzmann speed distribution."],
+  ["Bonding Lab", "simulators/bonding-lab.html", "S2 Models of bonding and structure", "See how electrons are transferred, shared or delocalised in ionic, covalent and metallic bonding, place substances on the bonding triangle, and explore the structures that result."],
   ["Bonding Triangle Explorer", "simulators/bonding-triangle.html", "S2.4 From models to materials", "Pick any two elements and see where they land on the van Arkel–Ketelaar triangle, with mean electronegativity, Δχ and % ionic character."],
   ["Neutralization Lab", "simulators/neutralization-lab.html", "R3.1 Proton transfer reactions", "Watch acids and bases swap partners to form salts, read the full, ionic and net ionic equations, then practise predicting the products."],
   ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature, pressure or adding a catalyst."]
@@ -495,7 +501,7 @@ renderNotes("");
 $("#mockList").innerHTML = MOCKS.map(m => `<div class="card sim"><h3>${esc(m[0])}</h3>${
   m[1] ? `<a class="btn" href="${m[1]}" target="_blank" rel="noopener">Question paper</a>` : `<span class="btn off">Coming soon</span>`}${
   m[2] ? `<a href="${m[2]}" target="_blank" rel="noopener">Markscheme</a>` : ""}</div>`).join("");
-$("#mockFolder").innerHTML = `All mock papers are also in the <a href="${FOLDERS.mocks}" target="_blank" rel="noopener">Mock exams folder</a> in Google Drive.`;
+$("#mockFolder").innerHTML = `Markschemes are released by your teacher after each mock.`;
 
 /* simulators */
 $("#simList").innerHTML = SIMS.map(s => `<div class="card sim"><span class="tag">${esc(s[2])}</span><h3>${esc(s[0])}</h3><p class="small" style="margin:0">${esc(s[3])}</p><a class="btn" href="${s[1]}">Open simulator</a></div>`).join("");
