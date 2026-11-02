@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voltaic and Electrolytic Cells</title>
+<style>
+:root{--bg:#f3f6f8;--card:#fff;--ink:#18222d;--muted:#5a6772;--line:#dde3e8;--accent:#0f766e;--accent-soft:#e2f3f1;
+  --an:#b91c1c;--an-soft:#fde8e8;--ca:#1d4ed8;--ca-soft:#e6eefe;--e:#facc15}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.back{display:inline-block;margin:12px 16px 0;font-weight:600;font-size:13px;color:var(--muted)}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 16px 40px;display:grid;gap:16px}
+h1{margin:0;font-size:clamp(1.6rem,3.4vw,2.2rem)} h2{margin:0 0 10px;font-size:1.05rem}
+.sub{margin:4px 0 0;color:var(--muted);max-width:72ch}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{font:inherit;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:600}
+.tab[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:920px){.grid{grid-template-columns:1fr}}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label.f{display:grid;gap:4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+select{font:inherit;font-size:15px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);text-transform:none;letter-spacing:0;font-weight:400}
+.chk{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+svg{width:100%;height:auto;display:block}
+.facts{display:grid;gap:10px}
+.fact{border-radius:10px;padding:10px 12px}
+.fact.an{background:var(--an-soft)} .fact.ca{background:var(--ca-soft)} .fact.ov{background:#f1f5f9}
+.fact h3{margin:0 0 4px;font-size:.95rem}
+.fact.an h3{color:var(--an)} .fact.ca h3{color:var(--ca)}
+.eqn{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;margin:2px 0}
+.small{font-size:13px;color:var(--muted)}
+.hide .answer{filter:blur(6px);user-select:none;pointer-events:none}
+#reveal{display:none}.hide #reveal{display:inline-block}
+.keyrow{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:8px}
+.keyrow span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:6px;display:inline-block}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+<div class="wrap">
+  <header>
+    <h1>Voltaic and Electrolytic Cells</h1>
+    <p class="sub">Build a cell and watch the electrons move through the wire. In a voltaic cell a spontaneous reaction pushes electrons round the circuit. In an electrolytic cell a power supply forces a non-spontaneous reaction to happen.</p>
+  </header>
+
+  <div class="tabs"><button class="tab" data-mode="volt" aria-pressed="true">Voltaic cell</button><button class="tab" data-mode="elec" aria-pressed="false">Electrolytic cell</button></div>
+
+  <div class="card">
+    <div class="row" id="voltCtl">
+      <label class="f">Left half-cell<select id="L"></select></label>
+      <label class="f">Right half-cell<select id="R"></select></label>
+    </div>
+    <div class="row" id="elecCtl" style="display:none">
+      <label class="f">Electrolyte and electrodes<select id="E"></select></label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label class="chk"><input type="checkbox" id="hl"> Show HL detail (E⦵ values, E⦵cell and ΔG⦵)</label>
+      <label class="chk"><input type="checkbox" id="predict"> Predict first (hide the answers)</label>
+      <label class="chk"><input type="checkbox" id="conv"> Also show conventional current</label>
+      <button class="btn" id="pause">Pause</button>
+    </div>
+  </div>
+
+  <div class="grid" id="main">
+    <div class="card">
+      <svg id="svg" viewBox="0 0 760 440" aria-label="Diagram of the cell with moving electrons"></svg>
+      <div class="keyrow" id="key"></div>
+    </div>
+    <div class="facts" id="facts"></div>
+  </div>
+
+  <div class="card" id="tableCard">
+    <h2>Standard electrode potentials used here (from the data booklet)</h2>
+    <table id="tbl"></table>
+    <p class="small" style="margin-top:8px">The more negative E⦵, the more readily the metal is oxidized, so the more reactive the metal. In a voltaic cell, the half-cell with the more negative E⦵ is the anode.</p>
+  </div>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const METALS=[
+ {m:"Mg",ion:"Mg²⁺",z:2,E:-2.37,metal:"#c9ced6",sol:"rgba(220,230,240,.55)",name:"magnesium"},
+ {m:"Al",ion:"Al³⁺",z:3,E:-1.66,metal:"#d4d8de",sol:"rgba(220,230,240,.55)",name:"aluminium"},
+ {m:"Zn",ion:"Zn²⁺",z:2,E:-0.76,metal:"#a8b3bd",sol:"rgba(220,230,240,.55)",name:"zinc"},
+ {m:"Fe",ion:"Fe²⁺",z:2,E:-0.45,metal:"#7b8590",sol:"rgba(196,224,190,.6)",name:"iron"},
+ {m:"Ni",ion:"Ni²⁺",z:2,E:-0.26,metal:"#9aa3a0",sol:"rgba(150,215,170,.6)",name:"nickel"},
+ {m:"Pb",ion:"Pb²⁺",z:2,E:-0.13,metal:"#6b7280",sol:"rgba(220,230,240,.55)",name:"lead"},
+ {m:"Cu",ion:"Cu²⁺",z:2,E:0.34,metal:"#c97a4a",sol:"rgba(80,150,230,.55)",name:"copper"},
+ {m:"Ag",ion:"Ag⁺",z:1,E:0.80,metal:"#d9dde3",sol:"rgba(220,230,240,.55)",name:"silver"}
+];
+const ELEC=[
+ {id:"NaCl(l)",label:"Molten sodium chloride, inert electrodes",level:"SL",sol:"rgba(255,200,120,.55)",
+  cat:{eq:"Na⁺ + e⁻ → Na(l)",prod:"sodium (liquid metal)",kind:"metal",col:"#cfd4da"},
+  an:{eq:"2Cl⁻ → Cl₂(g) + 2e⁻",prod:"chlorine gas (pale green)",kind:"gas",col:"#bef264"},
+  cations:[["Na⁺","#2563eb"]],anions:[["Cl⁻","#16a34a"]],
+  note:"In the molten salt the ions are free to move. Na⁺ ions gain electrons at the cathode (reduction) and Cl⁻ ions lose electrons at the anode (oxidation)."},
+ {id:"PbBr2(l)",label:"Molten lead(II) bromide, inert electrodes",level:"SL",sol:"rgba(255,210,140,.55)",
+  cat:{eq:"Pb²⁺ + 2e⁻ → Pb(l)",prod:"lead (liquid metal, collects at the bottom)",kind:"metal",col:"#9ca3af"},
+  an:{eq:"2Br⁻ → Br₂(g) + 2e⁻",prod:"bromine (brown vapour)",kind:"gas",col:"#b45309"},
+  cations:[["Pb²⁺","#2563eb"]],anions:[["Br⁻","#b45309"]],
+  note:"Solid PbBr₂ does not conduct because its ions cannot move. Once molten, Pb²⁺ is reduced at the cathode and Br⁻ is oxidized at the anode."},
+ {id:"H2SO4(aq)",label:"Dilute sulfuric acid, inert electrodes (HL)",level:"HL",sol:"rgba(225,235,245,.6)",
+  cat:{eq:"2H⁺ + 2e⁻ → H₂(g)",prod:"hydrogen gas",kind:"gas",col:"#ffffff",rate:2},
+  an:{eq:"2H₂O → O₂(g) + 4H⁺ + 4e⁻",prod:"oxygen gas",kind:"gas",col:"#ffffff",rate:1},
+  cations:[["H⁺","#2563eb"]],anions:[["SO₄²⁻","#7c3aed"]],
+  note:"Water is oxidized at the anode rather than SO₄²⁻. For every 4 electrons, 2 H₂ and 1 O₂ form, so the volume of hydrogen is twice the volume of oxygen."},
+ {id:"NaCl(aq) dilute",label:"Dilute aqueous sodium chloride, inert electrodes (HL)",level:"HL",sol:"rgba(225,235,245,.6)",
+  cat:{eq:"2H₂O + 2e⁻ → H₂(g) + 2OH⁻",prod:"hydrogen gas",kind:"gas",col:"#ffffff",rate:2},
+  an:{eq:"2H₂O → O₂(g) + 4H⁺ + 4e⁻",prod:"oxygen gas",kind:"gas",col:"#ffffff",rate:1},
+  cations:[["Na⁺","#2563eb"]],anions:[["Cl⁻","#16a34a"]],
+  note:"Water is reduced in preference to Na⁺ because sodium has a very negative E⦵. In dilute solution water is also oxidized in preference to Cl⁻, so oxygen forms at the anode."},
+ {id:"NaCl(aq) conc",label:"Concentrated aqueous sodium chloride, inert electrodes (HL)",level:"HL",sol:"rgba(225,235,245,.6)",
+  cat:{eq:"2H₂O + 2e⁻ → H₂(g) + 2OH⁻",prod:"hydrogen gas",kind:"gas",col:"#ffffff",rate:1},
+  an:{eq:"2Cl⁻ → Cl₂(g) + 2e⁻",prod:"chlorine gas (pale green)",kind:"gas",col:"#bef264",rate:1},
+  cations:[["Na⁺","#2563eb"]],anions:[["Cl⁻","#16a34a"]],
+  note:"At high Cl⁻ concentration, chlorine forms at the anode instead of oxygen. Hydrogen still forms at the cathode, and the solution around it becomes alkaline (OH⁻)."},
+ {id:"CuSO4 inert",label:"Aqueous copper(II) sulfate, inert electrodes (HL)",level:"HL",sol:"rgba(80,150,230,.55)",fade:true,
+  cat:{eq:"Cu²⁺ + 2e⁻ → Cu(s)",prod:"copper (pink-brown coating)",kind:"coat",col:"#c97a4a"},
+  an:{eq:"2H₂O → O₂(g) + 4H⁺ + 4e⁻",prod:"oxygen gas",kind:"gas",col:"#ffffff",rate:1},
+  cations:[["Cu²⁺","#2563eb"]],anions:[["SO₄²⁻","#7c3aed"]],
+  note:"Cu²⁺ is reduced in preference to water. As Cu²⁺ ions are used up, the blue colour fades, and H⁺ forms at the anode, so the solution becomes acidic."},
+ {id:"CuSO4 Cu",label:"Aqueous copper(II) sulfate, copper electrodes (HL: electroplating)",level:"HL",sol:"rgba(80,150,230,.55)",
+  cat:{eq:"Cu²⁺ + 2e⁻ → Cu(s)",prod:"copper deposited (cathode gains mass)",kind:"coat",col:"#c97a4a"},
+  an:{eq:"Cu(s) → Cu²⁺ + 2e⁻",prod:"copper anode dissolves (loses mass)",kind:"dissolve",col:"#c97a4a"},
+  cations:[["Cu²⁺","#2563eb"]],anions:[["SO₄²⁻","#7c3aed"]],copperAnode:true,
+  note:"The copper anode is oxidized instead of water. Copper moves from anode to cathode, so the blue colour stays the same. This is how objects are electroplated and how copper is purified."}
+];
+const F=96500;
+const gcd=(a,b)=>b?gcd(b,a%b):a, lcm=(a,b)=>a*b/gcd(a,b);
+const sign=v=>(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(2);
+const coef=(n,s)=>(n>1?n:"")+s;
+
+function voltaic(a,b){ // a,b METALS objects
+  const an=a.E<b.E?a:b, ca=an===a?b:a;
+  const n=lcm(an.z,ca.z), Ecell=ca.E-an.E, dG=-n*F*Ecell/1000;
+  const overall=`${coef(n/an.z,an.m)}(s) + ${coef(n/ca.z,ca.ion)}(aq) → ${coef(n/an.z,an.ion)}(aq) + ${coef(n/ca.z,ca.m)}(s)`;
+  return {an,ca,n,Ecell,dG,overall,
+    anEq:`${an.m}(s) → ${an.ion}(aq) + ${coef(an.z,"e⁻")}`, caEq:`${ca.ion}(aq) + ${coef(ca.z,"e⁻")} → ${ca.m}(s)`};
+}
+
+/* ---------- state ---------- */
+let mode="volt", paused=false, t=0, electrons=[], ions=[], bubbles=[], growth=0;
+const $=id=>document.getElementById(id);
+$("L").innerHTML=$("R").innerHTML=METALS.map((x,i)=>`<option value="${i}">${x.m} | ${x.ion}</option>`).join("");
+$("L").value=2; $("R").value=6;
+$("E").innerHTML=ELEC.map((x,i)=>`<option value="${i}">${x.label}</option>`).join("");
+$("tbl").innerHTML="<tr><th>Half-equation</th><th>E⦵ / V</th></tr>"+METALS.slice().sort((p,q)=>p.E-q.E).map(x=>`<tr><td class="eqn">${x.ion}(aq) + ${coef(x.z,"e⁻")} ⇌ ${x.m}(s)</td><td>${sign(x.E)}</td></tr>`).join("");
+
+/* ---------- geometry ---------- */
+const W=760;
+const VOLT={elL:{x:170,top:150,bot:350},elR:{x:590,top:150,bot:350},wireY:70,meterX:380};
+const ELE={elL:{x:270,top:150,bot:360},elR:{x:490,top:150,bot:360},wireY:70,battX:380};
+function wirePath(fromX,toX,top,midX){ // points from electrode top up, across (through device), down
+  return [[fromX,top],[fromX,VOLT.wireY],[midX,VOLT.wireY],[toX,VOLT.wireY],[toX,top]];
+}
+function along(pts,f){ // f 0..1 along polyline
+  const seg=[];let L=0;for(let i=1;i<pts.length;i++){const d=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);seg.push(d);L+=d;}
+  let d=f*L;for(let i=0;i<seg.length;i++){if(d<=seg[i]){const r=d/seg[i];return [pts[i][0]+(pts[i+1][0]-pts[i][0])*r,pts[i][1]+(pts[i+1][1]-pts[i][1])*r];}d-=seg[i];}
+  return pts[pts.length-1];
+}
+
+/* ---------- build ---------- */
+function setup(){
+  t=0; growth=0; bubbles=[]; electrons=[]; ions=[];
+  for(let i=0;i<14;i++) electrons.push(i/14);
+  if(mode==="volt"){
+    const a=METALS[+$("L").value], b=METALS[+$("R").value];
+    for(let i=0;i<6;i++) ions.push({k:i%2?"K⁺":"NO₃⁻",f:i/6});
+  } else {
+    const e=ELEC[+$("E").value];
+    for(let i=0;i<10;i++){ const cat=i%2===0; const sp=cat?e.cations[0]:e.anions[0];
+      ions.push({cat,label:sp[0],col:sp[1],x:300+Math.random()*160,y:200+Math.random()*150}); }
+  }
+  renderFacts();
+}
+function renderFacts(){
+  const hl=$("hl").checked; let html="";
+  if(mode==="volt"){
+    const a=METALS[+$("L").value], b=METALS[+$("R").value];
+    if(a===b){ $("facts").innerHTML='<div class="card"><b>Choose two different metals.</b><p class="small">Two identical half-cells have no potential difference, so no current flows.</p></div>'; return; }
+    const v=voltaic(a,b);
+    html+=`<div class="card"><h2>What's happening</h2><p style="margin:0">Electrons flow through the external wire from the <b>${v.an.name}</b> electrode to the <b>${v.ca.name}</b> electrode. ${v.an.m} is the more reactive metal (its E⦵ is more negative), so it is oxidized and gives up electrons.</p>
+      <div style="margin-top:8px"><button class="btn primary" id="reveal">Reveal answers</button></div></div>`;
+    html+=`<div class="answer facts">
+      <div class="fact an"><h3>Anode (negative electrode): ${v.an.name}</h3><div class="eqn">${v.anEq}</div><div class="small">Oxidation: the electrode loses mass as ${v.an.m} atoms become ${v.an.ion} ions.</div></div>
+      <div class="fact ca"><h3>Cathode (positive electrode): ${v.ca.name}</h3><div class="eqn">${v.caEq}</div><div class="small">Reduction: ${v.ca.ion} ions gain electrons and ${v.ca.m} is deposited, so the electrode gains mass.</div></div>
+      <div class="fact ov"><h3>Overall reaction (${v.n} mol of electrons transferred)</h3><div class="eqn">${v.overall}</div>
+      <div class="small">Salt bridge (KNO₃): K⁺ ions move towards the cathode and NO₃⁻ ions move towards the anode, keeping both solutions electrically neutral. Electrons never travel through the salt bridge or the solutions.</div>
+      ${hl?`<div class="eqn" style="margin-top:8px">E⦵cell = E⦵cathode − E⦵anode = ${sign(v.ca.E)} − (${sign(v.an.E)}) = ${sign(v.Ecell)} V</div>
+      <div class="eqn">ΔG⦵ = −nFE⦵cell = −${v.n} × 96 500 × ${v.Ecell.toFixed(2)} = ${v.dG.toFixed(0)} kJ</div>
+      <div class="small">E⦵cell is positive and ΔG⦵ is negative, so the reaction is spontaneous.</div>`:""}</div></div>`;
+  } else {
+    const e=ELEC[+$("E").value];
+    html+=`<div class="card"><h2>What's happening</h2><p style="margin:0">The power supply pumps electrons from the anode to the cathode through the external circuit. Positive ions (${e.cations[0][0]}) are attracted to the negative cathode and negative ions (${e.anions[0][0]}) to the positive anode. ${e.level==="HL"?"<b>HL:</b> in aqueous solution, water can be oxidized or reduced instead of the ions.":""}</p>
+      <div style="margin-top:8px"><button class="btn primary" id="reveal">Reveal answers</button></div></div>`;
+    html+=`<div class="answer facts">
+      <div class="fact ca"><h3>Cathode (negative electrode): reduction</h3><div class="eqn">${e.cat.eq}</div><div class="small">Product: ${e.cat.prod}</div></div>
+      <div class="fact an"><h3>Anode (positive electrode): oxidation</h3><div class="eqn">${e.an.eq}</div><div class="small">Product: ${e.an.prod}</div></div>
+      <div class="fact ov"><h3>Why</h3><div class="small" style="color:var(--ink)">${e.note}</div>
+      <div class="small" style="margin-top:6px">Compared with a voltaic cell the signs are reversed: here the anode is positive and the cathode is negative. Oxidation still happens at the anode and reduction at the cathode.</div></div></div>`;
+  }
+  $("facts").innerHTML=html;
+  const r=$("reveal"); if(r) r.onclick=()=>{$("predict").checked=false; applyPredict();};
+}
+function applyPredict(){ $("main").classList.toggle("hide",$("predict").checked); }
+
+/* ---------- draw ---------- */
+function beaker(x,w,top,bot,fill){
+  return `<path d="M${x} ${top} L${x} ${bot} Q${x} ${bot+12} ${x+12} ${bot+12} L${x+w-12} ${bot+12} Q${x+w} ${bot+12} ${x+w} ${bot} L${x+w} ${top}" fill="none" stroke="#64748b" stroke-width="3"/>
+  <rect x="${x+2}" y="${top+70}" width="${w-4}" height="${bot-top-68}" fill="${fill}"/>`;
+}
+function electrode(x,top,bot,col,label,sub,widthMul=1,coatCol=null,coat=0){
+  const w=26*widthMul;
+  let s=`<rect x="${x-w/2}" y="${top}" width="${w}" height="${bot-top}" rx="3" fill="${col}" stroke="#475569"/>`;
+  if(coatCol&&coat>0) s+=`<rect x="${x-w/2-coat}" y="${top+80}" width="${w+2*coat}" height="${bot-top-80}" rx="3" fill="${coatCol}" opacity=".95"/>`;
+  s+=`<text x="${x}" y="${bot+46}" text-anchor="middle" font-size="15" font-weight="700" fill="${label.includes("Anode")?"#b91c1c":"#1d4ed8"}">${label}</text>`;
+  s+=`<text x="${x}" y="${bot+64}" text-anchor="middle" font-size="12" fill="#5a6772">${sub}</text>`;
+  return s;
+}
+function eDot([x,y]){ return `<g><circle cx="${x}" cy="${y}" r="8" fill="#facc15" stroke="#a16207" stroke-width="1.5"/><text x="${x}" y="${y+3.5}" text-anchor="middle" font-size="9" font-weight="800" fill="#422006">e⁻</text></g>`; }
+function arrowLabel(x1,x2,y,text,col){
+  const dir=x2>x1?1:-1;
+  return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width="2.5"/><path d="M${x2} ${y} l${-10*dir} -6 l0 12 z" fill="${col}"/>
+   <text x="${(x1+x2)/2}" y="${y-8}" text-anchor="middle" font-size="13" font-weight="700" fill="${col}">${text}</text>`;
+}
+function draw(){
+  let s=`<rect width="${W}" height="440" fill="#fbfcfd"/>`;
+  const conv=$("conv").checked;
+  if(mode==="volt"){
+    const a=METALS[+$("L").value], b=METALS[+$("R").value], same=a===b;
+    const v=same?null:voltaic(a,b), leftIsAn=v&&v.an===a;
+    s+=beaker(70,200,150,370,a.sol)+beaker(490,200,150,370,b.sol);
+    // salt bridge
+    s+=`<path d="M235 290 L235 175 L525 175 L525 290" fill="none" stroke="#e2e8f0" stroke-width="30" stroke-linejoin="round"/><path d="M235 290 L235 175 L525 175 L525 290" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4 4"/>`;
+    s+=`<text x="380" y="168" text-anchor="middle" font-size="12" fill="#5a6772">salt bridge (KNO₃)</text>`;
+    // wires + voltmeter
+    s+=`<polyline points="170,150 170,70 345,70" fill="none" stroke="#334155" stroke-width="4"/><polyline points="415,70 590,70 590,150" fill="none" stroke="#334155" stroke-width="4"/>`;
+    s+=`<circle cx="380" cy="70" r="34" fill="#fff" stroke="#334155" stroke-width="3"/><text x="380" y="66" text-anchor="middle" font-size="12" fill="#5a6772">voltmeter</text>
+        <text x="380" y="86" text-anchor="middle" font-size="17" font-weight="800">${same?"0.00":v.Ecell.toFixed(2)} V</text>`;
+    const thinL=v?(leftIsAn?Math.max(.45,1-growth*.5):1):1, thinR=v?(!leftIsAn?Math.max(.45,1-growth*.5):1):1;
+    const coatL=v&&!leftIsAn?growth*8:0, coatR=v&&leftIsAn?growth*8:0;
+    s+=electrode(170,150,350,a.metal,same?a.m:(leftIsAn?"Anode (−)":"Cathode (+)"),`${a.m} in ${a.ion}(aq)`,thinL,a.metal,coatL);
+    s+=electrode(590,150,350,b.metal,same?b.m:(!leftIsAn?"Anode (−)":"Cathode (+)"),`${b.m} in ${b.ion}(aq)`,thinR,b.metal,coatR);
+    if(v){
+      const from=leftIsAn?170:590, to=leftIsAn?590:170;
+      const path=[[from,150],[from,70],[to,70],[to,150]];
+      electrons.forEach(f=>{ const p=along(path,f); if(Math.abs(p[0]-380)>36||p[1]>110) s+=eDot(p); });
+      s+=arrowLabel(leftIsAn?220:540,leftIsAn?320:440,28,"electron flow","#a16207");
+      if(conv) s+=arrowLabel(leftIsAn?540:220,leftIsAn?440:320,120,"conventional current","#64748b");
+      // salt bridge ions
+      const caX=leftIsAn?525:235, anX=leftIsAn?235:525;
+      ions.forEach(io=>{ const toward=io.k==="K⁺"?caX:anX, fromX=io.k==="K⁺"?anX:caX;
+        const p=along([[fromX,250],[fromX,175],[toward,175],[toward,250]],io.f);
+        s+=`<g><circle cx="${p[0]}" cy="${p[1]}" r="9" fill="${io.k==="K⁺"?"#93c5fd":"#fca5a5"}" stroke="#334155"/><text x="${p[0]}" y="${p[1]+3}" text-anchor="middle" font-size="7.5" font-weight="700">${io.k}</text></g>`; });
+      // electron hand-off at electrodes
+      const ax=leftIsAn?170:590, cx=leftIsAn?590:170;
+      const ph=(t*0.8)%1;
+      s+=`<g opacity="${1-ph}"><circle cx="${ax+22+ph*20}" cy="${300}" r="9" fill="#fff" stroke="#b91c1c"/><text x="${ax+22+ph*20}" y="303" text-anchor="middle" font-size="8" font-weight="700" fill="#b91c1c">${v.an.ion}</text></g>`;
+      s+=`<g opacity="${1-ph}"><circle cx="${cx-42+ph*20}" cy="${300}" r="9" fill="#fff" stroke="#1d4ed8"/><text x="${cx-42+ph*20}" y="303" text-anchor="middle" font-size="8" font-weight="700" fill="#1d4ed8">${v.ca.ion}</text></g>`;
+    }
+  } else {
+    const e=ELEC[+$("E").value];
+    let sol=e.sol; if(e.fade){ const a=Math.max(.08,.55-growth*.45); sol=`rgba(80,150,230,${a})`; }
+    s+=beaker(200,360,150,380,sol);
+    // battery
+    s+=`<polyline points="270,150 270,70 350,70" fill="none" stroke="#334155" stroke-width="4"/><polyline points="410,70 490,70 490,150" fill="none" stroke="#334155" stroke-width="4"/>`;
+    s+=`<line x1="356" y1="48" x2="356" y2="92" stroke="#334155" stroke-width="4"/><line x1="372" y1="58" x2="372" y2="82" stroke="#334155" stroke-width="8"/>
+        <line x1="388" y1="48" x2="388" y2="92" stroke="#334155" stroke-width="4"/><line x1="404" y1="58" x2="404" y2="82" stroke="#334155" stroke-width="8"/>
+        <text x="345" y="44" font-size="16" font-weight="800" fill="#b91c1c">+</text><text x="408" y="44" font-size="18" font-weight="800" fill="#1d4ed8">−</text>
+        <text x="380" y="112" text-anchor="middle" font-size="12" fill="#5a6772">power supply</text>`;
+    const inertCol="#4b5563";
+    const anCol=e.copperAnode?"#c97a4a":inertCol, caCol=e.copperAnode?"#c97a4a":inertCol;
+    const anW=e.an.kind==="dissolve"?Math.max(.45,1-growth*.5):1;
+    s+=electrode(270,150,360,anCol,"Anode (+)",e.copperAnode?"copper":"inert (graphite)",anW);
+    const coatCol=e.cat.kind==="coat"?e.cat.col:null;
+    s+=electrode(490,150,360,caCol,"Cathode (−)",e.copperAnode?"copper":"inert (graphite)",1,coatCol,coatCol?growth*8:0);
+    if(e.cat.kind==="metal"){ s+=`<ellipse cx="490" cy="${386}" rx="${10+growth*40}" ry="${3+growth*6}" fill="${e.cat.col}" stroke="#6b7280"/>`; }
+    // electrons: anode -> + terminal ; - terminal -> cathode
+    const p1=[[270,150],[270,70],[350,70]], p2=[[410,70],[490,70],[490,150]];
+    electrons.forEach(f=>{ s+=eDot(along(f<.5?p1:p2,(f%.5)*2)); });
+    s+=arrowLabel(285,335,28,"electrons","#a16207"); s+=arrowLabel(425,475,28,"electrons","#a16207");
+    if(conv){ s+=arrowLabel(475,425,146,"conventional current","#64748b"); }
+    // ions
+    ions.forEach(io=>{ s+=`<g><circle cx="${io.x}" cy="${io.y}" r="11" fill="${io.cat?"#dbeafe":"#fee2e2"}" stroke="${io.col}" stroke-width="2"/><text x="${io.x}" y="${io.y+3.5}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${io.col}">${io.label}</text></g>`; });
+    bubbles.forEach(b=>{ s+=`<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.col}" fill-opacity="${b.col==="#ffffff"?.9:.8}" stroke="#94a3b8"/>`; });
+  }
+  $("svg").innerHTML=s;
+}
+function key(){
+  $("key").innerHTML=`<span><i class="dot" style="background:#facc15;border:1px solid #a16207"></i>electron (e⁻), moving through the wire only</span>`+
+   (mode==="volt"?`<span><i class="dot" style="background:#93c5fd"></i>K⁺ (salt bridge)</span><span><i class="dot" style="background:#fca5a5"></i>NO₃⁻ (salt bridge)</span>`:
+    `<span><i class="dot" style="background:#dbeafe;border:1px solid #2563eb"></i>cation, moves to the cathode</span><span><i class="dot" style="background:#fee2e2;border:1px solid #b91c1c"></i>anion, moves to the anode</span>`);
+}
+
+/* ---------- loop ---------- */
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(!paused){
+    t+=dt; growth=Math.min(1,growth+dt/40);
+    electrons=electrons.map(f=>(f+dt*0.12)%1);
+    if(mode==="volt"){ ions.forEach(io=>io.f=(io.f+dt*0.06)%1); }
+    else {
+      const e=ELEC[+$("E").value];
+      ions.forEach(io=>{ const tx=io.cat?470:290; io.x+=(tx-io.x)*dt*0.35+(Math.random()-.5)*dt*30; io.y+=(Math.random()-.5)*dt*40;
+        io.y=Math.min(360,Math.max(225,io.y));
+        if(Math.abs(io.x-tx)<8){ io.x=300+Math.random()*160; io.y=225+Math.random()*130; } });
+      const spawn=(side,sp)=>{ if(sp.kind!=="gas") return; const r=(sp.rate||1);
+        if(Math.random()<dt*3*r){ const x=side==="an"?270:490; bubbles.push({x:x+(Math.random()<.5?-18:18)+Math.random()*4,y:340-Math.random()*120,r:2.5+Math.random()*2.5,col:sp.col}); } };
+      spawn("an",e.an); spawn("ca",e.cat);
+      bubbles.forEach(b=>b.y-=dt*55); bubbles=bubbles.filter(b=>b.y>222);
+    }
+  }
+  draw(); requestAnimationFrame(frame);
+}
+
+/* ---------- wiring ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ mode=b.dataset.mode;
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  $("voltCtl").style.display=mode==="volt"?"":"none"; $("elecCtl").style.display=mode==="elec"?"":"none";
+  $("tableCard").style.display=mode==="volt"?"":"none"; setup(); key(); });
+["L","R","E"].forEach(id=>$(id).onchange=setup);
+$("hl").onchange=renderFacts; $("conv").onchange=()=>{};
+$("predict").onchange=applyPredict;
+$("pause").onclick=()=>{paused=!paused; $("pause").textContent=paused?"Play":"Pause";};
+setup(); key(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>
