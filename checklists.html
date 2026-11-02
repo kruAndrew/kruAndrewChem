@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DP CHEMISTRY UNIT CHECKLISTS · UWC Thailand
+  =====================================================================
+  HOW TO EDIT (no coding needed)
+  All the checklist statements are in the "EDIT HERE" block below.
+  Each statement is one line:  ["I can ... statement", 0]
+  Use 0 for SL and HL students, 1 for HL only (AHL).
+  Keep the quotes and the commas at the ends of lines.
+  Ticks are saved in each student's own browser.
+  =====================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit checklists · DP Chemistry Hub</title>
+<style>
+  :root{
+    --ink:#1d2433; --muted:#5b6475; --bg:#f6f7fb; --card:#fff;
+    --line:#e3e6ee; --accent:#0f766e; --accent-soft:#e6f4f2;
+    --hl:#7c3aed; --hl-soft:#f1ebff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
+  header{background:var(--accent);color:#fff;padding:22px 20px 18px}
+  .wrap{max-width:1050px;margin:0 auto}
+  header a{color:#fff;opacity:.85;font-size:.9rem;text-decoration:none}
+  header a:hover{opacity:1;text-decoration:underline}
+  header h1{margin:6px 0 2px;font-size:1.7rem}
+  header p{margin:0;opacity:.9}
+  main{padding:22px 20px 60px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+  .seg button{font:inherit;border:0;background:transparent;padding:8px 16px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:600}
+  select,.tool{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  .tool{cursor:pointer}
+  .tool:hover{border-color:var(--accent)}
+  .lead{color:var(--muted);margin:0 0 16px}
+  .key{font-size:.85rem;color:var(--muted);margin:-6px 0 16px}
+  h2.strand{margin:26px 0 10px;font-size:1.1rem;color:var(--accent);border-bottom:2px solid var(--accent-soft);padding-bottom:4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:14px}
+  .card h3{margin:0;font-size:1.05rem;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+  .card h3 .code{color:var(--accent)}
+  .prog{margin-left:auto;font-size:.82rem;font-weight:600;color:var(--muted)}
+  .meter{height:6px;background:var(--line);border-radius:99px;margin:8px 0 6px;overflow:hidden}
+  .meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+  ul{list-style:none;margin:0;padding:0}
+  li{border-top:1px solid var(--line)}
+  li:first-child{border-top:0}
+  label{display:flex;gap:10px;align-items:flex-start;padding:7px 2px;cursor:pointer}
+  label input{margin-top:4px;width:17px;height:17px;accent-color:var(--accent);flex:none}
+  li.done span.t{color:var(--muted)}
+  .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px;background:var(--hl-soft);color:var(--hl)}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px}
+  @media print{
+    header,.bar,.key,footer{display:none}
+    body{background:#fff} main{padding:0}
+    .card{break-inside:avoid;border-color:#bbb}
+    .meter,.prog{display:none}
+  }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a href="index.html#notes">← Back to DP Chemistry Hub</a>
+  <h1>Unit checklists</h1>
+  <p>What you need to be able to do for every unit of the IB DP Chemistry course (first assessment 2025).</p>
+</div></header>
+<main><div class="wrap">
+  <p class="lead">Tick each statement when you can do it without your notes. Anything left unticked is a gap: go to the notes and practice questions for that topic.</p>
+  <div class="bar">
+    <div class="seg" id="lvl"><button data-l="sl">SL</button><button data-l="hl">HL</button></div>
+    <select id="jump" aria-label="Jump to unit"><option value="">Jump to a unit…</option></select>
+    <button class="tool" id="printBtn">Print / save as PDF</button>
+    <button class="tool" id="clearBtn">Clear my ticks</button>
+  </div>
+  <p class="key"><span class="badge" style="margin-left:0">HL</span> = additional higher level, HL students only. Your ticks are saved in this browser on this device.</p>
+  <div id="list"></div>
+</div></main>
+<footer>DP Chemistry · UWC Thailand</footer>
+<script>
+/* =====================================================================
+   EDIT HERE
+   {strand, code, title, items: [["I can ...", 0 for SL+HL or 1 for HL only]]}
+   ===================================================================== */
+const UNITS = [
+{strand:"Structure 1 · Models of the particulate nature of matter", code:"S1.1", title:"Introduction to the particulate nature of matter", items:[
+  ["Classify a substance as an element, compound or mixture, and explain the difference between homogeneous and heterogeneous mixtures.", 0],
+  ["Choose and describe a separation technique (filtration, crystallization, evaporation, distillation, paper chromatography, solvation) for a given mixture.", 0],
+  ["Use kinetic molecular theory to explain the arrangement and movement of particles in solids, liquids and gases, and describe each change of state by name.", 0],
+  ["Explain why temperature stays constant during a change of state, and interpret a heating or cooling curve.", 0],
+  ["Convert between °C and K, and explain that absolute temperature is proportional to the average kinetic energy of particles.", 0]]},
+{strand:"Structure 1 · Models of the particulate nature of matter", code:"S1.2", title:"The nuclear atom", items:[
+  ["State the relative mass, relative charge and location of protons, neutrons and electrons.", 0],
+  ["Use nuclear symbol notation (A, Z, X) to work out the numbers of protons, neutrons and electrons in atoms and ions.", 0],
+  ["Define isotopes and explain why isotopes have the same chemical properties but different physical properties.", 0],
+  ["Calculate relative atomic mass from isotope abundances, and work out abundances from a given relative atomic mass.", 0],
+  ["Interpret a mass spectrum of an element to find its isotopes, their abundances and its relative atomic mass.", 1]]},
+{strand:"Structure 1 · Models of the particulate nature of matter", code:"S1.3", title:"Electron configurations", items:[
+  ["Describe the difference between a continuous spectrum and a line (emission) spectrum.", 0],
+  ["Relate wavelength, frequency and energy of light, and place IR, visible and UV in order on the electromagnetic spectrum.", 0],
+  ["Explain how lines in the hydrogen emission spectrum come from electrons moving to lower energy levels, and why lines converge at higher energy.", 0],
+  ["Use 2n² to deduce the maximum number of electrons in a main energy level.", 0],
+  ["Describe s, p, d and f sublevels, and sketch the shapes of s and p orbitals.", 0],
+  ["Write full and condensed electron configurations and orbital (box) diagrams for atoms and ions up to Z = 36, using the Aufbau principle, Hund's rule and the Pauli exclusion principle.", 0],
+  ["Explain the exceptions for chromium and copper.", 0],
+  ["Calculate the first ionization energy of hydrogen from the convergence limit of its spectrum (frequency or wavelength data).", 1],
+  ["Use successive ionization energy data to deduce the group of an element and to support the idea of energy levels and sublevels.", 1]]},
+{strand:"Structure 1 · Models of the particulate nature of matter", code:"S1.4", title:"Counting particles by mass: the mole", items:[
+  ["Convert between amount (mol) and number of particles using the Avogadro constant.", 0],
+  ["Calculate relative formula mass from relative atomic masses.", 0],
+  ["Use n = m / M to convert between mass, amount and molar mass.", 0],
+  ["Determine empirical formulas from percentage or mass composition, and molecular formulas from the empirical formula and molar mass.", 0],
+  ["Calculate molar concentration (mol dm⁻³) and mass concentration (g dm⁻³), and carry out dilution calculations.", 0],
+  ["Apply Avogadro's law: equal volumes of gases at the same temperature and pressure contain equal numbers of particles.", 0]]},
+{strand:"Structure 1 · Models of the particulate nature of matter", code:"S1.5", title:"Ideal gases", items:[
+  ["List the assumptions of the ideal gas model.", 0],
+  ["Explain why real gases deviate from ideal behaviour at low temperature and high pressure.", 0],
+  ["Use the molar volume of an ideal gas at STP in calculations.", 0],
+  ["Use pV = nRT, including converting units (Pa, m³, K), and use it to find the molar mass of a gas.", 0],
+  ["Use the combined gas law (p₁V₁/T₁ = p₂V₂/T₂) and sketch or interpret graphs of p, V and T relationships.", 0]]},
+{strand:"Structure 2 · Models of bonding and structure", code:"S2.1", title:"The ionic model", items:[
+  ["Predict the charge of an ion from an element's position in the periodic table and its electron configuration.", 0],
+  ["Explain ionic bonding as electrostatic attraction between oppositely charged ions, and use electronegativity difference to predict ionic character.", 0],
+  ["Write formulas and names of ionic compounds, including polyatomic ions (ammonium, hydroxide, nitrate, hydrogencarbonate, carbonate, sulfate, phosphate).", 0],
+  ["Describe an ionic lattice and explain how lattice enthalpy depends on ionic charge and ionic radius.", 0],
+  ["Explain the physical properties of ionic compounds: volatility, electrical conductivity and solubility.", 0]]},
+{strand:"Structure 2 · Models of bonding and structure", code:"S2.2", title:"The covalent model", items:[
+  ["Explain a covalent bond as the attraction between a shared pair of electrons and the nuclei, and apply the octet rule.", 0],
+  ["Draw Lewis formulas for molecules and ions, including single, double and triple bonds.", 0],
+  ["Relate bond order to bond length and bond strength.", 0],
+  ["Identify coordination (dative) bonds in molecules and ions.", 0],
+  ["Use VSEPR theory to predict shapes and bond angles for species with up to four electron domains.", 0],
+  ["Use electronegativity to predict bond polarity, and use bond polarity and shape to predict molecular polarity.", 0],
+  ["Describe the covalent network structures of carbon allotropes (diamond, graphite, fullerenes, graphene), silicon and silicon dioxide, and explain their properties.", 0],
+  ["Identify London (dispersion), dipole–induced dipole, dipole–dipole forces and hydrogen bonding between molecules.", 0],
+  ["Rank intermolecular forces by strength and use them to explain volatility, solubility and electrical conductivity of molecular substances.", 0],
+  ["Explain how chromatography separates components, and calculate and use Rf values.", 0],
+  ["Draw resonance structures and explain delocalization of electrons.", 1],
+  ["Use physical and chemical evidence to explain the structure of benzene.", 1],
+  ["Apply VSEPR to species with five and six electron domains, including expanded octets.", 1],
+  ["Calculate formal charge and use it to choose the preferred Lewis formula.", 1],
+  ["Describe the formation of sigma (σ) and pi (π) bonds, and count them in a molecule.", 1],
+  ["Explain sp, sp² and sp³ hybridization and link the hybridization to molecular geometry.", 1]]},
+{strand:"Structure 2 · Models of bonding and structure", code:"S2.3", title:"The metallic model", items:[
+  ["Describe metallic bonding as attraction between a lattice of cations and delocalized electrons.", 0],
+  ["Use the metallic model to explain electrical and thermal conductivity, malleability and ductility.", 0],
+  ["Explain how ionic charge and radius affect the strength of metallic bonding and melting points.", 0],
+  ["Explain the high melting points and conductivity of transition elements in terms of delocalized d-electrons.", 1]]},
+{strand:"Structure 2 · Models of bonding and structure", code:"S2.4", title:"From models to materials", items:[
+  ["Describe bonding as a continuum between ionic, covalent and metallic models.", 0],
+  ["Place a substance on the bonding triangle using electronegativity data (mean electronegativity and electronegativity difference).", 0],
+  ["Explain why alloys are often harder and stronger than the pure metals, in terms of non-directional bonding and different-sized atoms.", 0],
+  ["Relate the properties of plastics to the structure of polymers.", 0],
+  ["Draw the repeating unit of an addition polymer from its monomer, and the monomer from a repeating unit.", 0],
+  ["Describe condensation polymerization, identify the small molecule released, and draw repeating units of polyesters and polyamides.", 1]]},
+{strand:"Structure 3 · Classification of matter", code:"S3.1", title:"The periodic table: classification of elements", items:[
+  ["Identify groups, periods and the s, p, d and f blocks, and classify elements as metals, metalloids or non-metals.", 0],
+  ["Link an element's period and group to its electron configuration.", 0],
+  ["Explain trends in atomic radius, ionic radius, ionization energy, electron affinity and electronegativity across periods and down groups.", 0],
+  ["Explain trends in reactivity down group 1 and group 17, and write equations for their typical reactions.", 0],
+  ["Describe the change from basic to acidic oxides across a period and write equations for reactions of oxides with water.", 0],
+  ["Assign oxidation states to atoms in compounds and ions, and use Roman numerals in names.", 0],
+  ["Explain the discontinuities in first ionization energy across a period (group 13 and group 16 dips).", 1],
+  ["Describe the characteristic properties of transition elements: variable oxidation states, complex ions, coloured compounds, catalytic and magnetic properties.", 1],
+  ["Explain variable oxidation states using the similar energies of 3d and 4s electrons.", 1],
+  ["Explain the colour of transition element complexes using d-orbital splitting and complementary colours.", 1]]},
+{strand:"Structure 3 · Classification of matter", code:"S3.2", title:"Functional groups: classification of organic compounds", items:[
+  ["Write and interpret empirical, molecular, full and condensed structural, skeletal and stereochemical formulas.", 0],
+  ["Identify functional groups: halogeno, hydroxyl, carbonyl, carboxyl, alkoxy, amino, amido, ester and phenyl.", 0],
+  ["Identify members of a homologous series and their common features.", 0],
+  ["Explain trends in physical properties (such as boiling point) within a homologous series.", 0],
+  ["Name organic compounds with up to six carbons in the main chain using IUPAC rules.", 0],
+  ["Identify and draw structural isomers, and classify alcohols, halogenoalkanes and amines as primary, secondary or tertiary.", 0],
+  ["Identify cis–trans and optical isomers, recognise chiral centres, and explain how a polarimeter distinguishes enantiomers.", 1],
+  ["Interpret fragmentation patterns in mass spectra of organic compounds.", 1],
+  ["Use infrared spectra and the data booklet to identify bonds and functional groups.", 1],
+  ["Use ¹H NMR spectra to deduce the number of hydrogen environments, their ratio and their chemical shifts.", 1],
+  ["Interpret splitting patterns in ¹H NMR using the n + 1 rule.", 1],
+  ["Combine index of hydrogen deficiency, MS, IR and ¹H NMR data to deduce the structure of an unknown compound.", 1]]},
+{strand:"Reactivity 1 · What drives chemical reactions?", code:"R1.1", title:"Measuring enthalpy changes", items:[
+  ["Explain that chemical reactions transfer energy between the system and the surroundings, while total energy is conserved.", 0],
+  ["Classify reactions as exothermic or endothermic from temperature changes and sign of ΔH.", 0],
+  ["Draw and interpret energy profiles, linking relative stability of reactants and products to the sign of ΔH.", 0],
+  ["Use q = mcΔT and ΔH = −q / n to calculate enthalpy changes from calorimetry data.", 0],
+  ["Evaluate calorimetry experiments, identifying sources of error such as heat loss.", 0]]},
+{strand:"Reactivity 1 · What drives chemical reactions?", code:"R1.2", title:"Energy cycles in reactions", items:[
+  ["Explain that bond breaking is endothermic and bond making is exothermic.", 0],
+  ["Calculate ΔH from average bond enthalpies and explain why the answer is approximate.", 0],
+  ["Apply Hess's law to calculate enthalpy changes for multistep reactions.", 0],
+  ["Define standard enthalpy changes of formation and combustion.", 1],
+  ["Calculate ΔH from standard enthalpy of formation or combustion data.", 1],
+  ["Construct and use Born–Haber cycles to calculate lattice enthalpy or other unknowns.", 1]]},
+{strand:"Reactivity 1 · What drives chemical reactions?", code:"R1.3", title:"Energy from fuels", items:[
+  ["Write balanced equations for complete combustion of metals, non-metals and organic compounds.", 0],
+  ["Write equations for incomplete combustion and describe the harmful products (carbon monoxide, carbon/soot).", 0],
+  ["Compare fossil fuels (coal, crude oil, natural gas) by specific energy and carbon dioxide emissions, and link them to climate change.", 0],
+  ["Describe biofuels, how they are made, and evaluate their advantages and disadvantages.", 0],
+  ["Write the electrode half-equations for hydrogen and methanol fuel cells and compare fuel cells with combustion.", 0]]},
+{strand:"Reactivity 1 · What drives chemical reactions?", code:"R1.4", title:"Entropy and spontaneity (HL only)", items:[
+  ["Explain entropy (S) as a measure of the dispersal of energy and matter, and predict the sign of ΔS for a reaction or change of state.", 1],
+  ["Calculate ΔS° from standard entropy data.", 1],
+  ["Use ΔG = ΔH − TΔS to calculate Gibbs energy change, converting units carefully.", 1],
+  ["Use the sign of ΔG to predict whether a reaction is spontaneous, and find the temperature at which spontaneity changes.", 1],
+  ["Explain how ΔG changes as a reaction approaches equilibrium and use ΔG° = −RT ln K.", 1]]},
+{strand:"Reactivity 2 · How much, how fast and how far?", code:"R2.1", title:"How much? The amount of chemical change", items:[
+  ["Write balanced equations, including ionic equations and state symbols.", 0],
+  ["Use mole ratios to calculate masses, gas volumes and solution concentrations of reactants and products.", 0],
+  ["Identify the limiting reactant and the reactant in excess.", 0],
+  ["Calculate theoretical yield and percentage yield.", 0],
+  ["Calculate atom economy and use it to discuss the efficiency and sustainability of a reaction.", 0]]},
+{strand:"Reactivity 2 · How much, how fast and how far?", code:"R2.2", title:"How fast? The rate of chemical change", items:[
+  ["Define rate of reaction and calculate rates from the gradient of a tangent on concentration, volume or mass–time graphs.", 0],
+  ["Use collision theory (energy and orientation) to explain how reactions happen.", 0],
+  ["Explain how concentration, pressure, surface area, temperature and catalysts change the rate.", 0],
+  ["Sketch and interpret Maxwell–Boltzmann distributions, showing activation energy and the effect of temperature and catalysts.", 0],
+  ["Draw energy profiles for catalysed and uncatalysed reactions.", 0],
+  ["Describe a reaction mechanism, identify intermediates, and identify the rate-determining step.", 1],
+  ["Draw energy profiles for multistep reactions, showing transition states and intermediates.", 1],
+  ["Deduce the rate equation and orders of reaction from experimental data and graphs.", 1],
+  ["Work out the units of the rate constant k for overall orders 0, 1 and 2.", 1],
+  ["Relate a rate equation to a proposed mechanism.", 1],
+  ["Use the Arrhenius equation (and its graph) to find activation energy and the frequency factor.", 1]]},
+{strand:"Reactivity 2 · How much, how fast and how far?", code:"R2.3", title:"How far? The extent of chemical change", items:[
+  ["Describe the features of dynamic equilibrium in a closed system.", 0],
+  ["Write the equilibrium constant expression (K) for homogeneous reactions.", 0],
+  ["Interpret the size of K and explain what it tells you about the position of equilibrium.", 0],
+  ["Use Le Châtelier's principle to predict the effect of changing concentration, pressure and temperature, and explain why a catalyst does not change the position.", 0],
+  ["Compare the reaction quotient Q with K to predict the direction of change.", 1],
+  ["Calculate K or equilibrium concentrations from given data (including ICE tables and approximations).", 1],
+  ["Link the value of K to ΔG°.", 1]]},
+{strand:"Reactivity 3 · What are the mechanisms of chemical change?", code:"R3.1", title:"Proton transfer reactions", items:[
+  ["Define Brønsted–Lowry acids and bases, and identify conjugate acid–base pairs.", 0],
+  ["Identify amphiprotic species and write equations to show their behaviour.", 0],
+  ["Calculate pH from [H⁺] and [H⁺] from pH, and explain the logarithmic scale.", 0],
+  ["Use Kw = [H⁺][OH⁻] to calculate concentrations and explain how Kw changes with temperature.", 0],
+  ["Distinguish strong and weak acids and bases by their extent of ionization, conductivity, pH and rate of reaction.", 0],
+  ["Write equations for neutralization reactions and name the salts formed.", 0],
+  ["Sketch and interpret the pH curve for a strong acid–strong base titration, including the equivalence point.", 0],
+  ["Calculate pOH and use pH + pOH = 14 at 298 K.", 1],
+  ["Use Ka, Kb, pKa and pKb to compare acid and base strength and calculate pH of weak acids and bases.", 1],
+  ["Use Ka × Kb = Kw for conjugate pairs.", 1],
+  ["Predict whether a salt solution is acidic, neutral or basic.", 1],
+  ["Sketch and interpret pH curves for all strong/weak combinations, including the half-equivalence point (pH = pKa).", 1],
+  ["Explain how acid–base indicators work and choose a suitable indicator for a titration.", 1],
+  ["Explain how buffer solutions work and calculate their pH.", 1]]},
+{strand:"Reactivity 3 · What are the mechanisms of chemical change?", code:"R3.2", title:"Electron transfer reactions", items:[
+  ["Define oxidation and reduction in terms of electrons and oxidation states, and identify oxidizing and reducing agents.", 0],
+  ["Write and balance redox half-equations and combine them, in acidic or neutral solutions.", 0],
+  ["Use an activity series to predict displacement reactions of metals and halogens.", 0],
+  ["Write equations for reactions of metals with acids.", 0],
+  ["Describe primary (voltaic) cells, including the direction of electron flow and the role of the salt bridge.", 0],
+  ["Describe how secondary (rechargeable) cells work.", 0],
+  ["Describe electrolysis of molten salts, identifying products and writing electrode half-equations.", 0],
+  ["Describe the oxidation of primary and secondary alcohols, including conditions for aldehyde vs carboxylic acid.", 0],
+  ["Describe reduction of carboxylic acids, aldehydes and ketones, and hydrogenation of alkenes and alkynes.", 0],
+  ["Describe the standard hydrogen electrode and how standard electrode potentials are measured.", 1],
+  ["Calculate E°cell and use it to predict whether a redox reaction is spontaneous.", 1],
+  ["Use ΔG° = −nFE°cell.", 1],
+  ["Predict the products of electrolysis of aqueous solutions, including the effect of concentration and electrode type.", 1],
+  ["Describe electroplating.", 1]]},
+{strand:"Reactivity 3 · What are the mechanisms of chemical change?", code:"R3.3", title:"Electron sharing reactions", items:[
+  ["Define a radical and represent it with a dot.", 0],
+  ["Explain how homolytic fission of a covalent bond forms radicals, and the role of UV light.", 0],
+  ["Describe the free-radical substitution of alkanes with halogens: initiation, propagation and termination steps.", 0]]},
+{strand:"Reactivity 3 · What are the mechanisms of chemical change?", code:"R3.4", title:"Electron-pair sharing reactions", items:[
+  ["Define a nucleophile and identify common nucleophiles.", 0],
+  ["Describe nucleophilic substitution reactions of halogenoalkanes.", 0],
+  ["Explain heterolytic fission and use curly arrows to show the movement of electron pairs.", 0],
+  ["Define an electrophile and identify common electrophiles.", 0],
+  ["Describe electrophilic addition reactions of alkenes with halogens, hydrogen halides and water.", 0],
+  ["Define Lewis acids and bases, and relate them to Brønsted–Lowry theory.", 1],
+  ["Describe the formation of complex ions with coordination bonds, and identify ligands.", 1],
+  ["Draw SN1 and SN2 mechanisms and explain how the halogenoalkane type and solvent affect which occurs.", 1],
+  ["Explain the effect of the leaving group on the rate of nucleophilic substitution.", 1],
+  ["Use carbocation stability (Markovnikov's rule) to predict the major product of electrophilic addition.", 1],
+  ["Draw the mechanism of electrophilic substitution of benzene (nitration).", 1]]}
+];
+/* =====================================================================
+   END OF EDIT AREA
+   ===================================================================== */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+let ticks = {};
+try { ticks = JSON.parse(store.get("chemChecklistTicks", "{}")) || {}; } catch(e){ ticks = {}; }
+let level = store.get("chemChecklistLevel", "hl");
+const key = (u, i) => u.code + "|" + u.items[i][0];
+const save = () => store.set("chemChecklistTicks", JSON.stringify(ticks));
+
+function render(){
+  let html = "", last = "";
+  UNITS.forEach((u, ui) => {
+    const idx = u.items.map((it, i) => i).filter(i => level === "hl" || !u.items[i][1]);
+    if (!idx.length) return;
+    if (u.strand !== last) { html += `<h2 class="strand">${esc(u.strand)}</h2>`; last = u.strand; }
+    html += `<div class="card" id="u-${u.code.replace(".","-")}"><h3><span class="code">${esc(u.code)}</span>${esc(u.title)}<span class="prog" data-u="${ui}"></span></h3><div class="meter"><i data-u="${ui}"></i></div><ul>${
+      idx.map(i => { const on = !!ticks[key(u,i)];
+        return `<li class="${on?"done":""}"><label><input type="checkbox" data-u="${ui}" data-i="${i}"${on?" checked":""}><span class="t">${esc(u.items[i][0])}${u.items[i][1]?'<span class="badge">HL</span>':""}</span></label></li>`; }).join("")}</ul></div>`;
+  });
+  $("#list").innerHTML = html;
+  document.querySelectorAll("#lvl button").forEach(b => b.classList.toggle("on", b.dataset.l === level));
+  UNITS.forEach((u, ui) => progress(ui));
+}
+function progress(ui){
+  const u = UNITS[ui], idx = u.items.map((it,i)=>i).filter(i => level === "hl" || !u.items[i][1]);
+  const done = idx.filter(i => ticks[key(u,i)]).length;
+  const p = document.querySelector(`.prog[data-u="${ui}"]`), m = document.querySelector(`.meter i[data-u="${ui}"]`);
+  if (p) p.textContent = `${done} / ${idx.length}`;
+  if (m) m.style.width = (idx.length ? 100*done/idx.length : 0) + "%";
+}
+$("#list").addEventListener("change", e => {
+  const c = e.target; if (!c.dataset.u) return;
+  const u = UNITS[c.dataset.u], k = key(u, +c.dataset.i);
+  if (c.checked) ticks[k] = 1; else delete ticks[k];
+  c.closest("li").classList.toggle("done", c.checked);
+  save(); progress(+c.dataset.u);
+});
+document.querySelectorAll("#lvl button").forEach(b => b.onclick = () => { level = b.dataset.l; store.set("chemChecklistLevel", level); render(); });
+$("#jump").innerHTML += UNITS.map(u => `<option value="u-${u.code.replace(".","-")}">${esc(u.code)} ${esc(u.title)}</option>`).join("");
+$("#jump").onchange = e => { const el = document.getElementById(e.target.value); if (el) el.scrollIntoView({behavior:"smooth"}); e.target.value = ""; };
+$("#printBtn").onclick = () => window.print();
+$("#clearBtn").onclick = () => { if (!Object.keys(ticks).length || !confirm("Clear all your ticks on this device?")) return; ticks = {}; store.del("chemChecklistTicks"); render(); };
+render();
+</script>
+</body>
+</html>
