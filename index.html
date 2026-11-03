@@ -107,16 +107,23 @@
   input.search{width:100%;max-width:440px;padding:10px 14px;border:1px solid var(--line);border-radius:999px;font:inherit;margin-bottom:14px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235b6672' stroke-width='2'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l4 4'/%3E%3C/svg%3E") no-repeat 14px center;padding-left:38px}
   /* simulator cards */
   .simgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
-  a.simcard{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
-  a.simcard:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(15,118,110,.18)}
+  div.simcard,a.simcard{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+  div.simcard:hover,a.simcard:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(15,118,110,.18)}
   .simcard .thumb{position:relative;aspect-ratio:16/10;background:#eef2f5;overflow:hidden}
   .simcard .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
-  a.simcard:hover .thumb img{transform:scale(1.04)}
+  div.simcard:hover .thumb img,a.simcard:hover .thumb img{transform:scale(1.04)}
   .simcard .play{position:absolute;right:12px;bottom:12px;background:rgba(15,118,110,.92);color:#fff;font-weight:700;font-size:.85rem;padding:6px 12px;border-radius:999px;opacity:0;transform:translateY(6px);transition:.2s}
-  a.simcard:hover .play{opacity:1;transform:none}
+  div.simcard:hover .play,a.simcard:hover .play{opacity:1;transform:none}
   .simcard .body{padding:14px 16px 16px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
   .simcard h3{margin:0;font-family:var(--display);font-size:1.2rem}
   .simcard p{margin:0;font-size:.9rem;color:var(--muted)}
+  .simcard .thumb,.simcard .body>a.t{display:block;color:inherit;text-decoration:none}
+  .simcard .body{flex:1}
+  .simcard .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+  .simcard .acts a{font-weight:700;font-size:.85rem;padding:6px 12px;border-radius:999px;text-decoration:none;border:1px solid var(--line)}
+  .simcard .acts a.go{background:#0f766e;color:#fff;border-color:#0f766e}
+  .simcard .acts a.ws{background:#fff7ed;color:#9a3412;border-color:#fdba74}
+  .simcard .acts a:hover{filter:brightness(.95)}
   /* mock cards */
   .mock{display:flex;flex-direction:column;gap:8px}
   .mock .lvl{font-size:.72rem;font-weight:800;letter-spacing:.06em;padding:2px 9px;border-radius:999px;align-self:flex-start}
@@ -185,7 +192,7 @@
 
   <section id="simulators">
     <h2>Simulators</h2>
-    <p class="lead">Interactive models to explore and practise with. They work on laptops, tablets and phones.</p>
+    <p class="lead">Interactive models to explore and practise with. They work on laptops, tablets and phones. Each one has a 2-page worksheet (📄) that walks you through the concept and how the settings link together. Open it beside the simulator, or print it on A4.</p>
     <div class="simgrid" id="simList"></div>
   </section>
 </main>
@@ -471,14 +478,14 @@ const MOCKS = [
   ["SL Mock 1 · Paper 2 · 1 h 30 min", D("1fGqET4PBaIGO5BHsNTMmOW1Ix28gNiWggV-5WEWhsDA"), D("10yAKLqcEOl_D8K_ZHOIyRe8PQMf4tS7l8eRDaKNJlr0")]
 ];
 
-/* ---------- SIMULATORS ---------- ["Title", "link", "Topic", "Description", "picture"] */
+/* ---------- SIMULATORS ---------- ["Title", "link", "Topic", "Description", "picture", "worksheet (2-page printable)"] */
 const SIMS = [
-  ["Ideal Gas Box", "simulators/ideal-gas-box.html", "S1.5 Ideal gases", "Squeeze, heat and fill a box of gas particles. Test pV = nRT and p₁V₁/T₁ = p₂V₂/T₂, plot your own graphs and watch the Maxwell–Boltzmann speed distribution.", "images/ideal-gas-box.jpg"],
-  ["Bonding Lab", "simulators/bonding-lab.html", "S2 Models of bonding and structure", "See how electrons are transferred, shared or delocalised in ionic, covalent and metallic bonding, place substances on the bonding triangle, and explore the structures that result.", "images/bonding-lab.jpg"],
-  ["Bonding Triangle Explorer", "simulators/bonding-triangle.html", "S2.4 From models to materials", "Pick any two elements and see where they land on the van Arkel–Ketelaar triangle, with mean electronegativity, Δχ and % ionic character.", "images/bonding-triangle.jpg"],
-  ["Neutralization Lab", "simulators/neutralization-lab.html", "R3.1 Proton transfer reactions", "Watch acids and bases swap partners to form salts, read the full, ionic and net ionic equations, then practise predicting the products.", "images/neutralization-lab.jpg"],
-  ["Voltaic and Electrolytic Cells", "simulators/cells.html", "R3.2 Electron transfer reactions", "Build voltaic cells from eight metal half-cells and electrolyse molten and aqueous electrolytes. Watch electrons move through the wire and ions move through the salt bridge and solution, with half-equations and (HL) E⦵cell and ΔG⦵.", "images/cells.jpg"],
-  ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature or pressure, or by adding a catalyst. Watch the concentration–time graph and Q vs K respond.", "images/lechatelier.jpg"]
+  ["Ideal Gas Box", "simulators/ideal-gas-box.html", "S1.5 Ideal gases", "Squeeze, heat and fill a box of gas particles. Test pV = nRT and p₁V₁/T₁ = p₂V₂/T₂, plot your own graphs and watch the Maxwell–Boltzmann speed distribution.", "images/ideal-gas-box.jpg", "simulators/worksheets/ideal-gas-box.html"],
+  ["Bonding Lab", "simulators/bonding-lab.html", "S2 Models of bonding and structure", "See how electrons are transferred, shared or delocalised in ionic, covalent and metallic bonding, place substances on the bonding triangle, and explore the structures that result.", "images/bonding-lab.jpg", "simulators/worksheets/bonding-lab.html"],
+  ["Bonding Triangle Explorer", "simulators/bonding-triangle.html", "S2.4 From models to materials", "Pick any two elements and see where they land on the van Arkel–Ketelaar triangle, with mean electronegativity, Δχ and % ionic character.", "images/bonding-triangle.jpg", "simulators/worksheets/bonding-triangle.html"],
+  ["Neutralization Lab", "simulators/neutralization-lab.html", "R3.1 Proton transfer reactions", "Watch acids and bases swap partners to form salts, read the full, ionic and net ionic equations, then practise predicting the products.", "images/neutralization-lab.jpg", "simulators/worksheets/neutralization-lab.html"],
+  ["Voltaic and Electrolytic Cells", "simulators/cells.html", "R3.2 Electron transfer reactions", "Build voltaic cells from eight metal half-cells and electrolyse molten and aqueous electrolytes. Watch electrons move through the wire and ions move through the salt bridge and solution, with half-equations and (HL) E⦵cell and ΔG⦵.", "images/cells.jpg", "simulators/worksheets/cells.html"],
+  ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature or pressure, or by adding a catalyst. Watch the concentration–time graph and Q vs K respond.", "images/lechatelier.jpg", "simulators/worksheets/lechatelier.html"]
 ];
 /* =====================================================================
    END OF EDIT AREA. You don't need to change anything below this line.
@@ -566,7 +573,7 @@ $("#mockList").innerHTML = MOCKS.map(m => { const lvl=m[0].startsWith("HL")?"HL"
 $("#mockFolder").innerHTML = `Try the paper under timed conditions before you open the markscheme.`;
 
 /* simulators */
-$("#simList").innerHTML = SIMS.map(s => `<a class="simcard" href="${s[1]}"><div class="thumb">${s[4]?`<img src="${s[4]}" alt="Screenshot of the ${esc(s[0])} simulator" loading="lazy">`:""}<span class="play">Open ▸</span></div><div class="body">${chip(s[2].split(" ")[0])}<h3>${esc(s[0])}</h3><p>${esc(s[3])}</p></div></a>`).join("");
+$("#simList").innerHTML = SIMS.map(s => `<div class="simcard"><a class="thumb" href="${s[1]}">${s[4]?`<img src="${s[4]}" alt="Screenshot of the ${esc(s[0])} simulator" loading="lazy">`:""}<span class="play">Open ▸</span></a><div class="body">${chip(s[2].split(" ")[0])}<a class="t" href="${s[1]}"><h3>${esc(s[0])}</h3></a><p>${esc(s[3])}</p><div class="acts"><a class="go" href="${s[1]}">▶ Open simulator</a>${s[5]?`<a class="ws" href="${s[5]}">📄 Worksheet</a>`:""}</div></div></div>`).join("");
 </script>
 </body>
 </html>
