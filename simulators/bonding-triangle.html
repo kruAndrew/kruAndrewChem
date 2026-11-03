@@ -122,7 +122,7 @@ h2{font-family:var(--display);font-size:1.05rem;margin:0 0 8px;font-weight:700}
     <div class="pt-scroll"><div class="pt" id="pt"></div></div>
     <div class="legend">χ low <span class="ramp" id="ramp"></span> high · Pauling scale · noble gases and period 7 omitted</div>
   </section>
-  <p class="note">* % ionic character uses Pauling's estimate, 100(1 − e<sup>−Δχ²/4</sup>); textbooks give slightly different curves. Region boundaries are approximate: ionic above Δχ ≈ 1.8 (a common rule of thumb), and a sloping metallic/covalent divide near χ̄ ≈ 2.0 that runs through the metalloids. The model uses only which two elements are present, not the formula, oxidation state or structure, so substances near a boundary (Al₂O₃, AlCl₃, GaAs) show mixed character, and some, such as LiH, land in the "wrong" region.</p>
+  <p class="note">* % ionic character uses Pauling's estimate, 100(1 − e<sup>−Δχ²/4</sup>); textbooks give slightly different curves. Region boundaries are approximate: ionic from Δχ ≈ 1.8 upwards (a common rule of thumb), and a sloping metallic/covalent divide near χ̄ ≈ 2.0 that runs through the metalloids. The model uses only which two elements are present, not the formula, oxidation state or structure, so substances near a boundary (Al₂O₃, AlCl₃, GaAs) show mixed character, and some, such as LiH, land in the "wrong" region.</p>
 </div>
 <script>
 const ROWS = [
@@ -147,7 +147,7 @@ const save=()=>{try{localStorage.setItem("btri",JSON.stringify({dp:S.dp,pins:S.p
 const en=s=>{const v=EL[s].en;return S.dp===1?Math.round(v*10)/10:v};
 const fmt=v=>v.toFixed(S.dp===1?1:2);
 const ION=1.8, POL=0.4, bx=y=>2.0+(0.4/1.8)*y;
-function region(x,y){ if(y>=ION) return "ionic"; if(x<bx(y)) return "metallic"; return y>=POL?"polar":"covalent"; }
+function region(x,y){ const e=1e-9; if(y>=ION-e) return "ionic"; if(x<bx(y)-e) return "metallic"; return y>POL+e?"polar":"covalent"; }
 const NAME={ionic:"Ionic",polar:"Polar covalent",covalent:"Covalent",metallic:"Metallic"};
 const WHY={
  ionic:"Large Δχ: electrons are effectively transferred, giving a lattice of oppositely charged ions. Expect high melting points and conduction only when molten or dissolved.",
