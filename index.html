@@ -16,7 +16,7 @@
                       between /d/ and /edit). Leave "" if not ready yet.
   • Notes:            ["Title", link, "Checklist" | "Notes" | "Worksheet" | "Practical"]
   • Mock papers:      ["Paper name", "link"]  (leave link "" = coming soon)
-  • Simulators:       ["Title", "simulators/file.html", "Topic", "What it does"]
+  • Simulators:       ["Title", "simulators/file.html", "Topic", "What it does", "images/picture.jpg"]
 
   Save, then re-upload (or press Commit on GitHub). Done.
   =====================================================================
@@ -26,77 +26,126 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DP Chemistry Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
 <style>
   :root{
-    --ink:#1d2433; --muted:#5b6475; --bg:#f6f7fb; --card:#fff;
-    --line:#e3e6ee; --accent:#0f766e; --accent-soft:#e6f4f2;
-    --hl:#7c3aed; --hl-soft:#f1ebff; --amber:#b45309; --amber-soft:#fff4e0;
+    --ink:#14212b; --muted:#5b6672; --bg:#f4f6f8; --card:#fff; --line:#e2e7ec;
+    --accent:#0f766e; --accent-2:#0b4f6c; --accent-soft:#e3f4f1;
+    --struct:#0f766e; --struct-soft:#ddf3ef; --react:#c2410c; --react-soft:#fdeee4;
+    --hl:#7c3aed; --hl-soft:#f1ebff; --amber:#b45309; --amber-soft:#fff6e6;
+    --display:"Bricolage Grotesque",system-ui,sans-serif; --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 14px rgba(16,24,40,.06);
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
-  header{background:var(--accent);color:#fff;padding:24px 20px 0}
-  .wrap{max-width:1050px;margin:0 auto}
-  header h1{margin:0 0 2px;font-size:1.8rem}
-  header p{margin:0 0 16px;opacity:.9}
-  nav{display:flex;flex-wrap:wrap;gap:4px}
-  nav a{color:#fff;opacity:.8;text-decoration:none;padding:10px 14px;border-radius:8px 8px 0 0}
-  nav a:hover{opacity:1;background:rgba(255,255,255,.12)}
-  nav a.active{background:var(--bg);color:var(--accent);opacity:1;font-weight:600}
-  main{padding:24px 20px 60px}
-  section{display:none} section.active{display:block}
-  h2{margin:0 0 6px;font-size:1.4rem}
-  h3{margin:0 0 8px;font-size:1.05rem}
-  .lead{color:var(--muted);margin:0 0 18px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
-  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;margin-bottom:14px}
-  .seg button{font:inherit;border:0;background:transparent;padding:8px 16px;cursor:pointer;color:var(--muted)}
-  .seg button.on{background:var(--accent);color:#fff;font-weight:600}
-  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:.95rem}
-  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{background:#fafbfd;font-size:.85rem;color:var(--muted);font-weight:600}
-  td.wk{color:var(--muted);width:3.5em} td.dt{white-space:nowrap;width:8em}
-  tr.brk td{background:#f1f2f6;color:var(--muted);text-align:center;font-style:italic}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto}
+  /* hero */
+  header.hero{position:relative;overflow:hidden;color:#fff;padding:38px 20px 30px;
+    background:radial-gradient(1100px 400px at 85% -10%,rgba(94,234,212,.35),transparent 60%),linear-gradient(135deg,#0b4f6c 0%,#0f766e 55%,#139a8c 100%)}
+  header.hero::after{content:"";position:absolute;inset:0;opacity:.13;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='104' viewBox='0 0 120 104'%3E%3Cg fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M30 2l26 15v30L30 62 4 47V17z'/%3E%3Cpath d='M90 54l26 15v30l-26 15-26-15V69z'/%3E%3Cpath d='M56 32h8M64 69l-8-22'/%3E%3C/g%3E%3Cg fill='white'%3E%3Ccircle cx='30' cy='2' r='4'/%3E%3Ccircle cx='56' cy='47' r='4'/%3E%3Ccircle cx='4' cy='17' r='4'/%3E%3Ccircle cx='90' cy='54' r='4'/%3E%3Ccircle cx='116' cy='99' r='4'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:180px auto}
+  .hero .wrap{position:relative;z-index:1}
+  .eyebrow{font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+  header h1{margin:4px 0 4px;font-family:var(--display);font-weight:800;font-size:clamp(2rem,5vw,3rem);line-height:1.05;letter-spacing:-.02em}
+  header p.sub{margin:0;opacity:.9;font-size:1.05rem}
+  .week{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .wk-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);border-radius:14px;padding:10px 14px;min-width:240px;flex:1;max-width:520px}
+  .wk-card .lbl{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+  .wk-card .t{font-weight:600;margin-top:2px}
+  .wk-card .asm{display:inline-block;margin-top:4px;font-size:.72rem;font-weight:700;background:#fde68a;color:#78350f;border-radius:999px;padding:1px 8px}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .stat{font-size:.85rem;background:rgba(0,0,0,.18);border-radius:999px;padding:4px 12px}
+  .stat b{font-family:var(--display);font-size:1rem;margin-right:4px}
+  /* nav */
+  nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;gap:4px;overflow-x:auto;padding:8px 20px;scrollbar-width:none}
+  nav a{display:inline-flex;align-items:center;gap:7px;color:var(--muted);text-decoration:none;padding:8px 14px;border-radius:999px;white-space:nowrap;font-weight:600;font-size:.93rem}
+  nav a .ic{font-size:1.05rem}
+  nav a:hover{background:var(--accent-soft);color:var(--accent)}
+  nav a.active{background:var(--accent);color:#fff}
+  main{padding:28px 20px 60px}
+  section{display:none;animation:fade .25s ease} section.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h2{margin:0 0 6px;font-family:var(--display);font-size:1.7rem;letter-spacing:-.01em}
+  h3{margin:0 0 8px;font-size:1.02rem}
+  .lead{color:var(--muted);margin:0 0 20px;max-width:75ch}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .grid > .card{margin-bottom:0}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff;margin-bottom:16px;padding:3px;gap:2px}
+  .seg button{font:inherit;font-weight:600;border:0;background:transparent;padding:7px 16px;cursor:pointer;color:var(--muted);border-radius:999px}
+  .seg button.on{background:var(--accent);color:#fff}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:.95rem;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f8fafb;font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  td.wk{color:var(--muted);width:3.5em} td.dt{white-space:nowrap;width:8em;color:var(--muted)}
+  tr.brk td{background:repeating-linear-gradient(45deg,#f3f5f7,#f3f5f7 8px,#eef1f4 8px,#eef1f4 16px);color:var(--muted);text-align:center;font-weight:600}
   tr.asm td{background:var(--amber-soft)}
-  tr.now td{box-shadow:inset 4px 0 0 var(--accent)}
-  .badge{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}
+  tr.now td{background:var(--accent-soft);font-weight:600}
+  tr.now td:first-child{box-shadow:inset 4px 0 0 var(--accent)}
+  .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:999px;margin-left:6px;vertical-align:1px}
   .b-asm{background:var(--amber);color:#fff}
   .b-now{background:var(--accent);color:#fff}
   .b-hl{background:var(--hl-soft);color:var(--hl)}
   .tbc{color:var(--muted);font-style:italic}
-  .topic{margin-bottom:12px}
-  .topic h3 .code{color:var(--accent);margin-right:6px}
+  .topic{margin-bottom:14px;transition:transform .15s,box-shadow .15s}
+  .topic:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(16,24,40,.09)}
+  .topic h3{display:flex;align-items:baseline;gap:8px}
+  .code{display:inline-block;font-family:var(--display);font-weight:800;font-size:.85rem;padding:2px 9px;border-radius:8px;flex-shrink:0}
+  .code.s{background:var(--struct-soft);color:var(--struct)} .code.r{background:var(--react-soft);color:var(--react)} .code.x{background:#eef2f6;color:#475569}
   .topic ul{margin:0;padding-left:18px}
-  .topic li{margin:3px 0}
-  .grade-h{margin:22px 0 10px;font-size:1.1rem;color:var(--accent);border-bottom:2px solid var(--accent-soft);padding-bottom:4px}
+  .topic li{margin:4px 0}
+  .grade-h{margin:26px 0 12px;font-family:var(--display);font-size:1.2rem;color:var(--accent-2);display:flex;align-items:center;gap:10px}
+  .grade-h::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--accent-soft),transparent)}
   a{color:var(--accent)}
-  .packs{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-  .pk{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:5px 10px;text-decoration:none;font-size:.9rem;background:#fff}
-  .pk:hover{border-color:var(--accent)}
-  .pk.hl{border-color:#ddd0fb}
-  .pk.soon{color:var(--muted);border-style:dashed}
-  .small{font-size:.85rem;color:var(--muted)}
-  input.search{width:100%;max-width:420px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;margin-bottom:14px}
-  .sim{display:flex;flex-direction:column;gap:6px}
-  .sim .tag{font-size:.75rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
-  .btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;align-self:flex-start;margin-top:4px}
+  .packs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .pk{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;text-decoration:none;font-size:.88rem;font-weight:600;background:#fff;color:var(--struct)}
+  .pk:hover{background:var(--accent-soft);border-color:var(--accent)}
+  .pk.hl{color:var(--hl);border-color:#ddd0fb} .pk.hl:hover{background:var(--hl-soft)}
+  .pk.soon{color:var(--muted);border-style:dashed;font-weight:500}
+  .small{font-size:.86rem;color:var(--muted)}
+  input.search{width:100%;max-width:440px;padding:10px 14px;border:1px solid var(--line);border-radius:999px;font:inherit;margin-bottom:14px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235b6672' stroke-width='2'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l4 4'/%3E%3C/svg%3E") no-repeat 14px center;padding-left:38px}
+  /* simulator cards */
+  .simgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
+  a.simcard{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+  a.simcard:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(15,118,110,.18)}
+  .simcard .thumb{position:relative;aspect-ratio:16/10;background:#eef2f5;overflow:hidden}
+  .simcard .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+  a.simcard:hover .thumb img{transform:scale(1.04)}
+  .simcard .play{position:absolute;right:12px;bottom:12px;background:rgba(15,118,110,.92);color:#fff;font-weight:700;font-size:.85rem;padding:6px 12px;border-radius:999px;opacity:0;transform:translateY(6px);transition:.2s}
+  a.simcard:hover .play{opacity:1;transform:none}
+  .simcard .body{padding:14px 16px 16px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+  .simcard h3{margin:0;font-family:var(--display);font-size:1.2rem}
+  .simcard p{margin:0;font-size:.9rem;color:var(--muted)}
+  /* mock cards */
+  .mock{display:flex;flex-direction:column;gap:8px}
+  .mock .lvl{font-size:.72rem;font-weight:800;letter-spacing:.06em;padding:2px 9px;border-radius:999px;align-self:flex-start}
+  .mock .lvl.SL{background:var(--struct-soft);color:var(--struct)} .mock .lvl.HL{background:var(--hl-soft);color:var(--hl)}
+  .btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:8px 14px;border-radius:999px;font-weight:600;align-self:flex-start;margin-top:4px}
+  .btn:hover{background:var(--accent-2)}
   .btn.off{background:#c9ced8;pointer-events:none}
-  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px}
+  .mock .ms{font-size:.9rem;font-weight:600}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:26px 20px;border-top:1px solid var(--line)}
+  @media (max-width:600px){ header.hero{padding:26px 16px 22px} main{padding:20px 14px 50px} nav .wrap{padding:8px 12px} }
 </style>
 </head>
 <body>
-<header><div class="wrap">
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">IB Diploma Programme · Chemistry</div>
   <h1 id="siteTitle"></h1>
-  <p id="siteSub"></p>
-  <nav id="nav">
-    <a href="#schedule">Course schedule</a>
-    <a href="#notes">Notes &amp; checklists</a>
-    <a href="#slides">Slide decks</a>
-    <a href="#practice">Practice questions</a>
-    <a href="#mocks">Mock papers</a>
-    <a href="#simulators">Simulators</a>
-  </nav>
+  <p class="sub" id="siteSub"></p>
+  <div class="week" id="weekNow"></div>
+  <div class="stats" id="stats"></div>
 </div></header>
+<nav><div class="wrap" id="nav">
+  <a href="#schedule"><span class="ic">🗓️</span>Schedule</a>
+  <a href="#notes"><span class="ic">📝</span>Notes &amp; checklists</a>
+  <a href="#slides"><span class="ic">🖥️</span>Slide decks</a>
+  <a href="#practice"><span class="ic">✏️</span>Practice questions</a>
+  <a href="#mocks"><span class="ic">📄</span>Mock papers</a>
+  <a href="#simulators"><span class="ic">🧪</span>Simulators</a>
+</div></nav>
 
 <main class="wrap">
   <section id="schedule">
@@ -132,13 +181,13 @@
     <h2>Full mock papers</h2>
     <p class="lead">Complete practice papers in the IB format. Paper 1 has two parts in one sitting: 1A is multiple choice and 1B is data-based questions. Paper 2 has short-answer and extended-response questions. Time yourself and use the data booklet.</p>
     <div class="grid" id="mockList"></div>
-    <div class="card small" id="mockFolder"></div>
+    <div class="card small" id="mockFolder" style="margin-top:16px"></div>
   </section>
 
   <section id="simulators">
     <h2>Simulators</h2>
     <p class="lead">Interactive models to explore and practise with. They work on laptops, tablets and phones.</p>
-    <div class="grid" id="simList"></div>
+    <div class="simgrid" id="simList"></div>
   </section>
 </main>
 <footer id="foot"></footer>
@@ -423,14 +472,14 @@ const MOCKS = [
   ["SL Mock 1 · Paper 2 · 1 h 30 min", D("1fGqET4PBaIGO5BHsNTMmOW1Ix28gNiWggV-5WEWhsDA"), D("10yAKLqcEOl_D8K_ZHOIyRe8PQMf4tS7l8eRDaKNJlr0")]
 ];
 
-/* ---------- SIMULATORS ---------- ["Title", "link", "Topic", "Description"] */
+/* ---------- SIMULATORS ---------- ["Title", "link", "Topic", "Description", "picture"] */
 const SIMS = [
-  ["Ideal Gas Box", "simulators/ideal-gas-box.html", "S1.5 Ideal gases", "Squeeze, heat and fill a box of gas particles. Test pV = nRT and p₁V₁/T₁ = p₂V₂/T₂, plot your own graphs and watch the Maxwell–Boltzmann speed distribution."],
-  ["Bonding Lab", "simulators/bonding-lab.html", "S2 Models of bonding and structure", "See how electrons are transferred, shared or delocalised in ionic, covalent and metallic bonding, place substances on the bonding triangle, and explore the structures that result."],
-  ["Bonding Triangle Explorer", "simulators/bonding-triangle.html", "S2.4 From models to materials", "Pick any two elements and see where they land on the van Arkel–Ketelaar triangle, with mean electronegativity, Δχ and % ionic character."],
-  ["Neutralization Lab", "simulators/neutralization-lab.html", "R3.1 Proton transfer reactions", "Watch acids and bases swap partners to form salts, read the full, ionic and net ionic equations, then practise predicting the products."],
-  ["Voltaic and Electrolytic Cells", "simulators/cells.html", "R3.2 Electron transfer reactions", "Build voltaic cells from eight metal half-cells and electrolyse molten and aqueous electrolytes. Watch electrons move through the wire and ions move through the salt bridge and solution, with half-equations and (HL) E⦵cell and ΔG⦵."],
-  ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature or pressure, or by adding a catalyst. Watch the concentration–time graph and Q vs K respond."]
+  ["Ideal Gas Box", "simulators/ideal-gas-box.html", "S1.5 Ideal gases", "Squeeze, heat and fill a box of gas particles. Test pV = nRT and p₁V₁/T₁ = p₂V₂/T₂, plot your own graphs and watch the Maxwell–Boltzmann speed distribution.", "images/ideal-gas-box.jpg"],
+  ["Bonding Lab", "simulators/bonding-lab.html", "S2 Models of bonding and structure", "See how electrons are transferred, shared or delocalised in ionic, covalent and metallic bonding, place substances on the bonding triangle, and explore the structures that result.", "images/bonding-lab.jpg"],
+  ["Bonding Triangle Explorer", "simulators/bonding-triangle.html", "S2.4 From models to materials", "Pick any two elements and see where they land on the van Arkel–Ketelaar triangle, with mean electronegativity, Δχ and % ionic character.", "images/bonding-triangle.jpg"],
+  ["Neutralization Lab", "simulators/neutralization-lab.html", "R3.1 Proton transfer reactions", "Watch acids and bases swap partners to form salts, read the full, ionic and net ionic equations, then practise predicting the products.", "images/neutralization-lab.jpg"],
+  ["Voltaic and Electrolytic Cells", "simulators/cells.html", "R3.2 Electron transfer reactions", "Build voltaic cells from eight metal half-cells and electrolyse molten and aqueous electrolytes. Watch electrons move through the wire and ions move through the salt bridge and solution, with half-equations and (HL) E⦵cell and ΔG⦵.", "images/cells.jpg"],
+  ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature or pressure, or by adding a catalyst. Watch the concentration–time graph and Q vs K respond.", "images/lechatelier.jpg"]
 ];
 /* =====================================================================
    END OF EDIT AREA. You don't need to change anything below this line.
@@ -441,6 +490,11 @@ const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
 $("#siteTitle").textContent = SITE.title; $("#siteSub").textContent = SITE.subtitle;
 $("#foot").textContent = SITE.footer; document.title = SITE.title;
 
+
+const chip = c => `<span class="code ${/^S\d/.test(c)?"s":/^R\d/.test(c)?"r":"x"}">${esc(c)}</span>`;
+function thisWeek(rows){ const now=new Date(); let wk=0;
+  for(const r of rows){ if(typeof r==="string") continue; wk++; const st=new Date(r[0]+"T00:00:00"); if(now>=st && now<new Date(st.getTime()+7*864e5)) return {wk,topic:r[1]||"To be confirmed",a:r[2]==="A"}; }
+  return null; }
 /* tabs */
 const tabs = ["schedule","notes","slides","practice","mocks","simulators"];
 function showTab(){
@@ -448,7 +502,10 @@ function showTab(){
   tabs.forEach(id => $("#"+id).classList.toggle("active", id===t));
   document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href")==="#"+t));
 }
-addEventListener("hashchange", showTab); showTab();
+let navScroll=0;
+document.querySelectorAll("#nav a").forEach(a=>a.addEventListener("click",()=>{navScroll=window.scrollY;}));
+addEventListener("hashchange", ()=>{ showTab(); const navTop=document.querySelector("nav").offsetTop; window.scrollTo(0, Math.min(navScroll, navTop)); });
+showTab(); requestAnimationFrame(()=>window.scrollTo(0,0));
 
 /* schedule */
 const fmtDate = s => new Date(s+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
@@ -467,6 +524,9 @@ function renderSchedule(g){
 }
 document.querySelectorAll("#gradeSeg button").forEach(b => b.onclick = () => renderSchedule(b.dataset.g));
 renderSchedule("g11");
+$("#weekNow").innerHTML = [["Grade 11",G11],["Grade 12",G12]].map(([g,rows]) => { const w=thisWeek(rows);
+  return `<div class="wk-card"><div class="lbl">${g} · this week${w?` (week ${w.wk})`:""}</div><div class="t">${w?esc(w.topic):"No lessons scheduled this week"}</div>${w&&w.a?'<span class="asm">Assessment week</span>':""}</div>`; }).join("");
+$("#stats").innerHTML = [[SLIDES.reduce((n,t)=>n+t.decks.length,0),"slide decks"],[PACKS.length,"topics with question packs"],[MOCKS.filter(m=>m[1]).length,"mock papers"],[SIMS.length,"simulators"]].map(([n,l])=>`<span class="stat"><b>${n}</b>${l}</span>`).join("");
 
 /* slides */
 function renderSlides(q=""){
@@ -475,7 +535,7 @@ function renderSlides(q=""){
     const decks = t.decks.filter(d => !q || (t.code+" "+t.name+" "+d[0]).toLowerCase().includes(q));
     if (!decks.length) return;
     if (t.grade !== lastGrade) { html += `<h3 class="grade-h">${t.grade}</h3>`; lastGrade = t.grade; }
-    html += `<div class="card topic"><h3><span class="code">${t.code}</span>${esc(t.name)}${t.hl?'<span class="badge b-hl">HL</span>':""}</h3><ul>${
+    html += `<div class="card topic"><h3>${chip(t.code)}${esc(t.name)}${t.hl?'<span class="badge b-hl">HL</span>':""}</h3><ul>${
       decks.map(d => `<li><a href="${d[1]}" target="_blank" rel="noopener">${esc(d[0])}</a>${d[2]==="HL"?'<span class="badge b-hl">HL</span>':""}</li>`).join("")}</ul></div>`;
   });
   $("#slideList").innerHTML = html || `<p class="small">No decks match.</p>`;
@@ -487,13 +547,13 @@ const pk = (id, label, hl) => id === "-" ? "" : id
   ? `<a class="pk${hl?" hl":""}" href="${D(id)}" target="_blank" rel="noopener">${label}</a>`
   : `<span class="pk soon">${label}: coming soon</span>`;
 $("#folderLinks").innerHTML = `All packs in Google Drive: <a href="${FOLDERS.sl}" target="_blank" rel="noopener">SL folder</a> · <a href="${FOLDERS.hl}" target="_blank" rel="noopener">HL folder</a>`;
-$("#packList").innerHTML = `<div class="grid">${PACKS.map(p => `<div class="card topic"><h3><span class="code">${p[0]}</span>${esc(p[1])}</h3><div class="packs">${
+$("#packList").innerHTML = `<div class="grid">${PACKS.map(p => `<div class="card topic"><h3>${chip(p[0])}${esc(p[1])}</h3><div class="packs">${
   pk(p[2],"SL questions")+pk(p[3],"SL markscheme")+pk(p[4],"HL questions",1)+pk(p[5],"HL markscheme",1)}</div></div>`).join("")}</div>`;
 /* notes */
 function renderNotes(t){
   $("#noteList").innerHTML = NOTES.map(u => {
     const items = u.items.filter(i => !t || i[2]===t);
-    return items.length ? `<div class="card topic"><h3><span class="code">${u.code}</span>${esc(u.name)}</h3><ul>${items.map(i => `<li><a href="${i[1]}" target="_blank" rel="noopener">${esc(i[0])}</a> <span class="small">· ${i[2]}</span></li>`).join("")}</ul></div>` : "";
+    return items.length ? `<div class="card topic"><h3>${chip(u.code)}${esc(u.name)}</h3><ul>${items.map(i => `<li><a href="${i[1]}" target="_blank" rel="noopener">${esc(i[0])}</a> <span class="small">· ${i[2]}</span></li>`).join("")}</ul></div>` : "";
   }).join("");
   document.querySelectorAll("#noteFilter button").forEach(b => b.classList.toggle("on", b.dataset.t===t));
 }
@@ -501,13 +561,13 @@ document.querySelectorAll("#noteFilter button").forEach(b => b.onclick = () => r
 renderNotes("");
 
 /* mocks */
-$("#mockList").innerHTML = MOCKS.map(m => `<div class="card sim"><h3>${esc(m[0])}</h3>${
-  m[1] ? `<a class="btn" href="${m[1]}" target="_blank" rel="noopener">Question paper</a>` : `<span class="btn off">Coming soon</span>`}${
-  m[2] ? `<a href="${m[2]}" target="_blank" rel="noopener">Markscheme (Paper ${m[0].includes("Paper 2")?"2":"1"})</a>` : ""}</div>`).join("");
+$("#mockList").innerHTML = MOCKS.map(m => { const lvl=m[0].startsWith("HL")?"HL":"SL"; return `<div class="card mock"><span class="lvl ${lvl}">${lvl==="HL"?"Higher level":"Standard level"}</span><h3>📄 ${esc(m[0])}</h3>${
+  m[1] ? `<a class="btn" href="${m[1]}" target="_blank" rel="noopener">Open question paper</a>` : `<span class="btn off">Coming soon</span>`}${
+  m[2] ? `<a class="ms" href="${m[2]}" target="_blank" rel="noopener">Markscheme (Paper ${m[0].includes("Paper 2")?"2":"1"}) →</a>` : ""}</div>`; }).join("");
 $("#mockFolder").innerHTML = `Try the paper under timed conditions before you open the markscheme.`;
 
 /* simulators */
-$("#simList").innerHTML = SIMS.map(s => `<div class="card sim"><span class="tag">${esc(s[2])}</span><h3>${esc(s[0])}</h3><p class="small" style="margin:0">${esc(s[3])}</p><a class="btn" href="${s[1]}">Open simulator</a></div>`).join("");
+$("#simList").innerHTML = SIMS.map(s => `<a class="simcard" href="${s[1]}"><div class="thumb">${s[4]?`<img src="${s[4]}" alt="Screenshot of the ${esc(s[0])} simulator" loading="lazy">`:""}<span class="play">Open ▸</span></div><div class="body">${chip(s[2].split(" ")[0])}<h3>${esc(s[0])}</h3><p>${esc(s[3])}</p></div></a>`).join("");
 </script>
 </body>
 </html>
