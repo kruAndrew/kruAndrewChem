@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redox Rush: Oxidation State Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0e2a; --bg2:#12164a; --panel:#181d55; --panel2:#20266a; --line:#2f3787;
+  --text:#eef0ff; --muted:#a3a9e0; --cyan:#3ef0ff; --pink:#ff4fa3; --lime:#b6ff4a; --amber:#ffc94a; --red:#ff5d6c; --violet:#9b7bff;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(1200px 700px at 70% -10%,#2a1f7a 0%,transparent 60%),radial-gradient(900px 600px at -10% 110%,#0f4a6e 0%,transparent 55%),var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;min-height:100vh}
+body{padding:18px}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+h1,h2,h3,.disp{font-family:'Fredoka',sans-serif;letter-spacing:.3px}
+.wrap{max-width:1040px;margin:0 auto}
+.back{display:inline-block;margin:0 0 10px;font-weight:600;font-size:13px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--cyan)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo h1{margin:0;font-size:28px;background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo small{display:block;color:var(--muted);font-size:12px;font-family:'DM Sans'}
+.iconbtn{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}
+.iconbtn:hover{background:var(--panel2)}
+.card{background:linear-gradient(180deg,var(--panel),#141849);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.hidden{display:none!important}
+
+/* HOME */
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:center;margin-bottom:16px}
+.hero h2{font-size:34px;margin:0 0 8px;line-height:1.1}
+.hero p{color:var(--muted);margin:0 0 10px;line-height:1.5}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.mode{text-align:left;padding:18px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);transition:transform .15s,border-color .15s}
+.mode:hover{transform:translateY(-3px);border-color:var(--cyan)}
+.mode h3{margin:6px 0 6px;font-size:21px}
+.mode p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+.mode .tag{font-family:'JetBrains Mono';font-size:11px;padding:3px 8px;border-radius:99px;display:inline-block}
+.tag.c{background:#123f55;color:var(--cyan)} .tag.p{background:#4d1640;color:var(--pink)} .tag.h{background:#4a3a0e;color:var(--amber)}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.lvl{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;transition:border-color .15s,transform .15s}
+.lvl:hover{border-color:var(--lime);transform:translateY(-2px)}
+.lvl .n{font-family:'JetBrains Mono';color:var(--lime);font-size:12px}
+.lvl h4{margin:4px 0;font-family:'Fredoka';font-size:17px}
+.lvl p{margin:0 0 8px;font-size:12.5px;color:var(--muted);line-height:1.35;min-height:34px}
+.stars{color:var(--amber);letter-spacing:2px;font-size:15px}
+.stars .off{color:#3a4190}
+.best{font-size:11px;color:var(--muted);font-family:'JetBrains Mono'}
+
+/* HL box */
+.hlbox{border:2px solid var(--amber);border-radius:var(--r);background:linear-gradient(180deg,#2a2353,#1b1a4a);padding:16px 18px;position:relative}
+.hlbox .badge{position:absolute;top:-12px;left:16px;background:var(--amber);color:#2a1d00;font-family:'Fredoka';font-weight:700;padding:2px 12px;border-radius:99px;font-size:13px}
+.hlbox h3{margin:6px 0 8px;font-size:19px}
+.formula-eq{font-family:'JetBrains Mono';font-size:18px;background:#120f33;border-radius:10px;padding:10px 12px;margin:8px 0;color:var(--amber);text-align:center}
+.hlbox ul{margin:6px 0 0 0;padding-left:18px;color:#d7d9f7;font-size:14px;line-height:1.5}
+.cmp{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.cmp th,.cmp td{border-top:1px solid #3c3b78;padding:6px;text-align:left;vertical-align:top}
+.cmp th{color:var(--amber);font-weight:600}
+
+/* GAME HUD */
+.hud{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;margin-bottom:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;text-align:center;min-width:86px}
+.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.stat .v{font-family:'JetBrains Mono';font-size:20px;font-weight:700}
+.hudl,.hudr{display:flex;gap:10px}
+.reactor{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px}
+.reactor .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:flex;justify-content:space-between}
+.bar{height:14px;border-radius:99px;background:#0d1035;overflow:hidden;margin-top:6px;border:1px solid #2a3080}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--lime),var(--amber));transition:width .4s;box-shadow:0 0 14px var(--cyan)}
+.lives{display:flex;gap:4px;justify-content:center;margin-top:2px}
+.life{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,var(--cyan) 45%,#0a6b80);box-shadow:0 0 8px var(--cyan);font-size:9px;display:flex;align-items:center;justify-content:center;color:#003;font-weight:700}
+.life.lost{background:#262b6b;box-shadow:none;color:#4b52a8}
+.combo{font-family:'Fredoka';color:var(--pink);font-size:13px;height:16px}
+
+.stage{display:grid;grid-template-columns:1fr 230px;gap:14px}
+.qcard{position:relative;overflow:hidden}
+.qmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-family:'JetBrains Mono'}
+.formula{font-family:'Fredoka';font-size:58px;text-align:center;margin:18px 0 6px;letter-spacing:1px;text-shadow:0 0 22px rgba(62,240,255,.35)}
+.formula sub{font-size:.55em}
+.formula sup{font-size:.5em;color:var(--pink)}
+.prompt{text-align:center;color:var(--muted);margin-bottom:16px;font-size:14px}
+.parts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.part{background:var(--bg2);border:2px solid var(--line);border-radius:14px;padding:10px 12px;text-align:center;min-width:150px;transition:border-color .2s,background .2s}
+.part .sym{font-family:'Fredoka';font-size:22px}
+.part .sym sub{font-size:.6em}
+.part .mult{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);margin-left:4px}
+.step{display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:center}
+.step button{width:34px;height:38px;border-radius:10px;background:var(--panel2);font-size:20px;font-weight:700}
+.step button:hover{background:#2c3490}
+.step input{width:70px;height:38px;border-radius:10px;border:1px solid var(--line);background:#0c0f33;color:var(--text);text-align:center;font-family:'JetBrains Mono';font-size:18px}
+.step input:focus{outline:2px solid var(--cyan)}
+.part.ok{border-color:var(--lime);background:#16361f}
+.part.no{border-color:var(--red);background:#3a1426}
+.part .fb{font-family:'JetBrains Mono';font-size:13px;margin-top:6px;min-height:16px}
+.actions{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.btn{padding:12px 22px;border-radius:12px;font-weight:700;font-size:15px}
+.btn.go{background:linear-gradient(90deg,var(--cyan),#5aa7ff);color:#04122a}
+.btn.go:hover{filter:brightness(1.1)}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.sumbox{margin:14px auto 0;max-width:560px;font-family:'JetBrains Mono';font-size:14px;text-align:center;padding:8px;border-radius:10px;background:#0f1240;border:1px dashed var(--line)}
+.explain{margin-top:16px;background:#0f1240;border-radius:12px;padding:12px 14px;border-left:4px solid var(--cyan);font-size:14.5px;line-height:1.5}
+.explain .eq{font-family:'JetBrains Mono';color:var(--cyan);font-size:14px}
+.warn{color:var(--amber);font-size:12px}
+
+/* Mascot */
+.side{display:flex;flex-direction:column;gap:12px}
+.mascot{text-align:center}
+.bubble{background:#fff;color:#1a1a40;border-radius:14px;padding:10px 12px;font-size:14px;font-weight:500;position:relative;margin-bottom:10px;min-height:60px;display:flex;align-items:center;justify-content:center}
+.bubble:after{content:'';position:absolute;bottom:-9px;left:50%;margin-left:-9px;border:9px solid transparent;border-top-color:#fff;border-bottom:0}
+#oxi{width:130px;height:130px}
+#oxi .orbit{transform-origin:65px 65px;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bob{animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.mini{font-size:12.5px;color:var(--muted);line-height:1.45}
+.mini b{color:var(--text)}
+
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.pop{position:absolute;right:18px;top:40px;font-family:'Fredoka';font-size:28px;color:var(--lime);pointer-events:none;animation:pop 1.1s forwards}
+@keyframes pop{0%{opacity:0;transform:translateY(10px) scale(.8)}20%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-40px)}}
+.overload{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:40}
+.overload div{font-family:'Fredoka';font-size:56px;color:var(--amber);text-shadow:0 0 30px var(--amber);animation:boom 1.6s forwards;text-align:center}
+@keyframes boom{0%{transform:scale(.3);opacity:0}25%{transform:scale(1.1);opacity:1}80%{opacity:1}100%{transform:scale(1.3);opacity:0}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:30}
+
+/* FC */
+.lewis{width:100%;max-width:480px;max-height:300px;display:block;margin:6px auto 0;background:#0e1138;border-radius:14px;border:1px solid var(--line)}
+.atom-hit{cursor:pointer}
+.keypad{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.keypad button{width:52px;height:44px;border-radius:10px;background:var(--panel2);font-family:'JetBrains Mono';font-size:17px;font-weight:700;border:1px solid var(--line)}
+.keypad button:hover{border-color:var(--amber)}
+.pref{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.prefopt{background:var(--bg2);border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center}
+.prefopt:hover{border-color:var(--amber)}
+.prefopt.ok{border-color:var(--lime)} .prefopt.no{border-color:var(--red)}
+.prefopt .lab{font-family:'Fredoka';font-size:20px}
+.prefopt svg{width:100%;background:#0e1138;border-radius:10px}
+
+/* Results */
+.results{text-align:center}
+.results h2{font-size:38px;margin:4px 0}
+.bigstars{font-size:44px;color:var(--amber);letter-spacing:6px}
+.bigstars .off{color:#30377e}
+.rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:640px;margin:16px auto}
+.review{text-align:left;max-width:720px;margin:14px auto 0}
+.review .item{background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:14px;border-left:4px solid var(--red)}
+.review .item b{font-family:'Fredoka';font-size:17px}
+.review .item sub{font-size:.65em}
+
+/* Rules modal */
+.modal{position:fixed;inset:0;background:rgba(5,6,25,.75);display:flex;align-items:flex-start;justify-content:center;padding:30px 14px;z-index:50;overflow:auto}
+.modal .card{max-width:760px;width:100%}
+.rules ol{line-height:1.6;padding-left:20px;font-size:15px}
+.rules li b{color:var(--cyan)}
+.timer{font-family:'JetBrains Mono';font-size:20px;font-weight:700}
+.timer.low{color:var(--red)}
+
+@media (max-width:880px){
+  .hero,.stage{grid-template-columns:1fr}
+  .modes{grid-template-columns:1fr}
+  .levels{grid-template-columns:repeat(2,1fr)}
+  .hud{grid-template-columns:1fr}
+  .hudl,.hudr{justify-content:center}
+  .formula{font-size:44px}
+  .rgrid{grid-template-columns:repeat(2,1fr)}
+  .side{flex-direction:row;align-items:center}
+  #oxi{width:90px;height:90px}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+  <a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+  <div class="top">
+    <div class="logo" id="homeLogo" title="Home">
+      <svg width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="8" fill="#3ef0ff"/><ellipse cx="21" cy="21" rx="19" ry="7" fill="none" stroke="#ff4fa3" stroke-width="2"/><ellipse cx="21" cy="21" rx="19" ry="7" fill="none" stroke="#b6ff4a" stroke-width="2" transform="rotate(60 21 21)"/><ellipse cx="21" cy="21" rx="19" ry="7" fill="none" stroke="#ffc94a" stroke-width="2" transform="rotate(120 21 21)"/></svg>
+      <div><h1>Redox Rush</h1><small>Oxidation state arcade · IB DP Chemistry</small></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="iconbtn" id="rulesBtn">📘 Rules</button>
+      <button class="iconbtn" id="soundBtn">🔇 Sound off</button>
+      <button class="iconbtn hidden" id="quitBtn">✕ Quit run</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section id="home">
+    <div class="hero">
+      <div>
+        <h2>Keep the reactor charged.<br>Account for every electron.</h2>
+        <p>Assign the oxidation state of each atom. Correct answers charge the <b>Redox Reactor</b>. Fill it for an <b>OVERLOAD</b> bonus. Build streaks for score multipliers (×1.5 at 3, ×2 at 6, ×3 at 10). Every wrong answer costs one of your three electrons.</p>
+        <p class="mini">Type answers with the sign first, e.g. <b>+6</b>, <b>−2</b>, <b>0</b>. Fractions are fine where needed (<b>8/3</b>). Hints halve the points but switch on the Σ checker.</p>
+      </div>
+      <div class="card mascot">
+        <div class="bubble" id="homeBubble">Hi, I'm Oxi! I keep track of electrons. Pick a mode and let's balance some books.</div>
+        <div class="bob"><svg id="oxiHome" width="120" height="120" viewBox="0 0 130 130"></svg></div>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button class="mode" id="mCampaign"><span class="tag c">CAMPAIGN</span><h3>🎯 Level Run</h3><p>10 compounds from one level, 3 lives. Earn up to 3 stars per level. Pick a level below.</p></button>
+      <button class="mode" id="mBlitz"><span class="tag p">BLITZ · 60 s</span><h3>⚡ Electron Blitz</h3><p>Levels 1–3 mixed against the clock. +3 s per correct answer, −5 s per miss. How high can you go?</p></button>
+      <button class="mode" id="mHL"><span class="tag h">HL ONLY</span><h3>🧪 Formal Charge Lab</h3><p>Assign formal charges on Lewis structures, then judge which structure is preferred.</p></button>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin:0 0 12px">Campaign levels</h3>
+      <div class="levels" id="levelGrid"></div>
+    </div>
+
+    <div class="hlbox" id="hlHome">
+      <span class="badge">HL</span>
+      <h3>Formal charge: the other way of counting electrons</h3>
+      <div class="formula-eq">FC = V − N − ½B</div>
+      <ul>
+        <li><b>V</b> = valence electrons of the free atom &nbsp;·&nbsp; <b>N</b> = non-bonding (lone-pair) electrons on the atom &nbsp;·&nbsp; <b>B</b> = electrons in bonds to the atom</li>
+        <li>The formal charges in a structure add up to the overall charge of the species.</li>
+        <li>Preferred Lewis structure: formal charges as close to zero as possible; any negative FC on the most electronegative atom.</li>
+      </ul>
+      <table class="cmp">
+        <tr><th></th><th>Oxidation state</th><th>Formal charge (HL)</th></tr>
+        <tr><td>Bonding electrons go…</td><td>all to the more electronegative atom (as if 100% ionic)</td><td>shared equally (as if 100% covalent)</td></tr>
+        <tr><td>Carbon in CO</td><td>+2</td><td>−1</td></tr>
+        <tr><td>Used for</td><td>redox: tracking electron transfer</td><td>choosing between Lewis structures</td></tr>
+      </table>
+      <p class="mini" style="margin:10px 0 0">Neither number is a "real" charge: both are bookkeeping models built on opposite extreme assumptions. A neat TOK prompt.</p>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="hidden">
+    <div class="hud">
+      <div class="hudl">
+        <div class="stat"><div class="k">Score</div><div class="v" id="hScore">0</div></div>
+        <div class="stat" id="livesStat"><div class="k">Electrons</div><div class="lives" id="hLives"></div></div>
+        <div class="stat hidden" id="timerStat"><div class="k">Time</div><div class="timer" id="hTime">60.0</div></div>
+      </div>
+      <div class="reactor">
+        <div class="k"><span>⚛ Redox Reactor</span><span id="hMult">×1</span></div>
+        <div class="bar"><i id="hBar"></i></div>
+        <div class="combo" id="hCombo"></div>
+      </div>
+      <div class="hudr">
+        <div class="stat"><div class="k">Streak</div><div class="v" id="hStreak">0</div></div>
+        <div class="stat"><div class="k">Q</div><div class="v" id="hQ">1/10</div></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="card qcard" id="qcard"></div>
+      <div class="side">
+        <div class="card mascot" style="flex:1">
+          <div class="bubble" id="bubble">Let's go!</div>
+          <div class="bob"><svg id="oxi" viewBox="0 0 130 130"></svg></div>
+        </div>
+        <div class="card mini" id="sideInfo"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="hidden">
+    <div class="card results" id="resCard"></div>
+  </section>
+</div>
+
+<div class="modal hidden" id="rulesModal">
+  <div class="card rules">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">📘 Oxidation state rules</h2><button class="iconbtn" id="rulesClose">✕ Close</button></div>
+    <ol>
+      <li><b>Uncombined elements</b> are 0 (Na, Cl₂, S₈, O₂).</li>
+      <li><b>Monatomic ions</b>: oxidation state = ion charge (Fe³⁺ → +3).</li>
+      <li><b>Sum rule</b>: oxidation states add up to 0 in a neutral compound, or to the ion charge in a polyatomic ion.</li>
+      <li><b>Fluorine</b> is always −1 (most electronegative element).</li>
+      <li><b>Oxygen</b> is usually −2. Exceptions: peroxides (O₂²⁻, −1), superoxides (O₂⁻, −½), bonded to F (OF₂, +2).</li>
+      <li><b>Hydrogen</b> is usually +1, but −1 in metal hydrides (NaH, LiAlH₄).</li>
+      <li><b>Group 1</b> +1, <b>Group 2</b> +2, <b>Al</b> +3 in compounds.</li>
+      <li><b>Halogens</b> are usually −1, but positive when bonded to O or to a more electronegative halogen (ClO⁻, ICl).</li>
+      <li><b>Organic carbon, atom by atom</b>: each bond to a more electronegative atom +1, each C–H −1, each C–C 0.</li>
+      <li><b>Notation</b>: oxidation states put the sign first (+6); ion charges put it last (2−). Names use Roman numerals: iron(III) oxide.</li>
+    </ol>
+    <div class="hlbox" style="margin-top:18px">
+      <span class="badge">HL</span>
+      <h3>Formal charge</h3>
+      <div class="formula-eq">FC = V − N − ½B</div>
+      <ul><li>Lone pairs count fully to the atom; bonding pairs are split equally.</li><li>ΣFC = overall charge.</li><li>Prefer structures with FCs closest to zero, and negative FCs on the most electronegative atoms.</li></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== QUESTION BANKS =====
+function q(f, charge, parts, note, hint){
+  return { f, charge, parts: parts.map(p => ({ el:p[0], n:p[1], ox:p[2], label:p[3]||null })), note:note||'', hint:hint||'' };
+}
+const LEVELS = [
+  { id:1, name:'Rookie Reactor', blurb:'Binary compounds, elements & simple ions', base:100, hint:'Start with the "fixed" elements: group 1 = +1, group 2 = +2, Al = +3, F = −1, O usually −2, H usually +1, halides usually −1. Then make the total equal the overall charge.' },
+  { id:2, name:'Ion Wrangler', blurb:'Oxyanions, acids & polyatomic ions', base:150, hint:'For an ion, the oxidation states add up to the ion charge, not zero. Assign O (−2) and H (+1) first, then solve for the central atom.' },
+  { id:3, name:'Rule Breakers', blurb:'Peroxides, hydrides, fluorine & interhalogens', base:200, hint:'Ask: is there an O–O bond (peroxide/superoxide)? Is H bonded to a metal (hydride, H −1)? Is O bonded to F? F always wins: it is always −1. Between halogens, the more electronegative one is negative.' },
+  { id:4, name:'Carbon Chameleon', blurb:'Individual carbon atoms in organic molecules', base:200, hint:'Bond-counting for each C: every bond to a more electronegative atom (O, N, Cl) counts +1 (a double bond counts 2), every C–H counts −1, C–C counts 0.' },
+  { id:5, name:'Boss Lab', blurb:'Mixed valence, complexes & fractional states', base:250, hint:'Fractions are allowed here (type e.g. 8/3). Treat ligands as units: NH₃ and H₂O are neutral, CN⁻ is C +2 / N −3, Cl⁻ is −1. Mixed-oxide "sites" have whole-number states that average out.' },
+];
+
+const OS_BANK = {
+1: [
+  q('NaCl',0,[['Na',1,1],['Cl',1,-1]]),
+  q('MgO',0,[['Mg',1,2],['O',1,-2]]),
+  q('Al2O3',0,[['Al',2,3],['O',3,-2]]),
+  q('H2O',0,[['H',2,1],['O',1,-2]]),
+  q('CO2',0,[['C',1,4],['O',2,-2]]),
+  q('CO',0,[['C',1,2],['O',1,-2]]),
+  q('SO2',0,[['S',1,4],['O',2,-2]]),
+  q('SO3',0,[['S',1,6],['O',3,-2]]),
+  q('NH3',0,[['N',1,-3],['H',3,1]]),
+  q('CH4',0,[['C',1,-4],['H',4,1]]),
+  q('FeCl3',0,[['Fe',1,3],['Cl',3,-1]],'Name: iron(III) chloride — the Roman numeral is the oxidation state.'),
+  q('FeCl2',0,[['Fe',1,2],['Cl',2,-1]],'Name: iron(II) chloride.'),
+  q('CuO',0,[['Cu',1,2],['O',1,-2]],'Name: copper(II) oxide.'),
+  q('Cu2O',0,[['Cu',2,1],['O',1,-2]],'Name: copper(I) oxide.'),
+  q('MnO2',0,[['Mn',1,4],['O',2,-2]],'Name: manganese(IV) oxide.'),
+  q('PCl5',0,[['P',1,5],['Cl',5,-1]]),
+  q('PCl3',0,[['P',1,3],['Cl',3,-1]]),
+  q('N2O',0,[['N',2,1],['O',1,-2]]),
+  q('NO2',0,[['N',1,4],['O',2,-2]]),
+  q('NO',0,[['N',1,2],['O',1,-2]]),
+  q('H2S',0,[['H',2,1],['S',1,-2]]),
+  q('CaCl2',0,[['Ca',1,2],['Cl',2,-1]]),
+  q('P4O10',0,[['P',4,5],['O',10,-2]]),
+  q('Fe2O3',0,[['Fe',2,3],['O',3,-2]],'Name: iron(III) oxide.'),
+  q('Cl2',0,[['Cl',2,0]],'Uncombined element: oxidation state is always 0.'),
+  q('S8',0,[['S',8,0]],'Uncombined element: oxidation state is always 0.'),
+  q('ZnS',0,[['Zn',1,2],['S',1,-2]]),
+  q('PbO2',0,[['Pb',1,4],['O',2,-2]],'Name: lead(IV) oxide.'),
+  q('SiO2',0,[['Si',1,4],['O',2,-2]]),
+  q('Mg3N2',0,[['Mg',3,2],['N',2,-3]]),
+  q('Fe',3,[['Fe',1,3]],'Monatomic ion: oxidation state = ion charge. Note the notation: ion charge 3+, oxidation state +3.'),
+  q('S',-2,[['S',1,-2]],'Monatomic ion: oxidation state = ion charge.'),
+],
+2: [
+  q('SO4',-2,[['S',1,6],['O',4,-2]]),
+  q('SO3',-2,[['S',1,4],['O',3,-2]]),
+  q('NO3',-1,[['N',1,5],['O',3,-2]]),
+  q('NO2',-1,[['N',1,3],['O',2,-2]]),
+  q('MnO4',-1,[['Mn',1,7],['O',4,-2]],'Manganate(VII) — the purple oxidising agent.'),
+  q('MnO4',-2,[['Mn',1,6],['O',4,-2]],'Manganate(VI): same atoms as MnO₄⁻, different charge, different oxidation state.'),
+  q('Cr2O7',-2,[['Cr',2,6],['O',7,-2]],'Dichromate(VI).'),
+  q('CrO4',-2,[['Cr',1,6],['O',4,-2]],'Chromate(VI) — same oxidation state as dichromate: their interconversion is not redox.'),
+  q('PO4',-3,[['P',1,5],['O',4,-2]]),
+  q('ClO4',-1,[['Cl',1,7],['O',4,-2]],'Chlorate(VII).'),
+  q('ClO3',-1,[['Cl',1,5],['O',3,-2]],'Chlorate(V).'),
+  q('ClO2',-1,[['Cl',1,3],['O',2,-2]],'Chlorate(III).'),
+  q('ClO',-1,[['Cl',1,1],['O',1,-2]],'Chlorate(I) — the active ion in bleach.'),
+  q('NH4',1,[['N',1,-3],['H',4,1]]),
+  q('CO3',-2,[['C',1,4],['O',3,-2]]),
+  q('HCO3',-1,[['H',1,1],['C',1,4],['O',3,-2]]),
+  q('H2SO4',0,[['H',2,1],['S',1,6],['O',4,-2]]),
+  q('HNO3',0,[['H',1,1],['N',1,5],['O',3,-2]]),
+  q('KMnO4',0,[['K',1,1],['Mn',1,7],['O',4,-2]]),
+  q('K2Cr2O7',0,[['K',2,1],['Cr',2,6],['O',7,-2]]),
+  q('VO2',1,[['V',1,5],['O',2,-2]],'Dioxovanadium(V) ion.'),
+  q('VO',2,[['V',1,4],['O',1,-2]],'Oxovanadium(IV) ion.'),
+  q('IO3',-1,[['I',1,5],['O',3,-2]]),
+  q('BrO3',-1,[['Br',1,5],['O',3,-2]]),
+  q('H3PO4',0,[['H',3,1],['P',1,5],['O',4,-2]]),
+  q('HPO4',-2,[['H',1,1],['P',1,5],['O',4,-2]]),
+  q('S2O3',-2,[['S',2,2],['O',3,-2]],'+2 is the AVERAGE. The two S atoms are not equivalent: bond-counting gives the central S +4 and the terminal S 0.'),
+  q('Fe(OH)3',0,[['Fe',1,3],['O',3,-2],['H',3,1]]),
+  q('Ca(NO3)2',0,[['Ca',1,2],['N',2,5],['O',6,-2]]),
+  q('(NH4)2SO4',0,[['N',2,-3],['H',8,1],['S',1,6],['O',4,-2]],'Two different polyatomic ions — each one sums to its own charge (NH₄⁺ and SO₄²⁻).'),
+],
+3: [
+  q('H2O2',0,[['H',2,1],['O',2,-1]],'Peroxide (O–O bond): O is −1.','Look for an O–O bond.'),
+  q('Na2O2',0,[['Na',2,1],['O',2,-1]],'Sodium peroxide contains the O₂²⁻ ion: O is −1.'),
+  q('BaO2',0,[['Ba',1,2],['O',2,-1]],'Barium peroxide (O₂²⁻): O is −1.'),
+  q('NaH',0,[['Na',1,1],['H',1,-1]],'Metal hydride: H is −1.'),
+  q('CaH2',0,[['Ca',1,2],['H',2,-1]],'Metal hydride: H is −1.'),
+  q('MgH2',0,[['Mg',1,2],['H',2,-1]],'Metal hydride: H is −1.'),
+  q('LiAlH4',0,[['Li',1,1],['Al',1,3],['H',4,-1]],'Lithium aluminium hydride: hydride H is −1.'),
+  q('NaBH4',0,[['Na',1,1],['B',1,3],['H',4,-1]],'H (2.2) is more electronegative than B (2.0), so H is −1.'),
+  q('OF2',0,[['O',1,2],['F',2,-1]],'F is always −1, which forces O to +2.'),
+  q('O2F2',0,[['O',2,1],['F',2,-1]],'F is always −1, so each O is +1.'),
+  q('KO2',0,[['K',1,1],['O',2,-0.5]],'Superoxide ion O₂⁻: each O is −½.','Fractions are allowed: −1/2 or −0.5.'),
+  q('ICl',0,[['I',1,1],['Cl',1,-1]],'Cl is more electronegative than I, so Cl takes −1.'),
+  q('ICl3',0,[['I',1,3],['Cl',3,-1]]),
+  q('ClF3',0,[['Cl',1,3],['F',3,-1]],'F beats Cl: here chlorine is positive.'),
+  q('BrF5',0,[['Br',1,5],['F',5,-1]]),
+  q('IF7',0,[['I',1,7],['F',7,-1]]),
+  q('XeF2',0,[['Xe',1,2],['F',2,-1]]),
+  q('XeF4',0,[['Xe',1,4],['F',4,-1]]),
+  q('XeO3',0,[['Xe',1,6],['O',3,-2]]),
+  q('SF6',0,[['S',1,6],['F',6,-1]]),
+  q('HOCl',0,[['H',1,1],['O',1,-2],['Cl',1,1]],'Chloric(I) acid: O is more electronegative than Cl, so Cl is +1.'),
+  q('SOCl2',0,[['S',1,4],['O',1,-2],['Cl',2,-1]]),
+  q('NH2OH',0,[['N',1,-1],['H',3,1],['O',1,-2]],'Hydroxylamine.'),
+  q('N2H4',0,[['N',2,-2],['H',4,1]],'Hydrazine.'),
+  q('Cl2O7',0,[['Cl',2,7],['O',7,-2]]),
+],
+4: [
+  q('CH3OH',0,[['C',1,-2],['H',4,1],['O',1,-2]],'Methanol. Bond-count: 3 C–H (−3) + 1 C–O (+1) = −2.'),
+  q('HCHO',0,[['H',2,1],['C',1,0],['O',1,-2]],'Methanal. 2 C–H (−2) + C=O (+2) = 0.'),
+  q('HCOOH',0,[['H',2,1],['C',1,2],['O',2,-2]],'Methanoic acid. 1 C–H (−1) + C=O (+2) + C–O (+1) = +2.'),
+  q('C2H6',0,[['C',2,-3],['H',6,1]]),
+  q('C2H4',0,[['C',2,-2],['H',4,1]]),
+  q('C2H2',0,[['C',2,-1],['H',2,1]]),
+  q('CH3Cl',0,[['C',1,-2],['H',3,1],['Cl',1,-1]]),
+  q('CH2Cl2',0,[['C',1,0],['H',2,1],['Cl',2,-1]]),
+  q('CHCl3',0,[['C',1,2],['H',1,1],['Cl',3,-1]]),
+  q('CCl4',0,[['C',1,4],['Cl',4,-1]]),
+  q('CH3–CHO',0,[['C',1,-3,'C in CH3'],['C',1,1,'C in CHO'],['H',4,1],['O',1,-2]],'Ethanal. CH₃: 3 C–H = −3. CHO: 1 C–H (−1) + C=O (+2) = +1. Average −1, but the atoms are different!'),
+  q('CH3–CH2–OH',0,[['C',1,-3,'C in CH3'],['C',1,-1,'C in CH2OH'],['H',6,1],['O',1,-2]],'Ethanol. CH₂OH: 2 C–H (−2) + C–O (+1) = −1. Oxidising ethanol → ethanal → ethanoic acid takes this carbon −1 → +1 → +3.'),
+  q('CH3–COOH',0,[['C',1,-3,'C in CH3'],['C',1,3,'C in COOH'],['H',4,1],['O',2,-2]],'Ethanoic acid. COOH: C=O (+2) + C–O (+1) = +3.'),
+  q('CH3–CO–CH3',0,[['C',2,-3,'C in each CH3'],['C',1,2,'C in C=O'],['H',6,1],['O',1,-2]],'Propanone. The C=O carbon: C=O (+2), two C–C (0) = +2.'),
+  q('HOOC–COOH',0,[['C',2,3],['H',2,1],['O',4,-2]],'Ethanedioic (oxalic) acid.'),
+  q('C2O4',-2,[['C',2,3],['O',4,-2]],'Ethanedioate (oxalate) ion.'),
+  q('CH3–CH2–CH3',0,[['C',2,-3,'C in each CH3'],['C',1,-2,'C in CH2'],['H',8,1]],'Propane: overall average −8/3, but each real carbon has a whole-number state.'),
+  q('CH3–CH=CH2',0,[['C',1,-3,'C in CH3'],['C',1,-1,'C in =CH–'],['C',1,-2,'C in =CH2'],['H',6,1]],'Propene.'),
+  q('CH3–CH2–Cl',0,[['C',1,-3,'C in CH3'],['C',1,-1,'C in CH2Cl'],['H',5,1],['Cl',1,-1]],'Chloroethane.'),
+  q('HCN',0,[['H',1,1],['C',1,2],['N',1,-3]],'C–H (−1) + C≡N (+3) = +2.'),
+  q('C6H12O6',0,[['C',6,0],['H',12,1],['O',6,-2]],'Glucose: the AVERAGE carbon is 0 (individual carbons range from −1 to +1).'),
+  q('CO(NH2)2',0,[['C',1,4],['O',1,-2],['N',2,-3],['H',4,1]],'Urea.'),
+],
+5: [
+  q('Fe3O4',0,[['Fe',3,8/3],['O',4,-2]],'Average +8/3. Magnetite is really FeO·Fe₂O₃: one Fe(II) and two Fe(III).','Fractions are allowed: type 8/3.'),
+  q('Fe3O4',0,[['Fe',1,2,'Fe site A'],['Fe',2,3,'Fe site B'],['O',4,-2]],'Magnetite = FeO·Fe₂O₃: one Fe(II) site, two Fe(III) sites. Average +8/3.','Think of it as FeO + Fe₂O₃ stuck together.'),
+  q('Pb3O4',0,[['Pb',2,2,'Pb site A'],['Pb',1,4,'Pb site B'],['O',4,-2]],'Red lead = 2PbO·PbO₂: two Pb(II) and one Pb(IV).','Think of it as 2PbO + PbO₂.'),
+  q('Mn3O4',0,[['Mn',3,8/3],['O',4,-2]],'Average +8/3 (one Mn(II), two Mn(III)).'),
+  q('S4O6',-2,[['S',2,0,'bridging S (–S–S–)'],['S',2,5,'terminal S (in SO3)'],['O',6,-2]],'Tetrathionate, ⁻O₃S–S–S–SO₃⁻. Average +2.5; the S–S bonds count 0 by bond-counting.','Bridging S atoms are bonded only to other S atoms.'),
+  q('S4O6',-2,[['S',4,2.5],['O',6,-2]],'Average +5/2. Formed when iodine oxidises thiosulfate (average +2 → +2.5).'),
+  q('K4[Fe(CN)6]',0,[['K',4,1],['Fe',1,2],['C',6,2],['N',6,-3]],'Hexacyanoferrate(II). Treat each CN⁻ as a unit: C +2, N −3.'),
+  q('K3[Fe(CN)6]',0,[['K',3,1],['Fe',1,3],['C',6,2],['N',6,-3]],'Hexacyanoferrate(III).'),
+  q('[Ni(CN)4]',-2,[['Ni',1,2],['C',4,2],['N',4,-3]]),
+  q('[Cu(NH3)4]',2,[['Cu',1,2],['N',4,-3],['H',12,1]],'NH₃ is a neutral ligand, so Cu carries the whole 2+ charge.'),
+  q('[Co(NH3)6]Cl3',0,[['Co',1,3],['N',6,-3],['H',18,1],['Cl',3,-1]]),
+  q('[Fe(H2O)6]',3,[['Fe',1,3],['H',12,1],['O',6,-2]],'H₂O is a neutral ligand.'),
+  q('[CuCl4]',-2,[['Cu',1,2],['Cl',4,-1]]),
+  q('Na2[Zn(OH)4]',0,[['Na',2,1],['Zn',1,2],['O',4,-2],['H',4,1]]),
+  q('NaN3',0,[['Na',1,1],['N',3,-1/3]],'Azide ion N₃⁻: average −1/3.','Fractions are allowed: type −1/3.'),
+  q('C3O2',0,[['C',3,4/3],['O',2,-2]],'Carbon suboxide O=C=C=C=O: average +4/3 (end carbons +2, central carbon 0).'),
+],
+};
+
+// ===== FORMAL CHARGE (HL) =====
+// atoms: [el, x, y, lonePairs]; bonds: [a, b, order]
+const VALENCE = { H:1, B:3, C:4, N:5, O:6, F:7, P:5, S:6, Cl:7 };
+function M(name, f, charge, atoms, bonds){ return { name, f, charge, atoms: atoms.map(a=>({el:a[0],x:a[1],y:a[2],lp:a[3]||0})), bonds }; }
+const FC_BANK = [
+  M('carbon monoxide','CO',0,[['C',130,110,1],['O',230,110,1]],[[0,1,3]]),
+  M('cyanide ion','CN',-1,[['C',130,110,1],['N',230,110,1]],[[0,1,3]]),
+  M('hydroxide ion','OH',-1,[['O',150,110,3],['H',240,110]],[[0,1,1]]),
+  M('oxonium ion','H3O',1,[['O',180,95,1],['H',105,135],['H',255,135],['H',180,180]],[[0,1,1],[0,2,1],[0,3,1]]),
+  M('ammonium ion','NH4',1,[['N',180,110],['H',180,35],['H',180,185],['H',105,110],['H',255,110]],[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]),
+  M('amide ion','NH2',-1,[['N',180,90,2],['H',115,150],['H',245,150]],[[0,1,1],[0,2,1]]),
+  M('tetrafluoroborate ion','BF4',-1,[['B',180,110],['F',180,38,3],['F',180,182,3],['F',105,110,3],['F',255,110,3]],[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]),
+  M('hydrogen cyanide','HCN',0,[['H',80,110],['C',165,110],['N',265,110,1]],[[0,1,1],[1,2,3]]),
+  M('ozone','O3',0,[['O',90,140,2],['O',180,85,1],['O',270,140,3]],[[0,1,2],[1,2,1]]),
+  M('nitronium ion','NO2',1,[['O',90,110,2],['N',180,110,0],['O',270,110,2]],[[0,1,2],[1,2,2]]),
+  M('nitrate ion','NO3',-1,[['N',180,115],['O',180,40,2],['O',105,165,3],['O',255,165,3]],[[0,1,2],[0,2,1],[0,3,1]]),
+  M('carbonate ion','CO3',-2,[['C',180,115],['O',180,40,2],['O',105,165,3],['O',255,165,3]],[[0,1,2],[0,2,1],[0,3,1]]),
+  M('sulfate ion (two S=O)','SO4',-2,[['S',180,110],['O',180,38,2],['O',180,182,2],['O',105,110,3],['O',255,110,3]],[[0,1,2],[0,2,2],[0,3,1],[0,4,1]]),
+  M('phosphate ion (one P=O)','PO4',-3,[['P',180,110],['O',180,38,2],['O',180,182,3],['O',105,110,3],['O',255,110,3]],[[0,1,2],[0,2,1],[0,3,1],[0,4,1]]),
+  M('thiocyanate ion','SCN',-1,[['S',90,110,2],['C',180,110,0],['N',270,110,2]],[[0,1,2],[1,2,2]]),
+  M('sulfur dioxide (two S=O)','SO2',0,[['S',180,85,1],['O',105,140,2],['O',255,140,2]],[[0,1,2],[0,2,2]]),
+  M('dinitrogen monoxide','N2O',0,[['N',90,110,1],['N',180,110,0],['O',270,110,3]],[[0,1,3],[1,2,1]]),
+  M('carbon dioxide','CO2',0,[['O',90,110,2],['C',180,110,0],['O',270,110,2]],[[0,1,2],[1,2,2]]),
+];
+const PREF_BANK = [
+  { name:'carbon dioxide', f:'CO2', charge:0, best:0,
+    A: M('','CO2',0,[['O',90,110,2],['C',180,110,0],['O',270,110,2]],[[0,1,2],[1,2,2]]),
+    B: M('','CO2',0,[['O',90,110,1],['C',180,110,0],['O',270,110,3]],[[0,1,3],[1,2,1]]),
+    why:'Structure A has every formal charge = 0. B separates charge (+1 on one O, −1 on the other) for no gain.' },
+  { name:'dinitrogen monoxide', f:'N2O', charge:0, best:1,
+    A: M('','N2O',0,[['N',90,110,2],['N',180,110,0],['O',270,110,2]],[[0,1,2],[1,2,2]]),
+    B: M('','N2O',0,[['N',90,110,1],['N',180,110,0],['O',270,110,3]],[[0,1,3],[1,2,1]]),
+    why:'Both have FCs of magnitude 0 and 1. Tie-breaker: the negative formal charge should sit on the most electronegative atom. In B the −1 is on O; in A it is on N. So B is preferred.' },
+  { name:'sulfate ion', f:'SO4', charge:-2, best:1,
+    A: M('','SO4',-2,[['S',180,110],['O',180,38,3],['O',180,182,3],['O',105,110,3],['O',255,110,3]],[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]),
+    B: M('','SO4',-2,[['S',180,110],['O',180,38,2],['O',180,182,2],['O',105,110,3],['O',255,110,3]],[[0,1,2],[0,2,2],[0,3,1],[0,4,1]]),
+    why:'A (octet S) puts +2 on S and −1 on every O. B (expanded octet) has S = 0 and only two O at −1, so by the formal-charge criterion B is preferred. TOK note: quantum-chemical calculations suggest the real bonding is closer to A plus strong ionic character, so this is a model with limits.' },
+  { name:'cyanate ion', f:'OCN', charge:-1, best:1,
+    A: M('','OCN',-1,[['O',90,110,2],['C',180,110,0],['N',270,110,2]],[[0,1,2],[1,2,2]]),
+    B: M('','OCN',-1,[['O',90,110,3],['C',180,110,0],['N',270,110,1]],[[0,1,1],[1,2,3]]),
+    why:'Both structures carry a single −1. In B it sits on O, the most electronegative atom, so B is preferred.' },
+  { name:'thiocyanate ion', f:'SCN', charge:-1, best:0,
+    A: M('','SCN',-1,[['S',90,110,2],['C',180,110,0],['N',270,110,2]],[[0,1,2],[1,2,2]]),
+    B: M('','SCN',-1,[['S',90,110,3],['C',180,110,0],['N',270,110,1]],[[0,1,1],[1,2,3]]),
+    why:'Both carry a single −1. N (3.0) is more electronegative than S (2.6), so A (−1 on N) is preferred by the formal-charge rules.' },
+];
+
+function formalCharges(mol){
+  const bondSum = mol.atoms.map(()=>0);
+  mol.bonds.forEach(([a,b,o])=>{ bondSum[a]+=o; bondSum[b]+=o; });
+  return mol.atoms.map((at,i)=> VALENCE[at.el] - 2*at.lp - bondSum[i]);
+}
+
+if (typeof module !== 'undefined') module.exports = { LEVELS, OS_BANK, FC_BANK, PREF_BANK, formalCharges, VALENCE };
+
+</script>
+<script>
+// ========= UTIL =========
+const $ = id => document.getElementById(id);
+const MINUS = '−';
+function fmtF(s){ return s.replace(/([A-Za-z\)\]])(\d+)/g,'$1<sub>$2</sub>'); }
+function fmtCharge(c){ if(!c) return ''; const m=Math.abs(c); return '<sup>'+(m===1?'':m)+(c>0?'+':MINUS)+'</sup>'; }
+function chargeText(c){ if(!c) return '0'; const m=Math.abs(c); return (m===1?'':m)+(c>0?'+':MINUS); }
+function fmtOx(v){
+  if(Math.abs(v)<1e-9) return '0';
+  const s = v>0?'+':MINUS, a=Math.abs(v);
+  for(const d of [1,2,3,4,6]){ const n=a*d; if(Math.abs(n-Math.round(n))<1e-6) return s+(d===1?Math.round(n):Math.round(n)+'/'+d); }
+  return s+a.toFixed(2);
+}
+function parseOx(raw){
+  let s=(raw||'').trim().replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(/^\+/,'+');
+  if(!s) return {empty:true};
+  if(/^\d+(\.\d+)?[+-]$/.test(s)) return {signLast:true};
+  let m;
+  if((m=s.match(/^([+-]?)(\d+)\/(\d+)$/))){ const v=(+m[2])/(+m[3]); if(!+m[3]) return {bad:true}; return {v: m[1]==='-'?-v:v}; }
+  if(/^[+-]?(\d+\.?\d*|\.\d+)$/.test(s)) return {v: parseFloat(s)};
+  return {bad:true};
+}
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem('redoxrush:'+k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem('redoxrush:'+k,JSON.stringify(v)); }catch(e){} }
+};
+
+// ========= SOUND =========
+let soundOn=false, actx=null;
+function beep(freqs,dur=0.09,type='sine',gain=0.07){
+  if(!soundOn) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    let t=actx.currentTime;
+    freqs.forEach(f=>{ const o=actx.createOscillator(),g=actx.createGain(); o.type=type;o.frequency.value=f; g.gain.setValueAtTime(gain,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur); t+=dur*0.8; });
+  }catch(e){}
+}
+const sfx = { ok:()=>beep([660,880,1175],0.09,'triangle'), no:()=>beep([220,160],0.16,'sawtooth',0.05), boom:()=>beep([523,659,784,1047,1319],0.12,'square',0.05), click:()=>beep([440],0.04,'sine',0.03) };
+
+// ========= MASCOT =========
+let oxiN=0;
+function oxiSVG(mood){ const gid='og'+(++oxiN);
+  const mouth = mood==='happy' ? '<path d="M50 76 Q65 92 80 76" stroke="#1a1040" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    : mood==='sad' ? '<path d="M52 84 Q65 72 78 84" stroke="#1a1040" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    : mood==='wow' ? '<ellipse cx="65" cy="80" rx="7" ry="9" fill="#1a1040"/>'
+    : '<path d="M53 79 Q65 86 77 79" stroke="#1a1040" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  const eyes = mood==='sad' ? '<path d="M45 58 l12 4 M85 58 l-12 4" stroke="#1a1040" stroke-width="4" stroke-linecap="round"/>' : '';
+  return `<defs><radialGradient id="${gid}" cx="38%" cy="32%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#7ff7ff"/><stop offset="1" stop-color="#1a8fb8"/></radialGradient></defs>
+  <g class="orbit"><ellipse cx="65" cy="65" rx="60" ry="20" fill="none" stroke="#ff4fa3" stroke-width="2.5" opacity=".8"/><circle cx="125" cy="65" r="5" fill="#ff4fa3"/></g>
+  <circle cx="65" cy="65" r="38" fill="url(#${gid})"/>
+  ${eyes}<circle cx="52" cy="62" r="6" fill="#1a1040"/><circle cx="78" cy="62" r="6" fill="#1a1040"/><circle cx="54" cy="60" r="2" fill="#fff"/><circle cx="80" cy="60" r="2" fill="#fff"/>
+  <circle cx="42" cy="74" r="5" fill="#ff8fc8" opacity=".6"/><circle cx="88" cy="74" r="5" fill="#ff8fc8" opacity=".6"/>
+  ${mouth}<text x="65" y="40" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="13" fill="#0b3550">e⁻</text>`;
+}
+function setOxi(mood,text){ $('oxi').innerHTML=oxiSVG(mood); if(text) $('bubble').textContent=text; }
+const QUIPS = {
+  ok:['Electrons accounted for!','Balanced. Beautifully.','The books balance!','Redox royalty!','Textbook. Literally.','Not a single electron lost. Well, apart from the oxidised ones.'],
+  no:['Re-check the sum: it must equal the overall charge.','Close, but an electron went missing.','Is every element behaving "normally" here?','Somebody misplaced an electron…','Read the explanation, then go again!'],
+  streak:['COMBO! The reactor is humming…','You are on fire (oxidatively).','Streak bonus engaged!','Unstoppable electron accountant!'],
+  hint:['The Σ checker is live. Make the total match!','Hints cost half the points, but they help you learn.'],
+};
+
+// ========= CONFETTI =========
+const cv=$('confetti'), cx=cv.getContext('2d'); let parts=[], animating=false;
+function resize(){ cv.width=innerWidth; cv.height=innerHeight; } addEventListener('resize',resize); resize();
+function confetti(n=60,x=innerWidth/2,y=innerHeight/3){
+  const cols=['#3ef0ff','#ff4fa3','#b6ff4a','#ffc94a','#9b7bff'];
+  for(let i=0;i<n;i++) parts.push({x,y,vx:(Math.random()-.5)*12,vy:Math.random()*-11-3,r:Math.random()*5+3,c:pick(cols),a:1,rot:Math.random()*6,vr:(Math.random()-.5)*.3,e:Math.random()<.35});
+  if(!animating){ animating=true; requestAnimationFrame(tick); }
+}
+function tick(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{ p.vy+=.35; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.a-=.012; cx.globalAlpha=Math.max(p.a,0); cx.fillStyle=p.c;
+    if(p.e){ cx.beginPath(); cx.arc(p.x,p.y,p.r*.8,0,7); cx.fill(); } else { cx.save(); cx.translate(p.x,p.y); cx.rotate(p.rot); cx.fillRect(-p.r,-p.r/2,p.r*2,p.r); cx.restore(); } });
+  parts=parts.filter(p=>p.a>0 && p.y<cv.height+40);
+  if(parts.length) requestAnimationFrame(tick); else { animating=false; cx.clearRect(0,0,cv.width,cv.height); }
+}
+
+// ========= STATE =========
+let S=null, blitzTimer=null;
+function show(id){ ['home','game','results'].forEach(s=>$(s).classList.toggle('hidden',s!==id)); $('quitBtn').classList.toggle('hidden',id!=='game'); window.scrollTo({top:0,behavior:'smooth'}); }
+function mult(){ const s=S.streak; return s>=10?3:s>=6?2:s>=3?1.5:1; }
+function renderHUD(){
+  $('hScore').textContent=S.score;
+  $('hStreak').textContent=S.streak;
+  $('hMult').textContent='×'+mult();
+  $('hBar').style.width=S.reactor+'%';
+  $('hQ').textContent = S.mode==='blitz' ? S.idx+1 : `${Math.min(S.idx+1,S.total)}/${S.total}`;
+  $('livesStat').classList.toggle('hidden',S.mode==='blitz');
+  $('timerStat').classList.toggle('hidden',S.mode!=='blitz');
+  $('hLives').innerHTML=[0,1,2].map(i=>`<span class="life ${i>=S.lives?'lost':''}">e⁻</span>`).join('');
+  $('hCombo').textContent = S.streak>=3 ? `🔥 ${S.streak} streak · ×${mult()} points` : '';
+}
+function newRun(mode,level){
+  S={mode,level,score:0,streak:0,best:0,reactor:0,lives:3,idx:0,correct:0,answered:0,missed:[],queue:[],total:10,timeLeft:60,locked:false};
+  if(mode==='campaign'){ S.queue=shuffle(OS_BANK[level]).slice(0,10); }
+  else if(mode==='blitz'){ S.queue=shuffle([...OS_BANK[1],...OS_BANK[2],...OS_BANK[3]]); S.total=S.queue.length; }
+  else if(mode==='hl'){
+    const a=shuffle(FC_BANK).slice(0,7), p=shuffle(PREF_BANK).slice(0,3); const qq=[];
+    let ai=0,pi=0; for(let i=0;i<10;i++){ if(i%3===2 && pi<p.length) qq.push({type:'pref',d:p[pi++]}); else qq.push({type:'fc',d:a[ai++]}); }
+    S.queue=qq;
+  }
+  show('game'); setOxi('neutral', mode==='hl'?'Formal charge time! FC = V − N − ½B.':mode==='blitz'?'60 seconds. Go go go!':`Level ${level}: ${LEVELS[level-1].name}. You've got this!`);
+  sideInfo();
+  renderHUD(); nextQ();
+  if(mode==='blitz'){ clearInterval(blitzTimer); const t0=performance.now(); let last=t0;
+    blitzTimer=setInterval(()=>{ const now=performance.now(); S.timeLeft-= (now-last)/1000; last=now; const t=Math.max(S.timeLeft,0); $('hTime').textContent=t.toFixed(1); $('hTime').classList.toggle('low',t<10); if(S.timeLeft<=0){ clearInterval(blitzTimer); endRun(); } },100); }
+}
+function sideInfo(){
+  let h='';
+  if(S.mode==='hl') h=`<b>Formal charge (HL)</b><br>FC = V − N − ½B<br>Tap an atom, then choose its charge. ΣFC must equal the overall charge.`;
+  else if(S.mode==='blitz') h=`<b>Blitz</b><br>+3 s for each correct answer, −5 s for each miss. No lives, just the clock. Hints still halve the points.`;
+  else h=`<b>${LEVELS[S.level-1].name}</b><br>${LEVELS[S.level-1].blurb}.<br><br>Press <b>Enter</b> to submit. Use ± buttons or type.`;
+  $('sideInfo').innerHTML=h;
+}
+function curBase(){ if(S.mode==='hl') return 200; if(S.mode==='blitz') return 100; return LEVELS[S.level-1].base; }
+
+// ========= OS QUESTION =========
+function nextQ(){
+  S.locked=false; S.hinted=false;
+  if(S.mode!=='blitz' && S.idx>=S.total) return endRun();
+  if(S.mode==='blitz' && S.idx>=S.queue.length){ S.queue=S.queue.concat(shuffle(S.queue)); }
+  const item=S.queue[S.idx];
+  renderHUD();
+  if(S.mode==='hl'){ item.type==='fc'?renderFC(item.d):renderPref(item.d); return; }
+  renderOS(item);
+}
+function partLabel(p){ return `<span class="sym">${fmtF(p.label||p.el)}</span>${p.n>1?`<span class="mult">×${p.n}</span>`:''}`; }
+function levelOf(item){ for(const L in OS_BANK) if(OS_BANK[L].includes(item)) return +L; return 1; }
+function renderOS(item){
+  const qc=$('qcard');
+  const lvl = S.mode==='blitz'?levelOf(item):S.level;
+  qc.innerHTML=`<div class="qmeta"><span>LEVEL ${lvl} · ${LEVELS[lvl-1].name.toUpperCase()}</span><span>${curBase()} pts</span></div>
+  <div class="formula">${fmtF(item.f)}${fmtCharge(item.charge)}</div>
+  <div class="prompt">Give the oxidation state of each ${item.parts.some(p=>p.label)?'atom / site':'element'}. ${item.charge?`Overall charge: <b>${chargeText(item.charge)}</b>`:'Neutral species.'}</div>
+  <div class="parts">${item.parts.map((p,i)=>`<div class="part" id="pt${i}">${partLabel(p)}
+    <div class="step"><button data-d="-1" data-i="${i}" aria-label="decrease">−</button><input id="in${i}" inputmode="text" autocomplete="off" placeholder="?" aria-label="oxidation state of ${p.label||p.el}"><button data-d="1" data-i="${i}" aria-label="increase">+</button></div>
+    <div class="fb" id="fb${i}"></div></div>`).join('')}</div>
+  <div class="sumbox hidden" id="sumbox"></div>
+  <div class="actions"><button class="btn ghost" id="hintBtn">💡 Hint (½ points)</button><button class="btn go" id="subBtn">Submit ⏎</button></div>
+  <div id="exp"></div>`;
+  qc.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const inp=$('in'+b.dataset.i); const r=parseOx(inp.value); let v=(r.v!=null)?r.v:0; v=Math.round(v)+(+b.dataset.d); if(r.v!=null && Math.abs(r.v-Math.round(r.v))>1e-6) v=(+b.dataset.d>0?Math.ceil(r.v):Math.floor(r.v)); inp.value=v>0?'+'+v:String(v).replace('-',MINUS); sfx.click(); updSum(item); });
+  item.parts.forEach((p,i)=>{ const inp=$('in'+i); inp.oninput=()=>updSum(item); inp.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); if(S.locked) $('nextBtn')?.click(); else submitOS(item);} }; });
+  $('hintBtn').onclick=()=>{ if(S.hinted||S.locked) return; S.hinted=true; $('hintBtn').disabled=true; $('sumbox').classList.remove('hidden'); updSum(item);
+    const L=LEVELS[lvl-1]; $('exp').innerHTML=`<div class="explain">💡 ${item.hint?item.hint+'<br>':''}${L.hint}</div>`; setOxi('neutral',pick(QUIPS.hint)); };
+  $('subBtn').onclick=()=>submitOS(item);
+  setTimeout(()=>$('in0')?.focus({preventScroll:true}),50);
+}
+function updSum(item){
+  if(!S.hinted) return;
+  let total=0, ok=true, terms=[];
+  item.parts.forEach((p,i)=>{ const r=parseOx($('in'+i).value); if(r.v==null){ok=false; terms.push(`${p.n>1?p.n:''}(?)`);} else { total+=p.n*r.v; terms.push(`${p.n>1?p.n:''}(${fmtOx(r.v)})`);} });
+  const match = ok && Math.abs(total-item.charge)<0.02;
+  $('sumbox').innerHTML = `Σ = ${terms.join(' + ')} = <b style="color:${!ok?'var(--muted)':match?'var(--lime)':'var(--red)'}">${ok?fmtOx(total).replace(/^\+?0$/,'0'):'?'}</b> &nbsp;·&nbsp; target ${item.charge?fmtOx(item.charge):'0'} ${ok?(match?'✓':'✗'):''}`;
+}
+function submitOS(item){
+  if(S.locked) return;
+  const vals=[]; let warn=false, empty=false;
+  item.parts.forEach((p,i)=>{ const r=parseOx($('in'+i).value); $('fb'+i).innerHTML='';
+    if(r.signLast){ warn=true; $('fb'+i).innerHTML='<span class="warn">Sign first: +'+$('in'+i).value.replace(/[+\-−]/,'')+'</span>'; }
+    else if(r.empty||r.bad){ empty=true; $('fb'+i).innerHTML='<span class="warn">'+(r.bad?'Not a number':'Enter a value')+'</span>'; }
+    vals.push(r.v); });
+  if(warn||empty){ setOxi('neutral', warn?'Oxidation states put the sign FIRST: +3, not 3+. (3+ is how you write an ion charge.)':'Fill in every box first!'); return; }
+  S.locked=true;
+  let allOk=true;
+  item.parts.forEach((p,i)=>{ const ok=Math.abs(vals[i]-p.ox)<0.02; allOk=allOk&&ok; $('pt'+i).classList.add(ok?'ok':'no'); $('in'+i).disabled=true;
+    $('fb'+i).innerHTML= ok?'<span style="color:var(--lime)">✓ '+fmtOx(p.ox)+'</span>':'<span style="color:var(--red)">✗ answer: '+fmtOx(p.ox)+'</span>'; });
+  document.querySelectorAll('.step button').forEach(b=>b.disabled=true);
+  const eq = item.parts.map(p=>`${p.n>1?p.n+' × ':''}${p.label?'('+p.label.replace(/\d/g,d=>'₀₁₂₃₄₅₆₇₈₉'[d])+')':p.el} (${fmtOx(p.ox)})`).join(' + ') + ` = ${item.charge?fmtOx(item.charge):'0'}`;
+  $('exp').innerHTML=`<div class="explain" style="border-left-color:${allOk?'var(--lime)':'var(--red)'}"><div class="eq">${eq} ✓</div>${item.note?'<div style="margin-top:6px">'+item.note+'</div>':''}</div>`;
+  resolve(allOk, item);
+  const act=document.querySelector('.actions'); act.innerHTML=`<button class="btn go" id="nextBtn">Next ➜</button>`;
+  $('nextBtn').onclick=advance; setTimeout(()=>$('nextBtn')?.focus({preventScroll:true}),30);
+}
+function resolve(ok,item){
+  S.answered++;
+  const qc=$('qcard');
+  if(ok){
+    S.correct++; S.streak++; S.best=Math.max(S.best,S.streak);
+    const pts=Math.round(curBase()*(S.hinted?0.5:1)*mult()); S.score+=pts;
+    const pop=document.createElement('div'); pop.className='pop'; pop.textContent='+'+pts; qc.appendChild(pop); setTimeout(()=>pop.remove(),1200);
+    S.reactor+= S.hinted?10:20;
+    if(S.mode==='blitz') S.timeLeft+=3;
+    sfx.ok(); confetti(35, innerWidth*0.45, innerHeight*0.35);
+    setOxi('happy', S.streak>=3 && S.streak%3===0 ? pick(QUIPS.streak) : pick(QUIPS.ok));
+    if(S.reactor>=100){ S.reactor=0; const bonus=300*mult(); S.score+=bonus; overload(bonus); }
+  } else {
+    S.streak=0; S.reactor=Math.max(0,S.reactor-15);
+    if(S.mode==='blitz') S.timeLeft-=5; else S.lives--;
+    S.missed.push(item);
+    sfx.no(); qc.classList.remove('shake'); void qc.offsetWidth; qc.classList.add('shake');
+    setOxi('sad', S.lives<=0 && S.mode!=='blitz' ? 'Out of electrons! Let\'s review what went wrong.' : pick(QUIPS.no));
+  }
+  renderHUD();
+}
+function overload(bonus){
+  const o=document.createElement('div'); o.className='overload'; o.innerHTML=`<div>⚛ REACTOR OVERLOAD ⚛<br><span style="font-size:30px">+${bonus} bonus</span></div>`; document.body.appendChild(o); setTimeout(()=>o.remove(),1700);
+  sfx.boom(); confetti(160); setOxi('wow','OVERLOAD!! The reactor is buzzing with electrons!');
+}
+function advance(){
+  if(S.mode!=='blitz' && S.lives<=0) return endRun();
+  if(S.mode==='blitz' && S.timeLeft<=0) return endRun();
+  S.idx++; nextQ();
+}
+
+// ========= LEWIS RENDERING =========
+function lpLayout(mol){
+  // returns per-atom {lps:[angles], badge:angle}
+  const adj=mol.atoms.map(()=>[]);
+  mol.bonds.forEach(([a,b])=>{ const A=mol.atoms[a],B=mol.atoms[b]; adj[a].push(Math.atan2(B.y-A.y,B.x-A.x)); adj[b].push(Math.atan2(A.y-B.y,A.x-B.x)); });
+  const cands=[-90,0,90,180,-45,45,135,-135].map(d=>d*Math.PI/180);
+  const dist=(a,b)=>{ let d=Math.abs(a-b)%(2*Math.PI); return d>Math.PI?2*Math.PI-d:d; };
+  return mol.atoms.map((at,i)=>{
+    const used=adj[i].slice(), lps=[];
+    for(let k=0;k<at.lp;k++){ let best=null,bs=-1; for(const c of cands){ const s=used.length?Math.min(...used.map(u=>dist(u,c))):Math.PI; if(s>bs+1e-6){bs=s;best=c;} } lps.push(best); used.push(best); }
+    let badge=null,bs=-1; for(const c of [-45,45,-135,135,-90,0,180,90].map(d=>d*Math.PI/180)){ const s=used.length?Math.min(...used.map(u=>dist(u,c))):Math.PI; if(s>bs+1e-6){bs=s;badge=c;} }
+    return {lps,badge};
+  });
+}
+function lewisSVG(mol,opt={}){
+  const L=lpLayout(mol), fc=formalCharges(mol);
+  let s='';
+  // bonds
+  mol.bonds.forEach(([a,b,o])=>{ const A=mol.atoms[a],B=mol.atoms[b]; const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,px=-uy,py=ux; const sh=15;
+    const offs=o===1?[0]:o===2?[-4,4]:[-6,0,6];
+    offs.forEach(k=>{ s+=`<line x1="${A.x+ux*sh+px*k}" y1="${A.y+uy*sh+py*k}" x2="${B.x-ux*sh+px*k}" y2="${B.y-uy*sh+py*k}" stroke="#c9ccff" stroke-width="2.4" stroke-linecap="round"/>`; }); });
+  mol.atoms.forEach((at,i)=>{
+    const col = at.el==='H'?'#c9ccff':({O:'#ff7a85',N:'#7fb2ff',C:'#e8e8ff',S:'#ffe06a',F:'#9dff9d',B:'#ffb27a',P:'#ffa04a',Cl:'#9dff9d'}[at.el]||'#fff');
+    const sel = opt.selected===i;
+    const askable = opt.ask && at.el!=='H';
+    if(askable) s+=`<circle cx="${at.x}" cy="${at.y}" r="17" fill="${sel?'rgba(255,201,74,.18)':'transparent'}" stroke="${sel?'#ffc94a':'#4a52b8'}" stroke-width="${sel?2.5:1.5}" stroke-dasharray="${sel?'0':'4 3'}"/>`;
+    s+=`<text x="${at.x}" y="${at.y+7}" text-anchor="middle" font-family="Fredoka" font-weight="600" font-size="21" fill="${col}">${at.el}</text>`;
+    L[i].lps.forEach(ang=>{ const r=21, cxp=at.x+Math.cos(ang)*r, cyp=at.y+Math.sin(ang)*r, px=-Math.sin(ang)*4.5, py=Math.cos(ang)*4.5;
+      s+=`<circle cx="${cxp+px}" cy="${cyp+py}" r="2.6" fill="#3ef0ff"/><circle cx="${cxp-px}" cy="${cyp-py}" r="2.6" fill="#3ef0ff"/>`; });
+    // badge
+    let label=null, bcol='#ffc94a', bfill='#2a2353';
+    if(opt.reveal){ if(at.el!=='H'||fc[i]!==0){ label=fc[i]===0?'0':fmtOx(fc[i]); if(opt.answers&&askable){ const ok=opt.answers[i]===fc[i]; bcol=ok?'#b6ff4a':'#ff5d6c'; bfill=ok?'#16361f':'#3a1426'; } } }
+    else if(askable){ const v=opt.answers?opt.answers[i]:undefined; label= v===undefined?'?':(v===0?'0':fmtOx(v)); if(v===undefined) bcol='#6b72d0'; }
+    if(label!==null && (opt.reveal || askable)){ const bx=at.x+Math.cos(L[i].badge)*31, by=at.y+Math.sin(L[i].badge)*31; const w=label.length>1?28:20;
+      s+=`<rect x="${bx-w/2}" y="${by-10}" width="${w}" height="20" rx="10" fill="${bfill}" stroke="${bcol}" stroke-width="1.5"/><text x="${bx}" y="${by+4.5}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="12" fill="${bcol}">${label}</text>`; }
+    if(askable && opt.clickable) s+=`<circle class="atom-hit" data-i="${i}" cx="${at.x}" cy="${at.y}" r="26" fill="transparent"/>`;
+  });
+  // brackets
+  if(mol.charge){ const xs=mol.atoms.map(a=>a.x), ys=mol.atoms.map(a=>a.y); const x0=Math.min(...xs)-42,x1=Math.max(...xs)+42,y0=Math.min(...ys)-40,y1=Math.max(...ys)+40;
+    s+=`<path d="M${x0+10} ${y0} H${x0} V${y1} H${x0+10} M${x1-10} ${y0} H${x1} V${y1} H${x1-10}" stroke="#c9ccff" stroke-width="2.4" fill="none"/>`;
+    s+=`<text x="${x1+6}" y="${y0+12}" font-family="Fredoka" font-size="18" fill="#ff4fa3">${chargeText(mol.charge)}</text>`; }
+  const xs=mol.atoms.map(a=>a.x), ys=mol.atoms.map(a=>a.y);
+  let vx0=Math.min(...xs)-55, vx1=Math.max(...xs)+(mol.charge?70:55), vy0=Math.min(...ys)-52, vy1=Math.max(...ys)+50;
+  if(vy1-vy0<150){ const c=(vy0+vy1)/2; vy0=c-75; vy1=c+75; }
+  return `<svg class="lewis" viewBox="${vx0} ${vy0} ${vx1-vx0} ${vy1-vy0}" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+}
+
+// ========= FC QUESTION =========
+function renderFC(mol){
+  const qc=$('qcard'); const ask=mol.atoms.map((a,i)=>a.el!=='H'?i:-1).filter(i=>i>=0);
+  const st={answers:{},selected:ask[0]};
+  qc.innerHTML=`<div class="qmeta"><span>HL · ASSIGN FORMAL CHARGES</span><span>${curBase()} pts</span></div>
+   <div class="formula" style="font-size:40px;margin:8px 0 0">${fmtF(mol.f)}${fmtCharge(mol.charge)}</div>
+   <div class="prompt" style="margin-bottom:4px">${mol.name} · tap each circled atom, then pick its formal charge (H atoms are 0).</div>
+   <div id="lw"></div>
+   <div class="keypad" id="kp">${[-3,-2,-1,0,1,2,3].map(v=>`<button data-v="${v}">${v===0?'0':fmtOx(v)}</button>`).join('')}</div>
+   <div class="sumbox hidden" id="sumbox"></div>
+   <div class="actions"><button class="btn ghost" id="hintBtn">💡 Hint (½ points)</button><button class="btn go" id="subBtn" disabled>Submit</button></div><div id="exp"></div>`;
+  const draw=()=>{ $('lw').innerHTML=lewisSVG(mol,{ask:true,clickable:!S.locked,answers:st.answers,selected:S.locked?null:st.selected});
+    $('lw').querySelectorAll('.atom-hit').forEach(h=>h.onclick=()=>{ st.selected=+h.dataset.i; sfx.click(); draw(); });
+    $('subBtn').disabled = S.locked || ask.some(i=>st.answers[i]===undefined);
+    if(S.hinted){ const vals=ask.map(i=>st.answers[i]); const done=vals.every(v=>v!==undefined); const tot=vals.reduce((a,v)=>a+(v||0),0); const m=done&&tot===mol.charge;
+      $('sumbox').innerHTML=`ΣFC = <b style="color:${!done?'var(--muted)':m?'var(--lime)':'var(--red)'}">${done?(tot===0?'0':fmtOx(tot)):'?'}</b> · target ${mol.charge?fmtOx(mol.charge):'0'} ${done?(m?'✓':'✗'):''}`; } };
+  $('kp').querySelectorAll('button').forEach(b=>b.onclick=()=>{ if(S.locked||st.selected==null) return; st.answers[st.selected]=+b.dataset.v; sfx.click();
+    const nxt=ask.find(i=>st.answers[i]===undefined); if(nxt!==undefined) st.selected=nxt; draw(); });
+  $('hintBtn').onclick=()=>{ if(S.hinted||S.locked) return; S.hinted=true; $('hintBtn').disabled=true; $('sumbox').classList.remove('hidden');
+    $('exp').innerHTML=`<div class="explain">💡 For each atom: start from its group valence electrons (V). Subtract every lone-pair electron (2 per pair of dots), then subtract one electron per bond line. Valence electrons: ${[...new Set(mol.atoms.map(a=>a.el))].map(e=>e+' '+VALENCE[e]).join(', ')}.</div>`; draw(); setOxi('neutral',pick(QUIPS.hint)); };
+  $('subBtn').onclick=()=>{
+    if(S.locked) return; S.locked=true;
+    const fc=formalCharges(mol); const ok=ask.every(i=>st.answers[i]===fc[i]);
+    $('lw').innerHTML=lewisSVG(mol,{ask:true,reveal:true,answers:st.answers});
+    $('kp').classList.add('hidden');
+    const bsum=mol.atoms.map(()=>0); mol.bonds.forEach(([a,b,o])=>{bsum[a]+=o;bsum[b]+=o;});
+    const seen=new Set(); const lines=[];
+    ask.forEach(i=>{ const a=mol.atoms[i]; const key=a.el+a.lp+'-'+bsum[i]; if(seen.has(key)) return; seen.add(key);
+      lines.push(`${a.el} (${a.lp} lone pair${a.lp===1?'':'s'}, ${bsum[i]} bond${bsum[i]===1?'':'s'}): ${VALENCE[a.el]} − ${2*a.lp} − ½(${2*bsum[i]}) = ${fc[i]===0?'0':fmtOx(fc[i])}`); });
+    $('exp').innerHTML=`<div class="explain" style="border-left-color:${ok?'var(--lime)':'var(--red)'}">${lines.map(l=>'<div class="eq">'+l+'</div>').join('')}<div style="margin-top:6px">ΣFC = ${mol.charge?fmtOx(mol.charge):'0'} = overall charge ✓</div></div>`;
+    resolve(ok,{fc:mol});
+    document.querySelector('.actions').innerHTML=`<button class="btn go" id="nextBtn">Next ➜</button>`; $('nextBtn').onclick=advance;
+  };
+  draw();
+}
+function renderPref(p){
+  const qc=$('qcard');
+  qc.innerHTML=`<div class="qmeta"><span>HL · PICK THE PREFERRED STRUCTURE</span><span>${curBase()} pts</span></div>
+   <div class="formula" style="font-size:40px;margin:8px 0 0">${fmtF(p.f)}${fmtCharge(p.charge)}</div>
+   <div class="prompt">${p.name}: work out the formal charges in your head (or on paper), then choose the better Lewis structure.</div>
+   <div class="pref"><button class="prefopt" data-k="0"><div class="lab">A</div>${lewisSVG(p.A)}</button><button class="prefopt" data-k="1"><div class="lab">B</div>${lewisSVG(p.B)}</button></div>
+   <div class="actions"><button class="btn ghost" id="hintBtn">💡 Hint (½ points)</button></div><div id="exp"></div>`;
+  $('hintBtn').onclick=()=>{ if(S.hinted||S.locked) return; S.hinted=true; $('hintBtn').disabled=true;
+    $('exp').innerHTML='<div class="explain">💡 Rule 1: formal charges as close to zero as possible. Rule 2 (tie-breaker): negative formal charge on the most electronegative atom. Electronegativity: O 3.4 > N 3.0 > S 2.6 ≈ C 2.6.</div>'; setOxi('neutral',pick(QUIPS.hint)); };
+  qc.querySelectorAll('.prefopt').forEach(b=>b.onclick=()=>{
+    if(S.locked) return; S.locked=true; const k=+b.dataset.k; const ok=k===p.best;
+    qc.querySelectorAll('.prefopt').forEach((x,j)=>{ x.classList.add(j===p.best?'ok':'no'); x.querySelector('svg').outerHTML=lewisSVG(j?p.B:p.A,{reveal:true}); });
+    $('exp').innerHTML=`<div class="explain" style="border-left-color:${ok?'var(--lime)':'var(--red)'}"><b>Preferred: ${p.best?'B':'A'}.</b> ${p.why}</div>`;
+    resolve(ok,{pref:p});
+    document.querySelector('.actions').innerHTML=`<button class="btn go" id="nextBtn">Next ➜</button>`; $('nextBtn').onclick=advance;
+  });
+}
+
+// ========= END =========
+function endRun(){
+  clearInterval(blitzTimer);
+  const acc = S.answered? S.correct/S.answered : 0;
+  let stars=0, key, title;
+  if(S.mode==='campaign'){ const done=S.lives>0; const frac=S.correct/S.total; stars = frac>=0.9?3:frac>=0.7?2:frac>=0.5?1:0; key='L'+S.level; title=`Level ${S.level}: ${LEVELS[S.level-1].name}`;
+    const prev=store.get('stars'+S.level,0); if(stars>prev) store.set('stars'+S.level,stars); }
+  else if(S.mode==='blitz'){ key='blitz'; title='Electron Blitz'; stars = S.correct>=20?3:S.correct>=12?2:S.correct>=6?1:0; }
+  else { key='hl'; title='HL Formal Charge Lab'; const frac=S.correct/10; stars=frac>=0.9?3:frac>=0.7?2:frac>=0.5?1:0; }
+  const prevBest=store.get('best_'+key,0), isBest=S.score>prevBest; if(isBest) store.set('best_'+key,S.score);
+  const ranks=['Electron Intern','Oxidation Apprentice','Redox Ranger','Electron Accountant','Grandmaster of Redox'];
+  const rank = ranks[Math.min(4, stars + (acc>=0.95?1:0))];
+  const missedHTML = S.missed.length ? `<div class="review"><h3>Review your misses</h3>${S.missed.map(m=>{
+      if(m.fc){ const fc=formalCharges(m.fc); return `<div class="item"><b>${fmtF(m.fc.f)}${fmtCharge(m.fc.charge)}</b> (${m.fc.name}): ${m.fc.atoms.map((a,i)=>a.el!=='H'?a.el+' '+(fc[i]===0?'0':fmtOx(fc[i])):null).filter(Boolean).join(', ')}</div>`; }
+      if(m.pref){ return `<div class="item"><b>${fmtF(m.pref.f)}${fmtCharge(m.pref.charge)}</b>: structure ${m.pref.best?'B':'A'} preferred. ${m.pref.why}</div>`; }
+      return `<div class="item"><b>${fmtF(m.f)}${fmtCharge(m.charge)}</b>: ${m.parts.map(p=>fmtF(p.label||p.el)+' '+fmtOx(p.ox)).join(', ')}${m.note?'<br><span class="mini">'+m.note+'</span>':''}</div>`; }).join('')}</div>` : '<p class="mini">No misses. Flawless electron accounting! 🎉</p>';
+  $('resCard').innerHTML=`<div class="mini">${title}</div><h2>${S.mode==='campaign'&&S.lives<=0?'Out of electrons!':'Run complete!'}</h2>
+    <div class="bigstars">${[0,1,2].map(i=>i<stars?'★':'<span class="off">★</span>').join('')}</div>
+    <div class="disp" style="font-size:20px;color:var(--cyan);margin-top:4px">Rank: ${rank}</div>
+    <div class="rgrid">
+      <div class="stat"><div class="k">Score</div><div class="v">${S.score}</div></div>
+      <div class="stat"><div class="k">Correct</div><div class="v">${S.correct}/${S.answered}</div></div>
+      <div class="stat"><div class="k">Accuracy</div><div class="v">${Math.round(acc*100)}%</div></div>
+      <div class="stat"><div class="k">Best streak</div><div class="v">${S.best}</div></div>
+    </div>
+    ${isBest&&S.score>0?'<div class="disp" style="color:var(--amber);font-size:20px">🏆 New personal best!</div>':`<div class="mini">Personal best: ${Math.max(prevBest,S.score)}</div>`}
+    <div class="actions"><button class="btn go" id="againBtn">Play again</button><button class="btn ghost" id="homeBtn2">Home</button>${S.mode==='campaign'&&S.level<5?'<button class="btn ghost" id="nextLvl">Next level ➜</button>':''}</div>
+    ${missedHTML}`;
+  const m=S.mode,l=S.level;
+  $('againBtn').onclick=()=>newRun(m,l); $('homeBtn2').onclick=goHome; if($('nextLvl')) $('nextLvl').onclick=()=>newRun('campaign',l+1);
+  show('results'); if(stars>=2) confetti(140);
+}
+
+// ========= HOME =========
+function goHome(){ clearInterval(blitzTimer); show('home'); renderLevels(); }
+function renderLevels(){
+  $('levelGrid').innerHTML=LEVELS.map(L=>{ const st=store.get('stars'+L.id,0), b=store.get('best_L'+L.id,0);
+    return `<button class="lvl" data-l="${L.id}"><div class="n">LEVEL ${L.id} · ${OS_BANK[L.id].length} compounds</div><h4>${L.name}</h4><p>${L.blurb}</p><div class="stars">${[0,1,2].map(i=>i<st?'★':'<span class="off">★</span>').join('')}</div><div class="best">best ${b}</div></button>`; }).join('');
+  document.querySelectorAll('.lvl').forEach(b=>b.onclick=()=>newRun('campaign',+b.dataset.l));
+}
+$('oxiHome').innerHTML=oxiSVG('happy');
+$('homeLogo').onclick=()=>{ if(S && !$('game').classList.contains('hidden') && S.answered>0) endRun(); else goHome(); };
+$('mCampaign').onclick=()=>newRun('campaign',1);
+$('mBlitz').onclick=()=>newRun('blitz');
+$('mHL').onclick=()=>newRun('hl');
+$('quitBtn').onclick=()=>{ if(S && S.answered>0) endRun(); else goHome(); };
+$('rulesBtn').onclick=()=>$('rulesModal').classList.remove('hidden');
+$('rulesClose').onclick=()=>$('rulesModal').classList.add('hidden');
+$('rulesModal').onclick=e=>{ if(e.target.id==='rulesModal') $('rulesModal').classList.add('hidden'); };
+$('soundBtn').onclick=()=>{ soundOn=!soundOn; $('soundBtn').textContent=soundOn?'🔊 Sound on':'🔇 Sound off'; if(soundOn) sfx.ok(); };
+addEventListener('keydown',e=>{ if(e.key==='Escape') $('rulesModal').classList.add('hidden'); });
+renderLevels();
+</script>
+</body>
+</html>
