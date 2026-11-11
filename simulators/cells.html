@@ -95,7 +95,7 @@ td,th{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
   <div class="card" id="tableCard">
     <h2>Standard electrode potentials used here (from the data booklet)</h2>
     <table id="tbl"></table>
-    <p class="small" style="margin-top:8px">The more negative E⦵, the more readily the metal is oxidized, so the more reactive the metal. In a voltaic cell, the half-cell with the more negative E⦵ is the anode.</p>
+    <p class="small" style="margin-top:8px">The more positive E⦵, the stronger the oxidizing agent on the left (MnO₄⁻ and Cl₂ are the strongest here). The more negative E⦵, the stronger the reducing agent on the right, so for metals, the more reactive the metal. In a voltaic cell, the half-cell with the more negative E⦵ is the anode. H₂, Cl₂, Fe²⁺/Fe³⁺ and MnO₄⁻/Mn²⁺ half-cells use an inert platinum electrode.</p>
   </div>
 </div>
 
@@ -110,6 +110,41 @@ const METALS=[
  {m:"Pb",ion:"Pb²⁺",z:2,E:-0.13,metal:"#6b7280",sol:"rgba(220,230,240,.55)",name:"lead"},
  {m:"Cu",ion:"Cu²⁺",z:2,E:0.34,metal:"#c97a4a",sol:"rgba(80,150,230,.55)",name:"copper"},
  {m:"Ag",ion:"Ag⁺",z:1,E:0.80,metal:"#d9dde3",sol:"rgba(220,230,240,.55)",name:"silver"}
+];
+/* Every voltaic half-cell is stored as a reduction: ox + z e⁻ ⇌ red. Species are [coefficient, formula, state]. */
+const PT="#e5e7eb";
+const HC=[
+ ...METALS.map(x=>({kind:"metal",label:`${x.m} | ${x.ion}`,couple:`${x.ion}/${x.m}`,E:x.E,z:x.z,
+   ox:[[1,x.ion,"aq"]],red:[[1,x.m,"s"]],anim:{ox:x.ion,red:x.m},redType:"metal",oxType:"ion",
+   elCol:x.metal,sol:x.sol,elName:`${x.name} electrode`,short:x.name,sub:`${x.m} in ${x.ion}(aq)`,reducer:x.m,oxidant:x.ion,
+   asAnode:`Oxidation: the electrode loses mass as ${x.m} atoms become ${x.ion} ions.`,
+   asCathode:`Reduction: ${x.ion} ions gain electrons and ${x.m} is deposited, so the electrode gains mass.`})),
+ {kind:"gas",label:"Pt | H₂ | H⁺ (standard hydrogen electrode)",couple:"H⁺/H₂",E:0.00,z:2,
+   ox:[[2,"H⁺","aq"]],red:[[1,"H₂","g"]],anim:{ox:"2H⁺",red:"H₂"},redType:"gas",oxType:"ion",gas:{col:"#ffffff",txt:"H₂(g) in"},
+   elCol:PT,sol:"rgba(225,235,245,.6)",elName:"platinum electrode of the hydrogen half-cell",short:"platinum (H⁺/H₂)",sub:"Pt, H₂(g), 1 mol dm⁻³ H⁺(aq)",reducer:"H₂",oxidant:"H⁺",
+   asAnode:"Oxidation: H₂ gas bubbled over the platinum is oxidized to H⁺ ions. Platinum is inert: it carries the electrons but its mass does not change.",
+   asCathode:"Reduction: H⁺ ions gain electrons at the platinum surface and form bubbles of H₂ gas. Platinum is inert, so its mass does not change.",
+   book:"The data booklet writes this as H⁺(aq) + e⁻ ⇌ ½H₂(g). Doubling a half-equation does not change E⦵.",
+   note:"<b>Standard hydrogen electrode (SHE):</b> H₂ at 100 kPa bubbled over platinum in 1 mol dm⁻³ H⁺(aq) at 298 K. Its E⦵ is defined as 0.00 V, so the voltmeter reading equals the size of the other half-cell's E⦵. This is how the values in the data booklet are measured."},
+ {kind:"gas",label:"Pt | Cl₂ | Cl⁻",couple:"Cl₂/Cl⁻",E:1.36,z:2,
+   ox:[[1,"Cl₂","g"]],red:[[2,"Cl⁻","aq"]],anim:{ox:"Cl₂",red:"2Cl⁻"},redType:"ion",oxType:"gas",gas:{col:"#bef264",txt:"Cl₂(g) in"},
+   elCol:PT,sol:"rgba(214,240,190,.6)",elName:"platinum electrode of the chlorine half-cell",short:"platinum (Cl₂/Cl⁻)",sub:"Pt, Cl₂(g), 1 mol dm⁻³ Cl⁻(aq)",reducer:"Cl⁻",oxidant:"Cl₂",
+   asAnode:"Oxidation: Cl⁻ ions lose electrons at the platinum surface and form pale green Cl₂ gas.",
+   asCathode:"Reduction: chlorine gas bubbled over the platinum gains electrons and forms Cl⁻ ions, which move into the solution. Cl₂ is a strong oxidizing agent.",
+   book:"The data booklet writes this as ½Cl₂(g) + e⁻ ⇌ Cl⁻(aq). Doubling a half-equation does not change E⦵.",
+   note:"<b>Chlorine half-cell:</b> neither Cl₂ nor Cl⁻ is a solid conductor, so an inert platinum electrode is used, just as in the hydrogen electrode."},
+ {kind:"ion",label:"Pt | Fe²⁺, Fe³⁺",couple:"Fe³⁺/Fe²⁺",E:0.77,z:1,
+   ox:[[1,"Fe³⁺","aq"]],red:[[1,"Fe²⁺","aq"]],anim:{ox:"Fe³⁺",red:"Fe²⁺"},redType:"ion",oxType:"ion",
+   elCol:PT,sol:"rgba(225,185,80,.45)",elName:"platinum electrode in the Fe²⁺/Fe³⁺ mixture",short:"platinum (Fe³⁺/Fe²⁺)",sub:"Pt in Fe²⁺(aq) + Fe³⁺(aq)",reducer:"Fe²⁺",oxidant:"Fe³⁺",
+   asAnode:"Oxidation: Fe²⁺ ions lose one electron at the platinum surface and become Fe³⁺ ions. Both stay in solution.",
+   asCathode:"Reduction: Fe³⁺ ions gain one electron at the platinum surface and become Fe²⁺ ions. Both stay in solution.",
+   note:"<b>Ion-mixture half-cell:</b> Fe²⁺ and Fe³⁺ are both in the same beaker (1 mol dm⁻³ each). Neither is a solid metal, so a platinum electrode carries the electrons. Compare Fe³⁺/Fe²⁺ (+0.77 V) with Fe²⁺/Fe (−0.45 V): they are different half-cells."},
+ {kind:"ion",label:"Pt | MnO₄⁻, Mn²⁺, H⁺",couple:"MnO₄⁻/Mn²⁺",E:1.51,z:5,
+   ox:[[1,"MnO₄⁻","aq"],[8,"H⁺","aq"]],red:[[1,"Mn²⁺","aq"],[4,"H₂O","l"]],anim:{ox:"MnO₄⁻",red:"Mn²⁺"},redType:"ion",oxType:"ion",
+   elCol:PT,sol:"rgba(140,30,160,.6)",fade:"rgba(245,225,238,.5)",elName:"platinum electrode in the acidified MnO₄⁻/Mn²⁺ mixture",short:"platinum (MnO₄⁻/Mn²⁺)",sub:"Pt in MnO₄⁻, Mn²⁺, H⁺(aq)",reducer:"Mn²⁺",oxidant:"MnO₄⁻",
+   asAnode:"Oxidation: Mn²⁺ ions are oxidized to MnO₄⁻ at the platinum surface.",
+   asCathode:"Reduction: purple MnO₄⁻ ions gain five electrons in acid and become very pale pink Mn²⁺ ions, so the purple colour fades. H⁺ is used up.",
+   note:"<b>Acidified permanganate half-cell:</b> H⁺ is part of the half-equation, so the solution must be acidified. Mn goes from +7 in MnO₄⁻ to +2 in Mn²⁺, which is why 5 electrons are needed."}
 ];
 const ELEC=[
  {id:"NaCl(l)",catEv:{from:"Na⁺",to:"Na",z:1,type:"metal"},anEv:{from:"2Cl⁻",to:"Cl₂",z:2,type:"gas"},label:"Molten sodium chloride, inert electrodes",level:"SL",sol:"rgba(255,200,120,.55)",
@@ -153,21 +188,29 @@ const gcd=(a,b)=>b?gcd(b,a%b):a, lcm=(a,b)=>a*b/gcd(a,b);
 const sign=v=>(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(2);
 const coef=(n,s)=>(n>1?n:"")+s;
 
-function voltaic(a,b){ // a,b METALS objects
+const fmt=(list,k=1)=>list.map(([c,f,s])=>`${coef(c*k,f)}(${s})`).join(" + ");
+const redEq=h=>`${fmt(h.ox)} + ${coef(h.z,"e⁻")} ⇌ ${fmt(h.red)}`;
+function voltaic(a,b){ // a,b HC objects
   const an=a.E<b.E?a:b, ca=an===a?b:a;
-  const n=lcm(an.z,ca.z), Ecell=ca.E-an.E, dG=-n*F*Ecell/1000;
-  const overall=`${coef(n/an.z,an.m)}(s) + ${coef(n/ca.z,ca.ion)}(aq) → ${coef(n/an.z,an.ion)}(aq) + ${coef(n/ca.z,ca.m)}(s)`;
-  return {an,ca,n,Ecell,dG,overall,
-    anEq:`${an.m}(s) → ${an.ion}(aq) + ${coef(an.z,"e⁻")}`, caEq:`${ca.ion}(aq) + ${coef(ca.z,"e⁻")} → ${ca.m}(s)`};
+  const n=lcm(an.z,ca.z), ka=n/an.z, kc=n/ca.z, Ecell=ca.E-an.E, dG=-n*F*Ecell/1000;
+  // add the half-equations, merge repeated species and cancel anything on both sides (e.g. H⁺, Fe²⁺)
+  const side=lists=>{const m=new Map();lists.forEach(([l,k])=>l.forEach(([c,f,s])=>{const key=f+"|"+s;m.set(key,(m.get(key)||0)+c*k);}));return m;};
+  const L=side([[an.red,ka],[ca.ox,kc]]), R=side([[an.ox,ka],[ca.red,kc]]);
+  let cancelled=[];
+  L.forEach((c,key)=>{ if(R.has(key)){ const d=Math.min(c,R.get(key)); L.set(key,c-d); R.set(key,R.get(key)-d); cancelled.push(key.split("|")[0]); } });
+  const out=m=>[...m].filter(([,c])=>c>0).map(([key,c])=>{const [f,s]=key.split("|");return `${coef(c,f)}(${s})`;}).join(" + ");
+  return {an,ca,n,ka,kc,Ecell,dG,overall:`${out(L)} → ${out(R)}`,cancelled,
+    anEq:`${fmt(an.red)} → ${fmt(an.ox)} + ${coef(an.z,"e⁻")}`, caEq:`${fmt(ca.ox)} + ${coef(ca.z,"e⁻")} → ${fmt(ca.red)}`};
 }
 
 /* ---------- state ---------- */
 let stepText="", mode="volt", paused=false, t=0, electrons=[], ions=[], bubbles=[], growth=0;
 const $=id=>document.getElementById(id);
-$("L").innerHTML=$("R").innerHTML=METALS.map((x,i)=>`<option value="${i}">${x.m} | ${x.ion}</option>`).join("");
+$("L").innerHTML=$("R").innerHTML=[["Metal | metal ion","metal"],["Gas electrodes (platinum)","gas"],["Ion mixtures (platinum)","ion"]]
+  .map(([g,k])=>`<optgroup label="${g}">`+HC.map((x,i)=>x.kind===k?`<option value="${i}">${x.label}</option>`:"").join("")+"</optgroup>").join("");
 $("L").value=2; $("R").value=6;
 $("E").innerHTML=ELEC.map((x,i)=>`<option value="${i}">${x.label}</option>`).join("");
-$("tbl").innerHTML="<tr><th>Half-equation</th><th>E⦵ / V</th></tr>"+METALS.slice().sort((p,q)=>p.E-q.E).map(x=>`<tr><td class="eqn">${x.ion}(aq) + ${coef(x.z,"e⁻")} ⇌ ${x.m}(s)</td><td>${sign(x.E)}</td></tr>`).join("");
+$("tbl").innerHTML="<tr><th>Half-equation</th><th>E⦵ / V</th></tr>"+HC.slice().sort((p,q)=>p.E-q.E).map(x=>`<tr><td class="eqn">${redEq(x)}</td><td>${sign(x.E)}</td></tr>`).join("");
 
 /* ---------- geometry ---------- */
 const W=760;
@@ -187,7 +230,6 @@ function setup(){
   t=0; growth=0; bubbles=[]; electrons=[]; ions=[];
   for(let i=0;i<14;i++) electrons.push(i/14);
   if(mode==="volt"){
-    const a=METALS[+$("L").value], b=METALS[+$("R").value];
     for(let i=0;i<6;i++) ions.push({k:i%2?"K⁺":"NO₃⁻",f:i/6});
   } else {
     const e=ELEC[+$("E").value];
@@ -199,16 +241,22 @@ function setup(){
 function renderFacts(){
   const hl=$("hl").checked; let html="";
   if(mode==="volt"){
-    const a=METALS[+$("L").value], b=METALS[+$("R").value];
-    if(a===b){ $("facts").innerHTML='<div class="card"><b>Choose two different metals.</b><p class="small">Two identical half-cells have no potential difference, so no current flows.</p></div>'; return; }
+    const a=HC[+$("L").value], b=HC[+$("R").value];
+    if(a===b){ $("facts").innerHTML='<div class="card"><b>Choose two different half-cells.</b><p class="small">Two identical half-cells have no potential difference, so no current flows.</p></div>'; return; }
     const v=voltaic(a,b);
-    html+=`<div class="card"><h2>What's happening</h2><p style="margin:0">Electrons flow through the external wire from the <b>${v.an.name}</b> electrode to the <b>${v.ca.name}</b> electrode. ${v.an.m} is the more reactive metal (its E⦵ is more negative), so it is oxidized and gives up electrons.</p>
+    const why=v.an.kind==="metal"&&v.ca.kind==="metal"
+      ?`${v.an.reducer} is the more reactive metal (its E⦵ is more negative), so it is oxidized and gives up electrons.`
+      :`The ${v.an.couple} half-cell has the more negative E⦵, so ${v.an.reducer} is oxidized and gives up electrons, and ${v.ca.oxidant} is reduced.`;
+    const notes=[a,b].filter(h=>h.note).map(h=>`<div class="small" style="margin-top:6px;color:var(--ink)">${h.note}</div>`).join("");
+    html+=`<div class="card"><h2>What's happening</h2><p style="margin:0">Electrons flow through the external wire from the <b>${v.an.elName}</b> to the <b>${v.ca.elName}</b>. ${why}</p>
       <div style="margin-top:8px"><button class="btn primary" id="reveal">Reveal answers</button></div></div>`;
     html+=`<div class="answer facts">
-      <div class="fact an"><h3>Anode (negative electrode): ${v.an.name}</h3><div class="eqn">${v.anEq}</div><div class="small">Oxidation: the electrode loses mass as ${v.an.m} atoms become ${v.an.ion} ions.</div></div>
-      <div class="fact ca"><h3>Cathode (positive electrode): ${v.ca.name}</h3><div class="eqn">${v.caEq}</div><div class="small">Reduction: ${v.ca.ion} ions gain electrons and ${v.ca.m} is deposited, so the electrode gains mass.</div></div>
+      <div class="fact an"><h3>Anode (negative electrode): ${v.an.short}</h3><div class="eqn">${v.anEq}</div><div class="small">${v.an.asAnode}</div></div>
+      <div class="fact ca"><h3>Cathode (positive electrode): ${v.ca.short}</h3><div class="eqn">${v.caEq}</div><div class="small">${v.ca.asCathode}</div></div>
       <div class="fact ov"><h3>Overall reaction (${v.n} mol of electrons transferred)</h3><div class="eqn">${v.overall}</div>
-      <div class="small">Salt bridge (KNO₃): K⁺ ions move towards the cathode and NO₃⁻ ions move towards the anode, keeping both solutions electrically neutral. Electrons never travel through the salt bridge or the solutions.</div>
+      ${v.cancelled.length?`<div class="small">When the half-equations were added, ${v.cancelled.join(" and ")} appeared on both sides, so the extra was cancelled.</div>`:""}
+      ${notes}
+      <div class="small" style="margin-top:6px">Salt bridge (KNO₃): K⁺ ions move towards the cathode and NO₃⁻ ions move towards the anode, keeping both solutions electrically neutral. Electrons never travel through the salt bridge or the solutions.</div>
       ${hl?`<div class="eqn" style="margin-top:8px">E⦵cell = E⦵cathode − E⦵anode = ${sign(v.ca.E)} − (${sign(v.an.E)}) = ${sign(v.Ecell)} V</div>
       <div class="eqn">ΔG⦵ = −nFE⦵cell = −${v.n} × 96 500 × ${v.Ecell.toFixed(2)} = ${v.dG.toFixed(0)} kJ</div>
       <div class="small">E⦵cell is positive and ΔG⦵ is negative, so the reaction is spontaneous.</div>`:""}</div></div>`;
@@ -229,30 +277,37 @@ function renderFacts(){
 /* ---------- E°cell calculation panel ---------- */
 function renderCalc(){
   const card=$("calcCard"); if(mode!=="volt"){card.style.display="none";return;} card.style.display="";
-  const a=METALS[+$("L").value], b=METALS[+$("R").value];
+  const a=HC[+$("L").value], b=HC[+$("R").value];
   // scale
-  const top=1.2, bot=-2.6, Y=v=>30+(top-v)/(top-bot)*360;
-  let g=`<rect width="360" height="420" fill="#fff"/>`;
+  const top=1.7, bot=-2.6, Y=v=>30+(top-v)/(top-bot)*360;
+  let g=`<rect width="440" height="420" fill="#fff"/>`;
   g+=`<line x1="120" y1="${Y(top)}" x2="120" y2="${Y(bot)}" stroke="#334155" stroke-width="3"/>`;
-  for(let v=1;v>=-2.5;v-=0.5){ g+=`<line x1="114" y1="${Y(v)}" x2="126" y2="${Y(v)}" stroke="#334155"/><text x="106" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="#5a6772">${sign(v).replace(".00","")}</text>`; }
+  for(let v=1.5;v>=-2.5;v-=0.5){ g+=`<line x1="114" y1="${Y(v)}" x2="126" y2="${Y(v)}" stroke="#334155"/><text x="106" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="#5a6772">${sign(v).replace(".00","").replace(/0$/,"")}</text>`; }
   g+=`<text x="120" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#5a6772">E⦵ / V</text>`;
-  g+=`<text x="16" y="${Y(0.9)}" font-size="11" fill="#1d4ed8" transform="rotate(-90 16 ${Y(0.9)})" text-anchor="end">more easily reduced ↑</text>`;
+  g+=`<text x="16" y="${Y(1.3)}" font-size="11" fill="#1d4ed8" transform="rotate(-90 16 ${Y(1.3)})" text-anchor="end">more easily reduced ↑</text>`;
   g+=`<text x="16" y="${Y(-1.6)}" font-size="11" fill="#b91c1c" transform="rotate(-90 16 ${Y(-1.6)})" text-anchor="middle">more easily oxidized ↓</text>`;
-  METALS.forEach(m=>{ const on=m===a||m===b; g+=`<circle cx="120" cy="${Y(m.E)}" r="${on?6:3.5}" fill="${on?"#0f766e":"#cbd5e1"}"/>${on?"":`<text x="134" y="${Y(m.E)+4}" font-size="11" fill="#94a3b8">${m.ion}/${m.m}</text>`}`; });
-  if(a!==b){
-    const v=voltaic(a,b), yc=Y(v.ca.E), ya=Y(v.an.E);
-    g+=`<g class="answer"><text x="134" y="${yc+4}" font-size="13" font-weight="800" fill="#1d4ed8">${v.ca.ion}/${v.ca.m}  ${sign(v.ca.E)} V  cathode</text>
-        <text x="134" y="${ya+4}" font-size="13" font-weight="800" fill="#b91c1c">${v.an.ion}/${v.an.m}  ${sign(v.an.E)} V  anode</text>
-        <line x1="300" y1="${ya}" x2="300" y2="${yc+8}" stroke="#0f766e" stroke-width="3"/><path d="M300 ${yc} l-6 10 l12 0 z" fill="#0f766e"/>
-        <line x1="290" y1="${ya}" x2="310" y2="${ya}" stroke="#0f766e" stroke-width="2"/>
-        <text x="296" y="${(ya+yc)/2}" text-anchor="end" font-size="13" font-weight="800" fill="#0f766e">E⦵cell</text>
-        <text x="296" y="${(ya+yc)/2+16}" text-anchor="end" font-size="13" font-weight="800" fill="#0f766e">${v.Ecell.toFixed(2)} V</text></g>`;
-    const twice=v.n/v.ca.z>1||v.n/v.an.z>1;
+  const v=a!==b?voltaic(a,b):null;
+  // spread labels so close values (e.g. Fe³⁺/Fe²⁺ +0.77 and Ag⁺/Ag +0.80) don't overlap
+  let prev=-1e9, prevOn=false; const pos=HC.slice().sort((p,q)=>q.E-p.E).map(h=>{ const on=h===a||h===b, ly=Math.max(Y(h.E),prev+(on||prevOn?16:12)); prev=ly; prevOn=on; return {h,on,ly}; });
+  pos.forEach(({h,on,ly})=>{ const y=Y(h.E);
+    g+=`<circle cx="120" cy="${y}" r="${on?6:3.5}" fill="${on?"#0f766e":"#cbd5e1"}"/>`;
+    if(Math.abs(ly-y)>1) g+=`<polyline points="126,${y} 130,${y} 134,${ly-4}" fill="none" stroke="#cbd5e1"/>`;
+    if(!on) g+=`<text x="136" y="${ly}" font-size="11" fill="#94a3b8">${h.couple}  ${sign(h.E)}</text>`;
+    else if(!v) g+=`<text x="136" y="${ly+1}" font-size="12" font-weight="800" fill="#0f766e">${h.couple}  ${sign(h.E)} V</text>`;
+    else { const isCa=h===v.ca; g+=`<text class="answer" x="136" y="${ly+1}" font-size="12" font-weight="800" fill="${isCa?"#1d4ed8":"#b91c1c"}">${h.couple}  ${sign(h.E)} V  ${isCa?"cathode":"anode"}</text>`; } });
+  if(v){
+    const yc=Y(v.ca.E), ya=Y(v.an.E);
+    g+=`<g class="answer"><line x1="372" y1="${ya}" x2="372" y2="${yc+8}" stroke="#0f766e" stroke-width="3"/><path d="M372 ${yc} l-6 10 l12 0 z" fill="#0f766e"/>
+        <line x1="362" y1="${ya}" x2="382" y2="${ya}" stroke="#0f766e" stroke-width="2"/>
+        <text x="380" y="${(ya+yc)/2}" font-size="13" font-weight="800" fill="#0f766e">E⦵cell</text>
+        <text x="380" y="${(ya+yc)/2+16}" font-size="13" font-weight="800" fill="#0f766e">${v.Ecell.toFixed(2)} V</text></g>`;
+    const twice=v.ka>1||v.kc>1;
+    const books=[v.ca,v.an].filter(h=>h.book).map(h=>`<div class="small">${h.book}</div>`).join("");
     $("calc").innerHTML=`<ol class="steps">
       <li><div><b>Look up both standard electrode potentials</b> in the data booklet. They are always written as reductions.
-        <div class="eqn">${v.ca.ion}(aq) + ${coef(v.ca.z,"e⁻")} ⇌ ${v.ca.m}(s)   E⦵ = ${sign(v.ca.E)} V</div>
-        <div class="eqn">${v.an.ion}(aq) + ${coef(v.an.z,"e⁻")} ⇌ ${v.an.m}(s)   E⦵ = ${sign(v.an.E)} V</div></div></li>
-      <li><div><b>Decide which is the cathode.</b> The half-cell with the more positive E⦵ (${v.ca.ion}/${v.ca.m}, ${sign(v.ca.E)} V) is reduced, so it is the <span style="color:#1d4ed8;font-weight:700">cathode</span>. The more negative one (${v.an.ion}/${v.an.m}, ${sign(v.an.E)} V) is oxidized, so it is the <span style="color:#b91c1c;font-weight:700">anode</span>.</div></li>
+        <div class="eqn">${redEq(v.ca)}   E⦵ = ${sign(v.ca.E)} V</div>
+        <div class="eqn">${redEq(v.an)}   E⦵ = ${sign(v.an.E)} V</div>${books}</div></li>
+      <li><div><b>Decide which is the cathode.</b> The half-cell with the more positive E⦵ (${v.ca.couple}, ${sign(v.ca.E)} V) is reduced, so it is the <span style="color:#1d4ed8;font-weight:700">cathode</span>. The more negative one (${v.an.couple}, ${sign(v.an.E)} V) is oxidized, so it is the <span style="color:#b91c1c;font-weight:700">anode</span>.</div></li>
       <li><div><b>Subtract:</b> E⦵cell = E⦵cathode − E⦵anode<br>
         <span class="big">E⦵cell = (${sign(v.ca.E)}) − (${sign(v.an.E)}) = ${sign(v.Ecell)} V</span><br>
         <span class="small">On the scale this is the distance between the two points, so E⦵cell for a working voltaic cell is always positive.</span></div></li>
@@ -260,7 +315,7 @@ function renderCalc(){
         <div class="eqn">ΔG⦵ = −nFE⦵cell = −${v.n} × 96 500 × ${v.Ecell.toFixed(2)} = −${Math.round(-v.dG*1000).toLocaleString("en-US").replace(/,/g," ")} J = −${Math.round(-v.dG)} kJ</div>
         <span class="small">F = 96 500 C mol⁻¹ (data booklet). n = ${v.n} mol of electrons transferred in the overall equation.</span></div></li>
     </ol>
-    ${twice?`<div class="warn"><b>Common mistake:</b> to balance electrons, the overall equation uses ${v.n/v.an.z>1?`${v.n/v.an.z} ${v.an.m}`:""}${v.n/v.an.z>1&&v.n/v.ca.z>1?" and ":""}${v.n/v.ca.z>1?`${v.n/v.ca.z} ${v.ca.ion}`:""}. Do <b>not</b> multiply the E⦵ values by these numbers. E⦵ is a property of the half-cell and does not depend on how many moles react. The multiple only appears in n when you calculate ΔG⦵.</div>`
+    ${twice?`<div class="warn"><b>Common mistake:</b> to balance electrons, the overall equation uses ${v.ka>1?`${v.ka*v.an.red[0][0]} ${v.an.red[0][1]}`:""}${v.ka>1&&v.kc>1?" and ":""}${v.kc>1?`${v.kc*v.ca.ox[0][0]} ${v.ca.ox[0][1]}`:""}. Do <b>not</b> multiply the E⦵ values by these numbers. E⦵ is a property of the half-cell and does not depend on how many moles react. The multiple only appears in n when you calculate ΔG⦵.</div>`
       :`<div class="warn"><b>Common mistake:</b> do not reverse the sign of the anode's E⦵ and then subtract it as well. Use E⦵cathode − E⦵anode with both values exactly as written in the data booklet.</div>`}`;
   } else {
     $("calc").innerHTML=`<p>Choose two different half-cells. With identical half-cells, E⦵cell = 0 V and no current flows.</p>`;
@@ -268,6 +323,8 @@ function renderCalc(){
   $("scale").innerHTML=g;
 }
 
+const rgba=c=>c.match(/[\d.]+/g).map(Number);
+function mix(c1,c2,f){ const p=rgba(c1),q=rgba(c2); return `rgba(${p.map((x,i)=>i<3?Math.round(x+(q[i]-x)*f):(x+(q[i]-x)*f).toFixed(2)).join(",")})`; }
 function applyPredict(){ document.body.classList.toggle("hide",$("predict").checked); }
 
 
@@ -283,10 +340,10 @@ function eSmall(x,y){ return `<g><circle cx="${x}" cy="${y}" r="6.5" fill="#facc
 function cathodeEvent(ex,face,y,ev,ph){
   const sx=ex+face*13, near=sx+face*(10+ev.from.length*3.5), far=sx+face*75;
   let s="", x=lerp(far,near,ph/0.35), yy=y, op=1, label=ph<0.62?ev.from:ev.to;
-  if(ph>=0.62){ if(ev.type==="gas"){ yy=y-(ph-0.62)*170; op=1-(ph-0.62)/0.38; } else { op=ph>0.85?1-(ph-0.85)/0.15:1; } }
+  if(ph>=0.62){ if(ev.type==="gas"){ yy=y-(ph-0.62)*170; op=1-(ph-0.62)/0.38; } else if(ev.type==="ion"){ x=lerp(near,far,(ph-0.62)/0.38); op=ph>0.85?1-(ph-0.85)/0.15:1; } else { op=ph>0.85?1-(ph-0.85)/0.15:1; } }
   s+=pill(x,yy,label,"#1d4ed8",op);
-  if(ph>0.3&&ph<0.62){ const f=(ph-0.3)/0.28; for(let k=0;k<Math.min(ev.z,4);k++){ s+=eSmall(lerp(ex,near-face*12,f), y-12+k*8); } }
-  const step=ph<0.32?`${ev.from} moves to the cathode surface.`:ph<0.62?`${ev.z} electron${ev.z>1?"s":""} pass${ev.z>1?"":"es"} from the cathode to ${ev.from}.`:`${ev.from} has gained ${ev.z} electron${ev.z>1?"s":""}: it is reduced to ${ev.to}.`;
+  if(ph>0.3&&ph<0.62){ const f=(ph-0.3)/0.28; for(let k=0;k<Math.min(ev.z,5);k++){ s+=eSmall(lerp(ex,near-face*12,f), y-12-(ev.z>4?4:0)+k*8); } }
+  const step=ph<0.32?`${ev.from} moves to the cathode surface.`:ph<0.62?`${ev.z} electron${ev.z>1?"s":""} pass${ev.z>1?"":"es"} from the cathode to ${ev.from}.`:`${ev.from} has gained ${ev.z} electron${ev.z>1?"s":""}: it is reduced to ${ev.to}${ev.type==="ion"?", which moves back into the solution":ev.type==="gas"?", which bubbles off":""}.`;
   return {svg:s,step};
 }
 function anodeEvent(ex,face,y,ev,ph){
@@ -294,7 +351,7 @@ function anodeEvent(ex,face,y,ev,ph){
   let s="", x=ev.surface?near:lerp(far,near,ph/0.3), yy=y, op=1, label=ph<0.5?ev.from:ev.to;
   if(ph>=0.62){ if(ev.type==="gas"){ yy=y-(ph-0.62)*170; op=1-(ph-0.62)/0.38; } else { x=lerp(near,far,(ph-0.62)/0.38); op=ph>0.85?1-(ph-0.85)/0.15:1; } }
   s+=pill(x,yy,label,"#b91c1c",op);
-  if(ph>0.32&&ph<0.62){ const f=(ph-0.32)/0.28; for(let k=0;k<Math.min(ev.z,4);k++){ s+=eSmall(lerp(near-face*12,ex,f), y-12+k*8); } }
+  if(ph>0.32&&ph<0.62){ const f=(ph-0.32)/0.28; for(let k=0;k<Math.min(ev.z,5);k++){ s+=eSmall(lerp(near-face*12,ex,f), y-12-(ev.z>4?4:0)+k*8); } }
   const step=ph<0.32?(ev.surface?`A ${ev.from} atom sits on the anode surface.`:`${ev.from} moves to the anode surface.`):ph<0.62?`${ev.from} gives ${ev.z} electron${ev.z>1?"s":""} to the anode.`:`${ev.from} has lost ${ev.z} electron${ev.z>1?"s":""}: it is oxidized to ${ev.to}${ev.type==="ion"?", which moves into the solution":""}.`;
   return {svg:s,step};
 }
@@ -322,9 +379,10 @@ function draw(){
   let s=`<rect width="${W}" height="440" fill="#fbfcfd"/>`;
   const conv=$("conv").checked;
   if(mode==="volt"){
-    const a=METALS[+$("L").value], b=METALS[+$("R").value], same=a===b;
+    const a=HC[+$("L").value], b=HC[+$("R").value], same=a===b;
     const v=same?null:voltaic(a,b), leftIsAn=v&&v.an===a;
-    s+=beaker(70,200,150,370,a.sol)+beaker(490,200,150,370,b.sol);
+    const solOf=(h,isCa)=>h.fade&&isCa?mix(h.sol,h.fade,growth):h.sol;
+    s+=beaker(70,200,150,370,solOf(a,v&&!leftIsAn))+beaker(490,200,150,370,solOf(b,v&&leftIsAn));
     // salt bridge
     s+=`<path d="M235 290 L235 175 L525 175 L525 290" fill="none" stroke="#e2e8f0" stroke-width="30" stroke-linejoin="round"/><path d="M235 290 L235 175 L525 175 L525 290" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4 4"/>`;
     s+=`<text x="380" y="168" text-anchor="middle" font-size="12" fill="#5a6772">salt bridge (KNO₃)</text>`;
@@ -332,10 +390,18 @@ function draw(){
     s+=`<polyline points="170,150 170,70 345,70" fill="none" stroke="#334155" stroke-width="4"/><polyline points="415,70 590,70 590,150" fill="none" stroke="#334155" stroke-width="4"/>`;
     s+=`<circle cx="380" cy="70" r="34" fill="#fff" stroke="#334155" stroke-width="3"/><text x="380" y="66" text-anchor="middle" font-size="12" fill="#5a6772">voltmeter</text>
         <text x="380" y="86" text-anchor="middle" font-size="17" font-weight="800">${same?"0.00":v.Ecell.toFixed(2)} V</text>`;
-    const thinL=v?(leftIsAn?Math.max(.45,1-growth*.5):1):1, thinR=v?(!leftIsAn?Math.max(.45,1-growth*.5):1):1;
-    const coatL=v&&!leftIsAn?growth*8:0, coatR=v&&leftIsAn?growth*8:0;
-    s+=electrode(170,150,350,a.metal,same?a.m:(leftIsAn?"Anode (−)":"Cathode (+)"),`${a.m} in ${a.ion}(aq)`,thinL,a.metal,coatL);
-    s+=electrode(590,150,350,b.metal,same?b.m:(!leftIsAn?"Anode (−)":"Cathode (+)"),`${b.m} in ${b.ion}(aq)`,thinR,b.metal,coatR);
+    const isM=h=>h.kind==="metal";
+    const thinL=v&&isM(a)&&leftIsAn?Math.max(.45,1-growth*.5):1, thinR=v&&isM(b)&&!leftIsAn?Math.max(.45,1-growth*.5):1;
+    const coatL=v&&isM(a)&&!leftIsAn?growth*8:0, coatR=v&&isM(b)&&leftIsAn?growth*8:0;
+    const lab=(h,an)=>same?(isM(h)?h.reducer:"Pt"):(an?"Anode (−)":"Cathode (+)");
+    s+=electrode(170,150,350,a.elCol,lab(a,leftIsAn),a.sub,isM(a)?thinL:.55,a.elCol,coatL);
+    s+=electrode(590,150,350,b.elCol,lab(b,!leftIsAn),b.sub,isM(b)?thinR:.55,b.elCol,coatR);
+    if(!isM(a)) s+=`<text x="170" y="345" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">Pt</text>`;
+    if(!isM(b)) s+=`<text x="590" y="345" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">Pt</text>`;
+    [[a,170,1],[b,590,-1]].forEach(([h,x,inw])=>{ if(!h.gas) return; const px=x+inw*32;
+      s+=`<polyline points="${px},118 ${px},338 ${x+inw*10},338" fill="none" stroke="#94a3b8" stroke-width="7" stroke-linejoin="round"/><polyline points="${px},118 ${px},338 ${x+inw*10},338" fill="none" stroke="#f8fafc" stroke-width="3" stroke-linejoin="round"/>
+        <text x="${px}" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">${h.gas.txt}</text>`; });
+    bubbles.forEach(bb=>{ s+=`<circle cx="${bb.x}" cy="${bb.y}" r="${bb.r}" fill="${bb.col}" fill-opacity=".85" stroke="#94a3b8"/>`; });
     if(v){
       const from=leftIsAn?170:590, to=leftIsAn?590:170;
       const path=[[from,330],[from,150],[from,70],[to,70],[to,150],[to,330]];
@@ -348,8 +414,8 @@ function draw(){
         s+=`<g><circle cx="${p[0]}" cy="${p[1]}" r="9" fill="${io.k==="K⁺"?"#93c5fd":"#fca5a5"}" stroke="#334155"/><text x="${p[0]}" y="${p[1]+3}" text-anchor="middle" font-size="7.5" font-weight="700">${io.k}</text></g>`; });
       const ph=(t%EVD)/EVD;
       const anFace=leftIsAn?-1:1, caFace=leftIsAn?1:-1; // keep events clear of the salt bridge legs
-      const A=anodeEvent(from,anFace,315,{from:v.an.m,to:v.an.ion,z:v.an.z,type:"ion",surface:true},ph);
-      const C=cathodeEvent(to,caFace,315,{from:v.ca.ion,to:v.ca.m,z:v.ca.z,type:"metal"},ph);
+      const A=anodeEvent(from,anFace,315,{from:v.an.anim.red,to:v.an.anim.ox,z:v.an.z,type:v.an.oxType,surface:isM(v.an)},ph);
+      const C=cathodeEvent(to,caFace,315,{from:v.ca.anim.ox,to:v.ca.anim.red,z:v.ca.z,type:v.ca.redType},ph);
       s+=A.svg+C.svg; stepText=`<b style="color:#b91c1c">Anode:</b> ${A.step}<br><b style="color:#1d4ed8">Cathode:</b> ${C.step}`;
     }
   } else {
@@ -395,7 +461,9 @@ function frame(now){
   if(!paused){
     t+=dt; growth=Math.min(1,growth+dt/40);
     electrons=electrons.map(f=>(f+dt*0.12)%1);
-    if(mode==="volt"){ ions.forEach(io=>io.f=(io.f+dt*0.06)%1); }
+    if(mode==="volt"){ ions.forEach(io=>io.f=(io.f+dt*0.06)%1);
+      [[HC[+$("L").value],170],[HC[+$("R").value],590]].forEach(([h,x])=>{ if(h.gas&&HC[+$("L").value]!==HC[+$("R").value]&&Math.random()<dt*4) bubbles.push({x:x+(Math.random()-.5)*16,y:336,r:2.5+Math.random()*2.5,col:h.gas.col}); });
+      bubbles.forEach(b=>b.y-=dt*55); bubbles=bubbles.filter(b=>b.y>222); }
     else {
       const e=ELEC[+$("E").value];
       ions.forEach(io=>{ const tx=io.cat?470:290; io.x+=(tx-io.x)*dt*0.35+(Math.random()-.5)*dt*30; io.y+=(Math.random()-.5)*dt*40;
