@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Displacement Reactions Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5f8;--panel:#fff;--ink:#1b2632;--muted:#5a6775;--line:#dce2e9;--accent:#1d64d8;--ok:#17784a;--okbg:#e2f4e9;--bad:#b3222b;--badbg:#fbe5e6;--chip:#edf1f5;--neutral:#f6f7f9}
+*{box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;font-size:15px}
+header{background:#13202d;color:#fff;padding:18px 20px 0}
+.hwrap{max-width:1180px;margin:0 auto}
+.back{display:inline-block;margin:0 0 8px;font-weight:600;font-size:13px;color:#aebccb;text-decoration:none}.back:hover{color:#fff}
+header h1{margin:0;font-size:1.35rem;font-weight:600}
+header p{margin:4px 0 14px;color:#aebccb;font-size:.9rem}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav button{background:transparent;border:0;color:#aebccb;padding:10px 14px;font:inherit;font-weight:500;cursor:pointer;border-radius:8px 8px 0 0}
+nav button:hover{color:#fff}
+nav button.active{background:var(--bg);color:var(--ink)}
+main{max-width:1180px;margin:0 auto;padding:20px}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:310px 1fr;gap:16px;align-items:start}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font-size:1rem;margin:0 0 8px;font-weight:600}
+.card h3{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;font-weight:600}
+.card h3:first-of-type{margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--chip);padding:6px 11px;border-radius:999px;cursor:pointer;font:inherit;font-size:.9rem;color:var(--ink)}
+.chip:hover{border-color:#a9b6c4}
+.chip.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tog{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:.9rem;cursor:pointer}
+.tog input{margin-top:3px}
+.btn{background:var(--accent);color:#fff;border:0;padding:10px 18px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.predict{display:flex;gap:8px;margin-top:10px}
+.predict button{flex:1;padding:9px;border:1px solid var(--line);background:var(--neutral);border-radius:8px;font:inherit;cursor:pointer}
+.predict button.sel{border-color:var(--accent);background:#e6efff;font-weight:600}
+.predict.off{opacity:.4;pointer-events:none}
+.score{margin-top:10px;font-size:.85rem;color:var(--muted)}
+.hint{font-size:.85rem;color:var(--muted);margin:6px 0 0}
+.stage{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start}
+@media(max-width:620px){.stage{grid-template-columns:1fr}.stage svg.app{max-width:220px;margin:0 auto;display:block}}
+svg.app{width:100%;height:auto}
+.out .placeholder{color:var(--muted)}
+.verdict{display:inline-block;padding:4px 10px;border-radius:6px;font-weight:600;font-size:.9rem;margin-bottom:8px}
+.verdict.y{background:var(--okbg);color:var(--ok)}
+.verdict.n{background:#eceff3;color:#3d4a57}
+.predfb{font-size:.88rem;margin:0 0 8px}
+.predfb.good{color:var(--ok)}.predfb.badc{color:var(--bad)}
+.out dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.92rem}
+.out dt{color:var(--muted);font-weight:500}
+.out dd{margin:0}
+.eq{font-family:'IBM Plex Mono',monospace;font-size:.88rem;background:var(--neutral);padding:2px 6px;border-radius:4px;display:inline-block}
+.why{margin-top:10px;font-size:.92rem;padding:10px 12px;background:#f2f6fc;border-left:3px solid var(--accent);border-radius:0 6px 6px 0}
+.etr{margin-top:12px}
+table.res{border-collapse:collapse;width:100%;font-size:.88rem}
+table.res th,table.res td{border:1px solid var(--line);padding:7px 6px;text-align:center}
+table.res th{background:var(--neutral);font-weight:600}
+table.res td{cursor:pointer}
+table.res td:hover{outline:2px solid #a9c3f0;outline-offset:-2px}
+table.res td.y{background:var(--okbg);color:var(--ok);font-weight:600}
+table.res td.n{background:#f1f3f6;color:#5a6775}
+table.res td.s{background:#fafbfc;color:#aab4be;cursor:default}
+table.res td.u{color:#b5bfca}
+table.res td.cur{outline:2px solid var(--accent);outline-offset:-2px}
+.tablewrap{overflow-x:auto}
+.ranker ol{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ranker li{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.ranker li .pos{width:22px;height:22px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:.8rem;font-weight:600}
+.ranker li .lab{flex:1}
+.ranker li button{border:1px solid var(--line);background:var(--neutral);border-radius:6px;width:30px;height:28px;cursor:pointer;font-size:.8rem}
+.ranker li.right{border-color:#8fd0aa;background:var(--okbg)}
+.ranker li.wrong{border-color:#efa9ad;background:var(--badbg)}
+.ends{font-size:.8rem;color:var(--muted);font-weight:500}
+.fb{margin-top:8px;font-size:.92rem}
+.fb.good{color:var(--ok)}.fb.badc{color:var(--bad)}
+.q{border-top:1px solid var(--line);padding:12px 0}
+.q:first-child{border-top:0;padding-top:0}
+.q p{margin:0 0 8px;font-weight:500}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts button{text-align:left;padding:8px 10px;border:1px solid var(--line);background:#fff;border-radius:8px;font:inherit;cursor:pointer}
+.opts button.right{background:var(--okbg);border-color:#8fd0aa}
+.opts button.wrong{background:var(--badbg);border-color:#efa9ad}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:880px){.summary{grid-template-columns:1fr}}
+.summary ul{margin:6px 0;padding-left:20px}
+.summary li{margin:4px 0}
+.callout{background:#fff8e6;border:1px solid #f0d9a0;border-radius:10px;padding:12px 14px;font-size:.92rem}
+#tubeG.shake{animation:shake .9s ease-in-out;transform-origin:100px 200px;transform-box:view-box}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-10deg)}80%{transform:rotate(8deg)}}
+.liq{transition:fill 1.3s ease}
+.notrans .liq,.notrans .liq *{transition:none!important}
+#drop{opacity:0}
+#drop.fall{animation:fall .6s ease-in forwards}
+@keyframes fall{0%{opacity:1;transform:translateY(0)}90%{opacity:1}100%{opacity:0;transform:translateY(130px)}}
+#dropper{transition:opacity .3s}
+#stripG{transition:transform .9s ease}
+#stripG.up{transform:translateY(-70px)}
+#dep{transition:opacity 2.6s ease;opacity:0}
+.bub{animation:rise 1.6s linear infinite;opacity:0}
+@keyframes rise{0%{opacity:0;transform:translateY(0)}15%{opacity:.8}100%{opacity:0;transform:translateY(-110px)}}
+.e{animation:emove 1.8s linear infinite;opacity:0}
+@keyframes emove{0%{opacity:0;transform:translateX(0)}12%{opacity:1}88%{opacity:1}100%{opacity:0;transform:translateX(118px)}}
+.legend{font-size:.8rem;color:var(--muted);margin-top:6px}
+.small{font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="hwrap">
+  <a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+  <h1>Displacement Reactions Simulator</h1>
+  <p>Halogen / halide and metal / metal-ion reactions · relative ease of oxidation and reduction</p>
+  <nav id="tabs">
+    <button class="active" data-t="p-hal">Halogens + halides</button>
+    <button data-t="p-met">Metals + metal ions</button>
+    <button data-t="p-unk">Unknown metals: interpret data</button>
+    <button data-t="p-sum">Key ideas</button>
+  </nav>
+</div></header>
+
+<main>
+<!-- ================= HALOGENS ================= -->
+<section class="panel active" id="p-hal">
+ <div class="grid">
+  <div class="col">
+   <div class="card">
+    <h2>1 · Choose reagents</h2>
+    <h3>Halogen solution (added from dropper)</h3>
+    <div class="chips" id="hX"></div>
+    <h3>Halide solution (in test tube)</h3>
+    <div class="chips" id="hY"></div>
+    <label class="tog"><input type="checkbox" id="hOrg"> <span>Add a cyclohexane layer and shake after mixing (the halogen dissolves in the top layer)</span></label>
+   </div>
+   <div class="card">
+    <h2>2 · Predict</h2>
+    <label class="tog" style="margin-top:0"><input type="checkbox" id="hPM" checked> <span>Predict before mixing</span></label>
+    <div class="predict" id="hPred"><button data-p="1">Reaction</button><button data-p="0">No reaction</button></div>
+    <div class="score" id="hScore"></div>
+   </div>
+   <div class="btnrow"><button class="btn" id="hGo">Mix</button><button class="btn secondary" id="hReset">Reset</button></div>
+  </div>
+  <div class="col">
+   <div class="card stage">
+    <svg class="app" viewBox="0 0 200 320" aria-label="Test tube">
+     <defs><clipPath id="tubeClip"><path d="M72 30 V262 a28 28 0 0 0 56 0 V30 Z"/></clipPath></defs>
+     <g id="dropper">
+       <rect x="93" y="0" width="14" height="10" rx="3" fill="#2b3a4a"/>
+       <path d="M95 10 H105 V36 L100 44 L95 36 Z" fill="#e7edf3" stroke="#8795a3" stroke-width="1.2"/>
+       <circle id="drop" cx="100" cy="48" r="4" fill="#ccc"/>
+     </g>
+     <g id="tubeG">
+      <g clip-path="url(#tubeClip)">
+        <rect id="hAq" class="liq" x="60" y="170" width="80" height="140" fill="rgba(215,232,244,.55)"/>
+        <rect id="hOrgL" class="liq" x="60" y="122" width="80" height="48" fill="rgba(248,249,251,.7)" style="display:none"/>
+        <line id="hBoundary" x1="60" x2="140" y1="170" y2="170" stroke="rgba(90,110,130,.35)" stroke-width="1" style="display:none"/>
+      </g>
+      <path d="M72 30 V262 a28 28 0 0 0 56 0 V30" fill="none" stroke="#7d8a97" stroke-width="3"/>
+      <ellipse cx="100" cy="30" rx="30" ry="4" fill="none" stroke="#7d8a97" stroke-width="2"/>
+      <path d="M80 50 V250" stroke="rgba(255,255,255,.7)" stroke-width="4" stroke-linecap="round"/>
+     </g>
+     <text id="hLabOrg" x="134" y="150" font-size="10" fill="#5a6775" style="display:none">cyclohexane</text>
+     <text x="134" y="240" font-size="10" fill="#5a6775">aqueous</text>
+    </svg>
+    <div class="out" id="hOut"></div>
+   </div>
+   <div class="card">
+    <h2>Results table</h2>
+    <p class="hint" style="margin:0 0 8px">Rows: halogen added. Columns: halide solution. Click a cell to set up that combination.</p>
+    <div class="tablewrap" id="hTable"></div>
+   </div>
+   <div class="card">
+    <h2>Rank the halogens by ease of reduction</h2>
+    <p class="hint" style="margin:0 0 6px">Use your results. Which halogen gains electrons most readily, so it is the strongest oxidising agent?</p>
+    <div class="ranker" id="hRank"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= METALS ================= -->
+<section class="panel" id="p-met">
+ <div class="grid">
+  <div class="col">
+   <div class="card">
+    <h2>1 · Choose reagents</h2>
+    <h3>Metal strip</h3>
+    <div class="chips" id="mM"></div>
+    <h3>Solution of metal ions</h3>
+    <div class="chips" id="mN"></div>
+   </div>
+   <div class="card">
+    <h2>2 · Predict</h2>
+    <label class="tog" style="margin-top:0"><input type="checkbox" id="mPM" checked> <span>Predict before adding the metal</span></label>
+    <div class="predict" id="mPred"><button data-p="1">Reaction</button><button data-p="0">No reaction</button></div>
+    <div class="score" id="mScore"></div>
+   </div>
+   <div class="btnrow"><button class="btn" id="mGo">Add metal</button><button class="btn secondary" id="mReset">Reset</button></div>
+  </div>
+  <div class="col">
+   <div class="card stage">
+    <svg class="app" viewBox="0 0 240 300" aria-label="Beaker">
+     <defs><clipPath id="bkClip"><path d="M42 40 V258 Q42 278 62 278 H178 Q198 278 198 258 V40 Z"/></clipPath></defs>
+     <g clip-path="url(#bkClip)">
+       <rect id="mSol" class="liq" x="30" y="112" width="180" height="180" fill="rgba(215,232,244,.55)"/>
+       <g id="bubbles"></g>
+     </g>
+     <g id="stripG" class="up">
+       <rect id="mStrip" x="106" y="30" width="28" height="200" rx="2" fill="#a7afb8" stroke="rgba(0,0,0,.2)"/>
+       <g id="dep"></g>
+     </g>
+     <line x1="42" x2="198" y1="112" y2="112" stroke="rgba(80,110,140,.35)"/>
+     <path d="M42 40 V258 Q42 278 62 278 H178 Q198 278 198 258 V40" fill="none" stroke="#7d8a97" stroke-width="3"/>
+     <path d="M36 40 H48 M192 40 H204" stroke="#7d8a97" stroke-width="3"/>
+     <path d="M52 60 V250" stroke="rgba(255,255,255,.7)" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div class="out" id="mOut"></div>
+   </div>
+   <div class="card">
+    <h2>Results table</h2>
+    <p class="hint" style="margin:0 0 8px">Rows: metal. Columns: metal ion in solution. Click a cell to set up that combination.</p>
+    <div class="tablewrap" id="mTable"></div>
+   </div>
+   <div class="card">
+    <h2>Rank the metals by ease of oxidation</h2>
+    <p class="hint" style="margin:0 0 6px">Count how many solutions each metal reacts with. Which metal loses electrons most readily, so it is the strongest reducing agent?</p>
+    <div class="ranker" id="mRank"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= UNKNOWN ================= -->
+<section class="panel" id="p-unk">
+ <div class="grid">
+  <div class="col">
+   <div class="card">
+    <h2>Unknown metals W, X, Y and Z</h2>
+    <p class="small" style="margin:0 0 10px">This mirrors exam questions: you are not expected to know the order, you deduce it from data. Each metal forms a 2+ ion, and all of the ion solutions are colourless. W, X, Y and Z are labels, not chemical symbols.</p>
+    <p class="small">Click cells in the table to run each test, or reveal the full data set as an exam would give it.</p>
+    <div class="btnrow" style="margin-top:10px"><button class="btn secondary" id="uAll">Show full data table</button><button class="btn secondary" id="uNew">New set of metals</button></div>
+   </div>
+  </div>
+  <div class="col">
+   <div class="card">
+    <h2>Observations: metal placed in a solution of ions</h2>
+    <div class="tablewrap" id="uTable"></div>
+    <p class="legend">✓ = a dark deposit forms on the metal · ✗ = no visible change · — = not tested (same metal)</p>
+   </div>
+   <div class="card">
+    <h2>Rank W, X, Y, Z by ease of oxidation</h2>
+    <div class="ranker" id="uRank"></div>
+   </div>
+   <div class="card">
+    <h2>Interpret the data</h2>
+    <div id="uQs"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= SUMMARY ================= -->
+<section class="panel" id="p-sum">
+ <div class="summary">
+  <div class="card">
+   <h2>Halogens and halide ions</h2>
+   <ul>
+    <li>Halogens act as <b>oxidising agents</b>: they gain electrons and are reduced: <span class="eq">X<sub>2</sub> + 2e<sup>−</sup> → 2X<sup>−</sup></span></li>
+    <li><b>Ease of reduction:</b> F<sub>2</sub> &gt; Cl<sub>2</sub> &gt; Br<sub>2</sub> &gt; I<sub>2</sub>. Going down the group, atomic radius increases, so an incoming electron is further from the nucleus and more shielded. It is attracted less strongly.</li>
+    <li>It follows that halide ions get <b>easier to oxidise</b> down the group. I<sup>−</sup> is the strongest reducing agent of the halides.</li>
+    <li>A halogen oxidises the halide ions of any halogen <b>below</b> it in group 17: <span class="eq">Cl<sub>2</sub> + 2Br<sup>−</sup> → 2Cl<sup>−</sup> + Br<sub>2</sub></span></li>
+    <li>K<sup>+</sup> or Na<sup>+</sup> are spectator ions and are left out of the ionic equation.</li>
+    <li>Br<sub>2</sub> and I<sub>2</sub> can both look orange-brown in water. Shaking with cyclohexane separates them clearly: <b>orange-red</b> for Br<sub>2</sub> and <b>purple</b> for I<sub>2</sub>.</li>
+    <li>F<sub>2</sub> is not used in these aqueous tests because it oxidises water itself.</li>
+   </ul>
+  </div>
+  <div class="card">
+   <h2>Metals and metal ions</h2>
+   <ul>
+    <li>The metal atom is <b>oxidised</b> and acts as the <b>reducing agent</b>: <span class="eq">M → M<sup>n+</sup> + ne<sup>−</sup></span>. The metal ion is reduced and acts as the oxidising agent.</li>
+    <li>A metal displaces (reduces) the ions of any metal that is <b>less easily oxidised</b> than itself.</li>
+    <li>The order of ease of <b>reduction of the ions</b> is the reverse of the order of ease of oxidation of the metals. The ions of the least reactive metal are the most easily reduced.</li>
+    <li>Balance the electrons: <span class="eq">Cu + 2Ag<sup>+</sup> → Cu<sup>2+</sup> + 2Ag</span>. A charge check shows 2+ on each side.</li>
+    <li>Sulfate and nitrate ions are spectators.</li>
+   </ul>
+   <div class="callout"><b>Syllabus note:</b> the relative reactivity of metals from displacement reactions does not need to be learned. Exam questions supply the data, and you must interpret it.</div>
+  </div>
+  <div class="card">
+   <h2>Reading a data table: exam technique</h2>
+   <ul>
+    <li>The metal that reacts with the <b>most</b> ion solutions is the most easily oxidised (strongest reducing agent).</li>
+    <li>The ion that is reduced by the <b>most</b> metals is the most easily reduced (strongest oxidising agent).</li>
+    <li>For the metal, count ticks along its <b>row</b>. For the ion, count ticks down its <b>column</b>.</li>
+    <li>To predict an untested reaction, place both species in your deduced order: a reaction happens only if the metal is above the metal of the ion.</li>
+   </ul>
+  </div>
+  <div class="card">
+   <h2>Common errors</h2>
+   <ul>
+    <li>"Chlorine displaces bromine." At the start, <b>bromide ions</b> are present, not bromine. Better: chlorine oxidises bromide ions to bromine.</li>
+    <li>Mixing up Cl<sub>2</sub> (oxidising agent) with Cl<sup>−</sup> (the product, which is a very weak reducing agent).</li>
+    <li>Writing Cu + Ag<sup>+</sup> → Cu<sup>2+</sup> + Ag. The atoms balance but the charges and electrons do not.</li>
+    <li>Writing iron as Fe<sup>3+</sup> in its reaction with Cu<sup>2+</sup>(aq). Fe<sup>2+</sup> forms, which is why the solution turns pale green.</li>
+    <li>Calling the metal ion "the reducing agent". The species that is <i>reduced</i> is the <i>oxidising</i> agent.</li>
+   </ul>
+  </div>
+ </div>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const gcd=(a,b)=>b?gcd(b,a%b):a; const lcm=(a,b)=>a*b/gcd(a,b);
+const COLOURLESS='rgba(215,232,244,.55)';
+const E='e<sup>−</sup>';
+const cf=n=>n===1?'':n;
+const ionM=(s,q)=>s+'<sup>'+(q===1?'+':q+'+')+'</sup>';
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+/* tabs */
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===b.dataset.t));
+});
+
+function chips(el,opts,cur,onPick){el.innerHTML='';opts.forEach(o=>{const b=document.createElement('button');b.className='chip'+(o.k===cur?' sel':'');b.innerHTML=o.label;b.onclick=()=>onPick(o.k);el.appendChild(b);});}
+
+function etrSVG(red,ox){
+  return `<svg viewBox="0 0 330 92" style="width:100%;max-width:420px">
+   <rect x="2" y="18" width="104" height="46" rx="8" fill="#fff4e5" stroke="#e4b46a"/>
+   <rect x="224" y="18" width="104" height="46" rx="8" fill="#e8f0ff" stroke="#8cabe6"/>
+   <foreignObject x="2" y="20" width="104" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="font:600 14px 'IBM Plex Sans',sans-serif;text-align:center;line-height:1.15">${red}<div style="font:500 10px 'IBM Plex Sans',sans-serif;color:#8a5a12">reducing agent</div></div></foreignObject>
+   <foreignObject x="224" y="20" width="104" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="font:600 14px 'IBM Plex Sans',sans-serif;text-align:center;line-height:1.15">${ox}<div style="font:500 10px 'IBM Plex Sans',sans-serif;color:#1d4fa0">oxidising agent</div></div></foreignObject>
+   <line x1="112" y1="41" x2="218" y2="41" stroke="#b7c2ce" stroke-dasharray="4 4"/>
+   <path d="M212 36 L220 41 L212 46" fill="none" stroke="#b7c2ce"/>
+   ${[0,.6,1.2].map(d=>`<g class="e" style="animation-delay:${d}s"><circle cx="100" cy="41" r="9" fill="#1d64d8"/><text x="100" y="45" font-size="10" fill="#fff" text-anchor="middle" font-family="IBM Plex Sans, sans-serif">e⁻</text></g>`).join('')}
+   <text x="54" y="82" font-size="10" text-anchor="middle" fill="#5a6775" font-family="IBM Plex Sans, sans-serif">loses e⁻ → oxidised</text>
+   <text x="276" y="82" font-size="10" text-anchor="middle" fill="#5a6775" font-family="IBM Plex Sans, sans-serif">gains e⁻ → reduced</text>
+  </svg>`;
+}
+/* fix electron travel distance to match diagram */
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes emove{0%{opacity:0;transform:translateX(12px)}12%{opacity:1}88%{opacity:1}100%{opacity:0;transform:translateX(124px)}}</style>');
+
+/* generic ranker */
+function Ranker(el,items,correct,top,bottom,goodMsg){
+  const lab={};items.forEach(i=>lab[i.k]=i.label);
+  let order=shuffle(correct);let tries=0;while(order.join()===correct.join()&&tries++<20)order=shuffle(correct);
+  function render(marks){
+    el.innerHTML=`<div class="ends">▲ ${top}</div><ol>${order.map((k,i)=>`<li class="${marks?(marks[i]?'right':'wrong'):''}"><span class="pos">${i+1}</span><span class="lab">${lab[k]}</span><button data-i="${i}" data-d="-1" aria-label="Move up">▲</button><button data-i="${i}" data-d="1" aria-label="Move down">▼</button></li>`).join('')}</ol><div class="ends">▼ ${bottom}</div><div class="btnrow" style="margin-top:10px"><button class="btn secondary" data-check>Check order</button></div><div class="fb"></div>`;
+    el.querySelectorAll('li button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,j=i+ +b.dataset.d;if(j<0||j>=order.length)return;[order[i],order[j]]=[order[j],order[i]];render();});
+    el.querySelector('[data-check]').onclick=()=>{const m=order.map((k,i)=>k===correct[i]);render(m);const fb=el.querySelector('.fb');const n=m.filter(Boolean).length;
+      if(n===order.length){fb.className='fb good';fb.innerHTML='✓ Correct. '+goodMsg;}else{fb.className='fb badc';fb.textContent=`${n} of ${order.length} in the right position. Go back to your results table and try again.`;}};
+  }
+  render();
+}
+
+/* ===================== HALOGENS ===================== */
+const HAL={
+ Cl:{n:'chlorine',X2:'Cl<sub>2</sub>',ion:'Cl<sup>−</sup>',salt:'KCl',sol:'chlorine water',r:1,
+     aq:'rgba(205,228,140,.75)',formed:'rgba(205,228,140,.75)',aqPale:'rgba(226,238,205,.6)',org:'rgba(222,236,190,.75)',aqName:'pale yellow-green',formedName:'pale yellow-green',orgName:'very pale green / colourless'},
+ Br:{n:'bromine',X2:'Br<sub>2</sub>',ion:'Br<sup>−</sup>',salt:'KBr',sol:'bromine water',r:2,
+     aq:'rgba(236,135,30,.85)',formed:'rgba(244,178,60,.82)',aqPale:'rgba(246,212,160,.6)',org:'rgba(212,78,24,.88)',aqName:'orange',formedName:'yellow-orange',orgName:'orange-red'},
+ I:{n:'iodine',X2:'I<sub>2</sub>',ion:'I<sup>−</sup>',salt:'KI',sol:'iodine solution',r:3,
+     aq:'rgba(122,62,18,.88)',formed:'rgba(132,70,22,.86)',aqPale:'rgba(214,180,140,.6)',org:'rgba(132,52,165,.9)',aqName:'brown',formedName:'brown',orgName:'purple / violet'}
+};
+const HK=Object.keys(HAL);
+let H={x:'Cl',y:'Br',org:false,pm:true,pred:null,busy:false,done:false,res:{},score:{c:0,t:0}};
+
+function hControls(){
+  chips($('#hX'),HK.map(k=>({k,label:HAL[k].X2+'(aq)'})),H.x,k=>{if(H.busy)return;H.x=k;hReset();});
+  chips($('#hY'),HK.map(k=>({k,label:HAL[k].salt+'(aq)'})),H.y,k=>{if(H.busy)return;H.y=k;hReset();});
+  $('#hPred').classList.toggle('off',!H.pm||H.done);
+  $('#hPred').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',H.pred!==null&&+b.dataset.p===H.pred));
+  $('#hGo').disabled=H.busy||H.done||(H.pm&&H.pred===null);
+  $('#hReset').disabled=H.busy;
+  $('#hScore').textContent=H.score.t?`Predictions correct: ${H.score.c} / ${H.score.t}`:'';
+  hTable();
+}
+function hSetVisual(instant){
+  const g=$('#tubeG');if(instant){g.classList.add('notrans');}
+  $('#hAq').style.fill=COLOURLESS;
+  $('#hOrgL').style.fill='rgba(248,249,251,.7)';
+  $('#hOrgL').style.display=H.org?'':'none';$('#hBoundary').style.display=H.org?'':'none';$('#hLabOrg').style.display=H.org?'':'none';
+  $('#hAq').setAttribute('y',H.org?170:150);
+  $('#drop').style.fill=HAL[H.x].aq;$('#dropper').style.opacity=1;
+  if(instant){void g.getBoundingClientRect();setTimeout(()=>g.classList.remove('notrans'),30);}
+}
+function hReset(){H.pred=null;H.done=false;hSetVisual(true);
+  $('#hOut').innerHTML=`<p class="placeholder">Tube contains colourless ${HAL[H.y].salt}(aq)${H.org?' with a cyclohexane layer on top':''}. The dropper holds ${HAL[H.x].sol}, which is ${HAL[H.x].aqName}.</p><p class="placeholder">${H.pm?'Make a prediction, then press <b>Mix</b>.':'Press <b>Mix</b>.'}</p>`;
+  hControls();}
+
+function hMix(){
+  if(H.busy)return;H.busy=true;hControls();
+  const X=HAL[H.x],Y=HAL[H.y],same=H.x===H.y,reacts=!same&&X.r<Y.r;
+  const d=$('#drop');d.classList.remove('fall');void d.getBoundingClientRect();d.classList.add('fall');
+  setTimeout(()=>{$('#hAq').style.fill=X.aq;$('#dropper').style.opacity=.25;},650);
+  if(reacts)setTimeout(()=>{$('#hAq').style.fill=Y.formed;},1900);
+  let t=3200;
+  if(H.org){
+    setTimeout(()=>{const g=$('#tubeG');g.classList.remove('shake');void g.getBoundingClientRect();g.classList.add('shake');},3100);
+    setTimeout(()=>{const P=reacts?Y:X;$('#hOrgL').style.fill=P.org;$('#hAq').style.fill=P.aqPale;},3600);
+    t=5000;
+  }
+  setTimeout(()=>{
+    const key=H.x+'|'+H.y;H.res[key]=same?'s':(reacts?'y':'n');
+    let pf='';
+    if(H.pm&&H.pred!==null){const ok=(H.pred===1)===reacts;H.score.t++;if(ok)H.score.c++;pf=`<p class="predfb ${ok?'good':'badc'}">${ok?'✓ Your prediction was correct.':'✗ Your prediction was incorrect.'}</p>`;}
+    $('#hOut').innerHTML=pf+hResultHTML(X,Y,same,reacts);
+    H.busy=false;H.done=true;hControls();
+  },t);
+}
+function hResultHTML(X,Y,same,reacts){
+  let obs,orgObs='';
+  if(same){obs=`No change. The mixture stays ${X.aqName}.`;if(H.org)orgObs=`On shaking, the cyclohexane layer turns ${X.orgName} because the ${X.n} dissolves in it.`;
+    return `<span class="verdict n">No reaction</span><dl><dt>Observation</dt><dd>${obs} ${orgObs}</dd></dl><div class="why">${X.X2} and ${X.ion} belong to the same element, so there is no net reaction.</div>`;}
+  if(reacts){
+    obs=`The mixture turns ${Y.formedName} as ${Y.X2} forms.`;
+    if(H.org)orgObs=` On shaking, the top cyclohexane layer turns <b>${Y.orgName}</b>, which confirms that ${Y.X2} is present.`;
+    return `<span class="verdict y">Reaction occurs</span>
+    <dl>
+     <dt>Observation</dt><dd>${obs}${orgObs}</dd>
+     <dt>Ionic equation</dt><dd><span class="eq">${X.X2}(aq) + 2${Y.ion}(aq) → 2${X.ion}(aq) + ${Y.X2}(aq)</span></dd>
+     <dt>Oxidation</dt><dd><span class="eq">2${Y.ion}(aq) → ${Y.X2}(aq) + 2${E}</span></dd>
+     <dt>Reduction</dt><dd><span class="eq">${X.X2}(aq) + 2${E} → 2${X.ion}(aq)</span></dd>
+     <dt>Oxidising agent</dt><dd>${X.X2}</dd>
+     <dt>Reducing agent</dt><dd>${Y.ion}</dd>
+     <dt>Spectator ion</dt><dd>K<sup>+</sup></dd>
+    </dl>
+    <div class="etr">${etrSVG(Y.ion,X.X2)}</div>
+    <div class="why">${X.X2} is more easily reduced than ${Y.X2}, so ${X.n} is a stronger oxidising agent. It takes electrons from ${Y.ion} ions and oxidises them to ${Y.X2}.</div>`;
+  }
+  obs=`No change. The mixture stays ${X.aqName}, the colour of the ${X.sol} that was added.`;
+  if(H.org)orgObs=` On shaking, the cyclohexane layer turns <b>${X.orgName}</b>. Only unreacted ${X.X2} is present, so no ${Y.X2} has formed.`;
+  return `<span class="verdict n">No reaction</span>
+   <dl><dt>Observation</dt><dd>${obs}${orgObs}</dd></dl>
+   <div class="why">${X.X2} is <b>less</b> easily reduced than ${Y.X2}. It is too weak an oxidising agent to remove electrons from ${Y.ion} ions.</div>`;
+}
+function hTable(){
+  let h='<table class="res"><tr><th>Added ↓ / Halide →</th>'+HK.map(k=>`<th>${HAL[k].salt}(aq)<br><span class="small">${HAL[k].ion}</span></th>`).join('')+'</tr>';
+  HK.forEach(x=>{h+=`<tr><th>${HAL[x].X2}(aq)</th>`;HK.forEach(y=>{const r=H.res[x+'|'+y];const cur=(x===H.x&&y===H.y)?' cur':'';
+    if(x===y)h+=`<td class="s${cur}" data-x="${x}" data-y="${y}">${r?'no reaction':'—'}</td>`;
+    else h+=`<td class="${r||'u'}${cur}" data-x="${x}" data-y="${y}">${r==='y'?'✓ reaction':r==='n'?'✗ no reaction':'?'}</td>`;});h+='</tr>';});
+  $('#hTable').innerHTML=h+'</table>';
+  $('#hTable').querySelectorAll('td').forEach(td=>td.onclick=()=>{if(H.busy)return;H.x=td.dataset.x;H.y=td.dataset.y;hReset();});
+}
+$('#hPred').querySelectorAll('button').forEach(b=>b.onclick=()=>{H.pred=+b.dataset.p;hControls();});
+$('#hPM').onchange=e=>{H.pm=e.target.checked;hReset();};
+$('#hOrg').onchange=e=>{if(H.busy){e.target.checked=H.org;return;}H.org=e.target.checked;hReset();};
+$('#hGo').onclick=hMix;$('#hReset').onclick=()=>{if(!H.busy)hReset();};
+Ranker($('#hRank'),HK.map(k=>({k,label:`${HAL[k].X2} <span class="small">(${HAL[k].n})</span>`})),['Cl','Br','I'],'most easily reduced (strongest oxidising agent)','least easily reduced',
+ 'Ease of reduction decreases down group 17. The atoms get larger, so an incoming electron is further from the nucleus and more shielded. This means the halide ions get <b>easier</b> to oxidise down the group: I<sup>−</sup> &gt; Br<sup>−</sup> &gt; Cl<sup>−</sup>. (F<sub>2</sub> would sit at the top, but it oxidises water.)');
+hReset();
+
+/* ===================== METALS ===================== */
+const MET={
+ Mg:{n:'magnesium',q:2,r:1,salt:'MgSO<sub>4</sub>',anion:'SO<sub>4</sub><sup>2−</sup>',metal:'#c9cdd3',dep:'#80868f',depName:'grey'},
+ Zn:{n:'zinc',q:2,r:2,salt:'ZnSO<sub>4</sub>',anion:'SO<sub>4</sub><sup>2−</sup>',metal:'#a9b1ba',dep:'#6e767f',depName:'grey'},
+ Fe:{n:'iron',q:2,r:3,salt:'FeSO<sub>4</sub>',anion:'SO<sub>4</sub><sup>2−</sup>',ionCol:'rgba(186,224,165,.75)',ionColName:'pale green',metal:'#7b7e83',dep:'#2e3032',depName:'dark grey / black'},
+ Pb:{n:'lead',q:2,r:4,salt:'Pb(NO<sub>3</sub>)<sub>2</sub>',anion:'NO<sub>3</sub><sup>−</sup>',metal:'#6b7280',dep:'#3d424b',depName:'dark grey crystalline'},
+ Cu:{n:'copper',q:2,r:5,salt:'CuSO<sub>4</sub>',anion:'SO<sub>4</sub><sup>2−</sup>',ionCol:'rgba(62,145,226,.78)',ionColName:'blue',metal:'#c46b3f',dep:'#b0613a',depName:'pink-brown'},
+ Ag:{n:'silver',q:1,r:6,salt:'AgNO<sub>3</sub>',anion:'NO<sub>3</sub><sup>−</sup>',metal:'#d5dae0',dep:'#a3aab3',depName:'grey-silver crystalline'}
+};
+const MK=Object.keys(MET);
+let M={m:'Zn',n:'Cu',pm:true,pred:null,busy:false,done:false,res:{},score:{c:0,t:0}};
+
+function mControls(){
+  chips($('#mM'),MK.map(k=>({k,label:k+'(s)'})),M.m,k=>{if(M.busy)return;M.m=k;mReset();});
+  chips($('#mN'),MK.map(k=>({k,label:MET[k].salt+'(aq)'})),M.n,k=>{if(M.busy)return;M.n=k;mReset();});
+  $('#mPred').classList.toggle('off',!M.pm||M.done);
+  $('#mPred').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',M.pred!==null&&+b.dataset.p===M.pred));
+  $('#mGo').disabled=M.busy||M.done||(M.pm&&M.pred===null);
+  $('#mReset').disabled=M.busy;
+  $('#mScore').textContent=M.score.t?`Predictions correct: ${M.score.c} / ${M.score.t}`:'';
+  mTable();
+}
+function buildDeposit(N){
+  const D=MET[N];let s=`<rect x="105" y="122" width="30" height="108" rx="2" fill="${D.dep}" opacity=".85"/>`;
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  for(let i=0;i<28;i++){const side=Math.random()<.5;const x=side?rnd(101,109):rnd(131,139);s+=`<circle cx="${x.toFixed(1)}" cy="${rnd(124,228).toFixed(1)}" r="${rnd(2,4.5).toFixed(1)}" fill="${D.dep}"/>`;}
+  if(N==='Ag'||N==='Pb'){for(let i=0;i<16;i++){const left=Math.random()<.5;const y=rnd(126,226),len=rnd(10,24),x0=left?105:135,x1=left?x0-len:x0+len,y1=y+rnd(-8,8);
+    s+=`<line x1="${x0}" y1="${y.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="${N==='Ag'?'#c9cfd6':'#4a4f58'}" stroke-width="1.6" stroke-linecap="round"/>`;}}
+  return s;
+}
+function mSetVisual(instant){
+  const sv=$('#mSol').closest('svg');if(instant)sv.classList.add('notrans');
+  $('#mSol').style.fill=MET[M.n].ionCol||COLOURLESS;
+  $('#mStrip').setAttribute('fill',MET[M.m].metal);
+  const dep=$('#dep');dep.style.transition='none';dep.style.opacity=0;dep.innerHTML='';void dep.getBoundingClientRect();dep.style.transition='';
+  $('#stripG').classList.add('up');$('#bubbles').innerHTML='';
+  if(instant){void sv.getBoundingClientRect();setTimeout(()=>sv.classList.remove('notrans'),30);}
+}
+function mReset(){M.pred=null;M.done=false;mSetVisual(true);
+  const N=MET[M.n];
+  $('#mOut').innerHTML=`<p class="placeholder">Beaker contains ${N.salt}(aq), which is ${N.ionCol?N.ionColName:'colourless'}. A strip of ${MET[M.m].n} is held above it.</p><p class="placeholder">${M.pm?'Make a prediction, then press <b>Add metal</b>.':'Press <b>Add metal</b>.'}</p>`;
+  mControls();}
+function mMix(){
+  if(M.busy)return;M.busy=true;mControls();
+  const A=MET[M.m],B=MET[M.n],same=M.m===M.n,reacts=!same&&A.r<B.r;
+  $('#stripG').classList.remove('up');
+  if(reacts){
+    setTimeout(()=>{$('#dep').innerHTML=buildDeposit(M.n);void $('#dep').getBoundingClientRect();$('#dep').style.opacity=1;
+      $('#mSol').style.transition='fill 3s ease';$('#mSol').style.fill=A.ionCol||COLOURLESS;
+      if(M.m==='Mg'){let b='';for(let i=0;i<10;i++){b+=`<circle class="bub" cx="${(104+Math.random()*32).toFixed(0)}" cy="${(200+Math.random()*30).toFixed(0)}" r="${(1.5+Math.random()*2).toFixed(1)}" fill="none" stroke="rgba(255,255,255,.95)" style="animation-delay:${(Math.random()*1.6).toFixed(2)}s"/>`;}$('#bubbles').innerHTML=b;}
+    },1000);
+  }
+  setTimeout(()=>{
+    $('#mSol').style.transition='';
+    const key=M.m+'|'+M.n;M.res[key]=same?'s':(reacts?'y':'n');
+    let pf='';
+    if(M.pm&&M.pred!==null){const ok=(M.pred===1)===reacts;M.score.t++;if(ok)M.score.c++;pf=`<p class="predfb ${ok?'good':'badc'}">${ok?'✓ Your prediction was correct.':'✗ Your prediction was incorrect.'}</p>`;}
+    $('#mOut').innerHTML=pf+mResultHTML(M.m,M.n,same,reacts);
+    M.busy=false;M.done=true;mControls();
+  },reacts?4200:2000);
+}
+function mResultHTML(a,b,same,reacts){
+  const A=MET[a],B=MET[b];
+  if(same)return `<span class="verdict n">No reaction</span><dl><dt>Observation</dt><dd>No visible change.</dd></dl><div class="why">A metal in a solution of its own ions gives no net reaction.</div>`;
+  if(!reacts)return `<span class="verdict n">No reaction</span><dl><dt>Observation</dt><dd>No visible change. The metal surface stays the same, and the solution stays ${B.ionCol?B.ionColName:'colourless'}.</dd></dl>
+    <div class="why">${cap(A.n)} is <b>less</b> easily oxidised than ${B.n}. ${a} atoms cannot give electrons to ${ionM(b,B.q)} ions, so ${a} cannot reduce them.</div>`;
+  const e=lcm(A.q,B.q),ca=e/A.q,cb=e/B.q;
+  let obs=`A ${B.depName} solid (${B.n}) forms on the surface of the ${A.n}.`;
+  if(B.ionCol&&A.ionCol)obs+=` The ${B.ionColName} solution fades and turns ${A.ionColName} as ${ionM(a,A.q)} forms.`;
+  else if(B.ionCol)obs+=` The ${B.ionColName} colour of the solution fades.`;
+  else if(A.ionCol)obs+=` The solution turns ${A.ionColName} as ${ionM(a,A.q)}(aq) forms.`;
+  if(a==='Mg')obs+=` <span class="small">Some effervescence may also be seen, because magnesium also reacts slowly with water to give H<sub>2</sub>.</span>`;
+  let bal='';if(ca>1)bal=`Multiply the oxidation half-equation by ${ca}. `;if(cb>1)bal+=`Multiply the reduction half-equation by ${cb}. `;
+  if(bal)bal=`<dt>Balancing</dt><dd>${bal}Each side then has ${e} ${E} transferred.</dd>`;
+  return `<span class="verdict y">Reaction occurs</span>
+  <dl>
+   <dt>Observation</dt><dd>${obs}</dd>
+   <dt>Ionic equation</dt><dd><span class="eq">${cf(ca)}${a}(s) + ${cf(cb)}${ionM(b,B.q)}(aq) → ${cf(ca)}${ionM(a,A.q)}(aq) + ${cf(cb)}${b}(s)</span></dd>
+   <dt>Oxidation</dt><dd><span class="eq">${a}(s) → ${ionM(a,A.q)}(aq) + ${cf(A.q)}${E}</span></dd>
+   <dt>Reduction</dt><dd><span class="eq">${ionM(b,B.q)}(aq) + ${cf(B.q)}${E} → ${b}(s)</span></dd>
+   ${bal}
+   <dt>Oxidising agent</dt><dd>${ionM(b,B.q)}</dd>
+   <dt>Reducing agent</dt><dd>${a}</dd>
+   <dt>Spectator ion</dt><dd>${B.anion}</dd>
+  </dl>
+  <div class="etr">${etrSVG(a,ionM(b,B.q))}</div>
+  <div class="why">${cap(A.n)} is more easily oxidised than ${B.n}. ${a} atoms lose electrons to ${ionM(b,B.q)} ions, which are reduced to ${b} metal.</div>`;
+}
+function mTable(){
+  let h='<table class="res"><tr><th>Metal ↓ / Ion →</th>'+MK.map(k=>`<th>${ionM(k,MET[k].q)}</th>`).join('')+'<th>Total ✓</th></tr>';
+  MK.forEach(x=>{h+=`<tr><th>${x}</th>`;let tot=0;MK.forEach(y=>{const r=M.res[x+'|'+y];if(r==='y')tot++;const cur=(x===M.m&&y===M.n)?' cur':'';
+    if(x===y)h+=`<td class="s${cur}" data-x="${x}" data-y="${y}">—</td>`;
+    else h+=`<td class="${r||'u'}${cur}" data-x="${x}" data-y="${y}">${r==='y'?'✓':r==='n'?'✗':'?'}</td>`;});h+=`<td class="s">${tot}</td></tr>`;});
+  $('#mTable').innerHTML=h+'</table>';
+  $('#mTable').querySelectorAll('td[data-x]').forEach(td=>td.onclick=()=>{if(M.busy)return;M.m=td.dataset.x;M.n=td.dataset.y;mReset();});
+}
+$('#mPred').querySelectorAll('button').forEach(b=>b.onclick=()=>{M.pred=+b.dataset.p;mControls();});
+$('#mPM').onchange=e=>{M.pm=e.target.checked;mReset();};
+$('#mGo').onclick=mMix;$('#mReset').onclick=()=>{if(!M.busy)mReset();};
+Ranker($('#mRank'),MK.map(k=>({k,label:`${k} <span class="small">(${MET[k].n})</span>`})),['Mg','Zn','Fe','Pb','Cu','Ag'],'most easily oxidised (strongest reducing agent)','least easily oxidised',
+ 'For the ions, the ease of reduction runs the other way: Ag<sup>+</sup> is most easily reduced and Mg<sup>2+</sup> least. Remember that you do not need to learn this order, because exam questions supply the data.');
+mReset();
+
+/* ===================== UNKNOWN ===================== */
+const UL=['W','X','Y','Z'];
+let U={order:[],res:{},all:false};
+const uR=k=>U.order.indexOf(k);
+function uNew(){U.order=shuffle(UL);U.res={};U.all=false;uTable();
+  Ranker($('#uRank'),UL.map(k=>({k,label:k})),U.order,'most easily oxidised','least easily oxidised',
+   `The ease of reduction of the ions is the reverse: ${U.order.slice().reverse().map(k=>k+'<sup>2+</sup>').join(' &gt; ')}.`);
+  uQs();}
+function uTable(){
+  let h='<table class="res"><tr><th>Metal ↓ / Solution →</th>'+UL.map(k=>`<th>${k}<sup>2+</sup>(aq)</th>`).join('')+'</tr>';
+  UL.forEach(x=>{h+=`<tr><th>${x}</th>`;UL.forEach(y=>{
+    if(x===y){h+='<td class="s">—</td>';return;}
+    const seen=U.all||U.res[x+'|'+y];const r=uR(x)<uR(y);
+    h+=seen?`<td class="${r?'y':'n'}">${r?'✓ deposit':'✗ no change'}</td>`:`<td class="u" data-x="${x}" data-y="${y}">click to test</td>`;});h+='</tr>';});
+  $('#uTable').innerHTML=h+'</table>';
+  $('#uTable').querySelectorAll('td[data-x]').forEach(td=>td.onclick=()=>{U.res[td.dataset.x+'|'+td.dataset.y]=true;uTable();});
+}
+function uQs(){
+  const o=U.order;
+  const i=Math.floor(Math.random()*3),j=i+1+Math.floor(Math.random()*(3-i));
+  const eqn=(a,b)=>`${a}(s) + ${b}<sup>2+</sup>(aq) → ${a}<sup>2+</sup>(aq) + ${b}(s)`;
+  const right=eqn(o[i],o[j]);
+  const wrongPairs=[];for(let p=0;p<4;p++)for(let q=0;q<p;q++)wrongPairs.push([o[p],o[q]]);
+  const rev=[o[j],o[i]];
+  const others=shuffle(wrongPairs.filter(w=>!(w[0]===rev[0]&&w[1]===rev[1]))).slice(0,2);
+  const q3opts=shuffle([right,eqn(...rev),...others.map(w=>eqn(...w))]);
+  const strongOx=o[3];
+  const Q=[
+   {t:'Which metal is the strongest reducing agent?',opts:UL.slice(),ans:o[0],why:`${o[0]} reduces the ions of all three other metals (three ✓ in its row), so it loses electrons most readily.`},
+   {t:'Which ion is the most easily reduced?',opts:UL.map(k=>k+'<sup>2+</sup>'),ans:strongOx+'<sup>2+</sup>',why:`${strongOx}<sup>2+</sup> is reduced by all three other metals (three ✓ in its column). This means ${strongOx} is the least easily oxidised metal.`},
+   {t:'Which reaction would occur?',opts:q3opts,ans:right,why:`${o[i]} is above ${o[j]} in your order, so ${o[i]} is more easily oxidised and can reduce ${o[j]}<sup>2+</sup>. Each of the other options has a less easily oxidised metal reducing the ion of a more easily oxidised one.`},
+   {t:`A fifth metal, V, reacts with ${o[2]}<sup>2+</sup>(aq) but not with ${o[1]}<sup>2+</sup>(aq). Where does V fit?`,
+    opts:shuffle([`Between ${o[1]} and ${o[2]}`,`Above ${o[0]}`,`Between ${o[2]} and ${o[3]}`,`Between ${o[0]} and ${o[1]}`]),ans:`Between ${o[1]} and ${o[2]}`,
+    why:`V reduces ${o[2]}<sup>2+</sup>, so V is more easily oxidised than ${o[2]}. V cannot reduce ${o[1]}<sup>2+</sup>, so V is less easily oxidised than ${o[1]}.`}
+  ];
+  const el=$('#uQs');el.innerHTML='';
+  Q.forEach((q,n)=>{const d=document.createElement('div');d.className='q';
+    d.innerHTML=`<p>${n+1}. ${q.t}</p><div class="opts">${q.opts.map(x=>`<button>${x}</button>`).join('')}</div><div class="fb"></div>`;
+    d.querySelectorAll('.opts button').forEach((b,k)=>b.onclick=()=>{const ok=q.opts[k]===q.ans;
+      d.querySelectorAll('.opts button').forEach((bb,kk)=>{bb.classList.remove('right','wrong');if(q.opts[kk]===q.ans&&ok)bb.classList.add('right');});
+      if(!ok)b.classList.add('wrong');
+      const fb=d.querySelector('.fb');fb.className='fb '+(ok?'good':'badc');fb.innerHTML=ok?'✓ '+q.why:'✗ Not quite. Check the data table and count the ticks in rows and columns.';});
+    el.appendChild(d);});
+}
+$('#uAll').onclick=()=>{U.all=true;uTable();};
+$('#uNew').onclick=uNew;
+uNew();
+</script>
+</body>
+</html>
