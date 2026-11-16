@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Chemistry IA Feedback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a moderator's desk — the student's report on the left with coloured highlights, the criterion-by-criterion feedback sheet on the right. */
+:root{
+  --ink:#1b2433;
+  --muted:#5b6678;
+  --paper:#f4f6f9;
+  --surface:#ffffff;
+  --line:#dde2ea;
+  --accent:#1f4fa8;
+  --rd:#2f6fdc; --rd-bg:rgba(47,111,220,.22);
+  --da:#118a6b; --da-bg:rgba(17,138,107,.22);
+  --c:#c27a06;  --c-bg:rgba(230,150,10,.26);
+  --ev:#9a3fb5; --ev-bg:rgba(154,63,181,.22);
+  --gen:#5b6678; --gen-bg:rgba(91,102,120,.22);
+  --high:#c0392b; --med:#d68910; --low:#7f8c8d;
+  --font-display:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#e6eaf1; --muted:#9aa5b6; --paper:#11161e; --surface:#1a212c; --line:#2c3644; --accent:#7ea6f0;
+    --rd:#6f9df0; --da:#3fc39d; --c:#f0b443; --ev:#c98ae0; --gen:#9aa5b6;
+    --high:#ff7b6b; --med:#f5b041; --low:#a0aab4;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e6eaf1; --muted:#9aa5b6; --paper:#11161e; --surface:#1a212c; --line:#2c3644; --accent:#7ea6f0;
+  --rd:#6f9df0; --da:#3fc39d; --c:#f0b443; --ev:#c98ae0; --gen:#9aa5b6;
+  --high:#ff7b6b; --med:#f5b041; --low:#a0aab4;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body);display:flex;flex-direction:column}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+header.top{display:flex;align-items:center;gap:16px;padding:10px 20px;border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+header.top h1{font-size:20px}
+header.top .sub{color:var(--muted);font-size:13px}
+header.top .spacer{flex:1}
+
+.btn{border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:6px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0d1420}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0d1420}}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.small{padding:3px 9px;font-size:13px}
+
+main{flex:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(380px,1fr);min-height:0}
+@media (max-width:900px){main{grid-template-columns:1fr;overflow:auto} .pane{max-height:none!important;overflow:visible!important}}
+.pane{overflow:auto;min-height:0}
+.left{border-right:1px solid var(--line);padding:16px 20px;background:var(--paper)}
+.right{padding:16px 20px 40px;background:var(--surface)}
+
+/* Setup */
+.setup{display:grid;gap:14px;max-width:760px;margin:0 auto}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:28px;text-align:center;background:var(--surface);cursor:pointer}
+.drop.over{border-color:var(--accent)}
+.drop strong{display:block;font-size:16px;margin-bottom:4px}
+.drop .muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.field{display:grid;gap:4px;flex:1;min-width:160px}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 9px}
+.field textarea{min-height:58px;resize:vertical}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.note{font-size:13px;color:var(--muted)}
+.status{font-size:14px;padding:10px 12px;border-radius:8px;background:var(--paper);border:1px solid var(--line);display:none}
+.status.show{display:block}
+.status.err{border-color:var(--high);color:var(--high)}
+.stages{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.stage{font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.stage.done{border-color:var(--da);color:var(--da)}
+
+/* Report viewer */
+.legend{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;position:sticky;top:-16px;background:var(--paper);padding:8px 0;z-index:5}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:13px;background:var(--surface);cursor:pointer;user-select:none}
+.chip .sw{width:10px;height:10px;border-radius:3px}
+.chip.off{opacity:.45}
+.pages{display:grid;gap:16px;justify-items:center}
+.page{position:relative;width:100%;max-width:820px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15);border-radius:2px}
+.page canvas{display:block;width:100%;height:auto}
+.page .pnum{position:absolute;top:6px;right:8px;font:600 11px var(--font-mono);color:#667;background:rgba(255,255,255,.85);padding:1px 6px;border-radius:4px}
+.hl{position:absolute;border-radius:2px;cursor:pointer;mix-blend-mode:multiply;transition:outline-color .2s}
+.hl.RD{background:var(--rd-bg);border-bottom:2px solid #2f6fdc}
+.hl.DA{background:var(--da-bg);border-bottom:2px solid #118a6b}
+.hl.C{background:var(--c-bg);border-bottom:2px solid #c27a06}
+.hl.EV{background:var(--ev-bg);border-bottom:2px solid #9a3fb5}
+.hl.GEN{background:var(--gen-bg);border-bottom:2px solid #5b6678}
+.hl.flash{outline:3px solid #e53935;outline-offset:1px}
+.hidden-crit-RD .hl.RD,.hidden-crit-DA .hl.DA,.hidden-crit-C .hl.C,.hidden-crit-EV .hl.EV,.hidden-crit-GEN .hl.GEN{display:none}
+.marker{position:absolute;left:-2px;width:20px;height:20px;border-radius:50%;color:#fff;font:600 11px/20px var(--font-mono);text-align:center;transform:translateX(-100%);cursor:pointer}
+.empty-viewer{color:var(--muted);text-align:center;padding:60px 20px;border:1px dashed var(--line);border-radius:10px;background:var(--surface)}
+
+/* Feedback */
+.summary{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--paper);margin-bottom:14px}
+.total{text-align:center;padding:0 10px}
+.total .big{font:600 40px/1 var(--font-mono)}
+.total .of{color:var(--muted);font-size:13px}
+.crit-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tile{border-radius:8px;padding:8px;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--tc);cursor:pointer}
+.tile .nm{font-size:12px;color:var(--muted)}
+.tile .mk{font:600 20px var(--font-mono)}
+.tile .bd{font-size:11px;color:var(--muted)}
+.flags{display:flex;gap:6px;flex-wrap:wrap;grid-column:1/-1}
+.flag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--surface);border:1px solid var(--line)}
+.flag.warn{border-color:var(--med);color:var(--med)}
+.flag.bad{border-color:var(--high);color:var(--high)}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap;position:sticky;top:-16px;background:var(--surface);z-index:4;padding-top:8px}
+.tab{border:none;background:none;padding:8px 12px;cursor:pointer;border-bottom:3px solid transparent;font-weight:500;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--tc,var(--accent))}
+.panel{display:none}
+.panel.active{display:block}
+.panel h2{font-size:22px;margin-bottom:4px}
+.panel .lede{color:var(--muted);font-size:14px;margin:0 0 12px}
+.markrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stepper button{border:none;background:var(--paper);width:30px;height:30px;cursor:pointer;font-weight:600}
+.stepper span{min-width:58px;text-align:center;font:600 16px var(--font-mono)}
+.band{font-size:13px;padding:2px 8px;border-radius:99px;border:1px solid var(--tc);color:var(--tc)}
+.teacher{font-size:13px;background:var(--paper);border-left:3px solid var(--tc);padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:12px}
+.teacher b{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block}
+.strengths{margin:0 0 14px;padding-left:18px}
+.strengths li{margin:2px 0}
+h3.sec{font-family:var(--font-body);font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+
+.card{border:1px solid var(--line);border-left:4px solid var(--pc);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:var(--surface);display:grid;gap:6px}
+.card.flash{box-shadow:0 0 0 3px var(--tc)}
+.card .meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px}
+.tag{font:600 11px var(--font-mono);padding:1px 6px;border-radius:4px;background:var(--paper);border:1px solid var(--line)}
+.prio{font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:11px;color:var(--pc)}
+.card .num{font:600 11px var(--font-mono);width:20px;height:20px;border-radius:50%;background:var(--tc);color:#fff;display:inline-grid;place-items:center}
+.card .issue{font-weight:600}
+.card .action{padding-left:10px;border-left:2px solid var(--tc)}
+.card .action::before{content:"Change: ";font-weight:600;color:var(--tc)}
+.card .why{font-size:13px;color:var(--muted)}
+.card .why::before{content:"Guidance: ";font-weight:600}
+.card .q{font-size:13px;font-style:italic;color:var(--muted);background:var(--paper);padding:4px 8px;border-radius:4px}
+.card .tools{display:flex;gap:6px;justify-content:flex-end}
+.link{background:none;border:none;color:var(--accent);cursor:pointer;padding:0;font-size:13px;text-decoration:underline}
+.link.none{color:var(--muted);text-decoration:none;cursor:default}
+[contenteditable]:hover{background:var(--paper)}
+[contenteditable]:focus{background:var(--paper);outline:1px dashed var(--accent)}
+.del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px}
+.del:hover{color:var(--high)}
+
+.student-preview{border:1px solid var(--line);border-radius:8px;padding:16px 18px;background:var(--paper);font-size:14px;max-width:72ch}
+.student-preview h4{margin:14px 0 6px;font-size:15px}
+.student-preview ol{padding-left:20px;margin:4px 0}
+.student-preview li{margin:4px 0}
+.manual{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.manual summary{cursor:pointer;font-weight:600}
+.copybox{width:100%;min-height:120px;font:12px var(--font-mono);display:none}
+.welcome{display:grid;gap:12px}
+.welcome .crit{border-left:4px solid var(--tc);padding:6px 12px;background:var(--paper);border-radius:0 6px 6px 0}
+.welcome .crit b{display:block}
+.welcome .crit span{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Chemistry IA Feedback</h1>
+    <div class="sub">IB DP Chemistry scientific investigation · four criteria, 24 marks</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn small" id="newBtn" hidden>Mark another report</button>
+</header>
+
+<main>
+  <section class="pane left" id="leftPane">
+    <div class="setup" id="setup">
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose a student report PDF">
+        <strong id="dropTitle">Drop the student's IA report (PDF) here</strong>
+        <span class="muted" id="dropSub">or click to choose a file. The PDF stays in this page; only its text and page images are sent to Claude.</span>
+        <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+      </div>
+      <div class="row">
+        <div class="field"><label for="sname">Student first name (optional)</label><input id="sname" placeholder="e.g. Mai"></div>
+        <div class="field" style="max-width:140px"><label for="level">Level</label>
+          <select id="level"><option>HL</option><option>SL</option></select></div>
+        <div class="field" style="max-width:180px"><label for="stage">Draft stage</label>
+          <select id="stage"><option>First draft</option><option>Final submission</option></select></div>
+      </div>
+      <div class="field"><label for="tnotes">Notes for the marker (optional)</label>
+        <textarea id="tnotes" placeholder="e.g. I have seen the full raw data. Database investigation using PubChem. Student had limited lab time."></textarea></div>
+      <details id="apiSetup" class="manual" hidden>
+        <summary id="apiSummary">One-click marking setup (Anthropic API key)</summary>
+        <p class="note" style="margin:8px 0">Paste your own Anthropic API key. It stays in this browser and is sent only to Anthropic, never to this website. Create one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> (billed per report to that account).</p>
+        <div class="row">
+          <div class="field" style="min-width:240px"><label for="apiKey">API key</label><input id="apiKey" type="password" autocomplete="off" placeholder="sk-ant-..."></div>
+          <div class="field" style="max-width:240px"><label for="apiModel">Model</label>
+            <select id="apiModel"><option value="claude-opus-5-5">Claude Opus 5.5 (most careful)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (faster, cheaper)</option></select></div>
+        </div>
+        <div class="row" style="align-items:center;margin-top:8px">
+          <label class="check"><input type="checkbox" id="rememberKey"> Remember the key on this device</label>
+          <button class="btn small" type="button" id="forgetKey">Forget key</button>
+        </div>
+        <p class="note" style="margin:6px 0 0">Only tick "Remember" on your own computer, not a shared one.</p>
+      </details>
+      <label class="check"><input type="checkbox" id="useImages" checked> Send page images so graphs and tables are read as well as text</label>
+      <div class="row" style="align-items:center">
+        <button class="btn primary" id="goBtn" disabled>Generate feedback</button>
+        <button class="btn" id="stopBtn" hidden>Stop</button>
+        <span class="note" id="aiNote">Marking takes one to three minutes.</span>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <details id="manual" class="manual" hidden>
+        <summary>Mark in a Claude chat instead</summary>
+        <ol class="note" style="padding-left:18px;margin:8px 0">
+          <li>Click <b>Copy marking prompt</b>. It holds the IB guidance and the text of this report.</li>
+          <li>Paste it into a new Claude chat and send it. For graphs and tables, attach the PDF to the same message.</li>
+          <li>Copy Claude's whole reply, paste it in the box below, and click <b>Show feedback</b>.</li>
+        </ol>
+        <div class="row" style="align-items:center">
+          <button class="btn" id="copyPrompt" type="button">Copy marking prompt</button>
+          <span class="note" id="copyMsg"></span>
+        </div>
+        <textarea id="promptBox" class="copybox" aria-label="Marking prompt" readonly></textarea>
+        <div class="field" style="margin-top:10px"><label for="replyBox">Claude's reply</label>
+          <textarea id="replyBox" style="min-height:90px" placeholder="Paste the JSON reply here"></textarea></div>
+        <div class="row" style="margin-top:8px"><button class="btn primary" id="showReply" type="button">Show feedback</button></div>
+      </details>
+    </div>
+    <div id="viewer" hidden>
+      <div class="legend" id="legend"></div>
+      <div class="pages" id="pages"></div>
+    </div>
+  </section>
+
+  <section class="pane right" id="rightPane">
+    <div id="welcome" class="welcome">
+      <h2 style="font-size:22px">What you'll get</h2>
+      <p class="note" style="margin:0">Feedback for each criterion, a conservative estimated mark out of 6, and numbered actions linked to highlighted passages in the report. Marks and wording can be edited before you copy or download the student version.</p>
+      <div class="crit" style="--tc:var(--rd)"><b>Research design</b><span>RQ in a specific context · explained methodological considerations · reproducible method</span></div>
+      <div class="crit" style="--tc:var(--da)"><b>Data analysis</b><span>Clear and precise recording · appropriate uncertainties · accurate, relevant processing</span></div>
+      <div class="crit" style="--tc:var(--c)"><b>Conclusion</b><span>Justified and fully consistent with the analysis · compared with accepted scientific context</span></div>
+      <div class="crit" style="--tc:var(--ev)"><b>Evaluation</b><span>Relative impact of specific weaknesses explained · realistic, linked improvements explained</span></div>
+      <p class="note">Guidance used: Chemistry guide IA criteria and clarifications, Teacher Support Material (Unpacking the IA), and the May 2026 subject report.</p>
+    </div>
+    <div id="results" hidden></div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+"use strict";
+/* ---------------- Guidance digest (condensed from the uploaded IB documents) ---------------- */
+const GUIDANCE = `
+=== IB DP CHEMISTRY IA (first assessment 2025): CRITERIA, 6 marks each, 24 total, equal weighting ===
+
+RESEARCH DESIGN (RD) - how well the methodology (purpose and practice) used to address the RQ is communicated.
+1-2: RQ stated without context; methodological considerations stated; method lacks detail to be reproduced.
+3-4: RQ outlined within a broad context; methodological considerations for collecting relevant and sufficient data described; method reproducible with few ambiguities or omissions.
+5-6: RQ described within a specific and appropriate context; methodological considerations explained; method allows the investigation to be reproduced.
+Clarifications: RQ with context refers to the IV and DV (or two correlated variables), gives a concise description of the system, and background theory of direct relevance. Methodological considerations = choice of methods for measuring IV and DV; choice of databases/model and sampling; scope, quantity and quality of measurements (range, interval, frequency of IV, repeats, precision); identification of control variables and how they were controlled; safety, ethical and environmental issues. Method description = specific materials and precise steps, without unnecessary or repetitive information.
+TSM detail (RD1 context): RQ unique to the student; IV and DV (or derived DV) present and quantifiable; background focused on the exact system, not a general overview of the topic; explain how the DV relates to the system; realistic IV range linked to the context; correctly balanced equations with state symbols; avoid vague terms ("efficient", "suitable") and over-ambitious RQs; avoid RQs whose answer is already known; a hypothesis is optional but if given must be addressed in the conclusion; more than one IV allowed only with a clear link and adequate depth; database work must explain choice of sources and comment on reliability.
+TSM detail (RD2 methodological considerations): method must be able to generate data that answers the RQ; a trial/preliminary investigation should be described and assessed; at least FIVE values of the IV for a trend (four only in exceptional cases, e.g. expensive/harmful chemical); rationale for range and interval explained; sampling rate considered; how EACH control variable is controlled or monitored (confounding variables monitored); "room temperature" or air-conditioning is NOT control of solution temperature (use a thermostatic water bath, or record temperature); repeats with a rationale; control experiments where relevant; provision for qualitative observations; sample details (e.g. not just "red wine"), sampling location and storage; risk assessment: safe handling, specific hazards, specific waste disposal for named chemicals (even if a technician disposes of waste), green chemistry where possible; stating an issue is not the same as showing it was mitigated; if no safety/ethical/environmental issues, a statement to that effect.
+TSM detail (RD3 reproducible method): logical sequence; equipment and instrument sizes and uncertainties; chemicals with concentrations; how solutions and dilutions were prepared (volumetric glassware); how the limiting reactant was established; brand names where items are variables; correct IUPAC names; standard protocols cited; it is a record of what was done (not a proposed plan) including trialling; annotated photos/diagrams only where they add value; database/simulation methods need screenshots, URLs or program names, and how data were filtered/extracted.
+May 2026 subject report (RD): most students were placed in the middle band. Common problems: background including personal engagement or general information not linked to the specific system; control variables DESCRIBED rather than EXPLAINED (why it matters chemically and how it was controlled); derived DV given instead of the measured DV; fewer than five IV values, or two IVs with an inadequate range for one; room temperature / AC used as a control; repeats but no experimental replicates where appropriate; null hypothesis with fewer than 10 values; weak safety awareness, especially waste disposal; database papers without raw data; missing detail of solution preparation and dilution; omitted concentrations or conditions; incorrect IUPAC names; "to what extent" RQs are ambiguous and should be avoided.
+
+DATA ANALYSIS (DA) - recording, processing and presenting data in ways relevant to the RQ.
+1-2: recording and processing communicated but neither clear nor precise; limited evidence of considering uncertainties; some relevant processing but with MAJOR omissions, inaccuracies or inconsistencies.
+3-4: communication either clear OR precise; uncertainties considered but with some significant omissions or inaccuracies; relevant processing carried out but with some SIGNIFICANT omissions, inaccuracies or inconsistencies.
+5-6: communication both clear AND precise; appropriate consideration of uncertainties; relevant processing carried out appropriately and accurately.
+Clarifications: clear = method of processing easily understood; precise = conventions followed (annotation of graphs and tables, units, decimal places, significant figures). Major problems prevent a valid conclusion; significant problems allow a conclusion with limited validity or detail.
+TSM detail: sufficient, relevant data; qualitative observations recorded with the raw data; concise tables with titles/numbers, column headings with units AND uncertainties; consistent decimal places matching instrument precision (raw and processed); SI/metric units; a sample calculation (or spreadsheet screenshot with formula) for processing; graphs with title, labelled axes with units, suitable scale, best-fit line or curve justified by theory (do not assume linear without reason); uncertainty of a single reading quoted to the same decimal place as the reading (e.g. 87.4 ± 0.1 cm3, not ± 0.05 or ± 1); realistic uncertainties (e.g. hand stopwatch reaction time); repeated measurements usually show a spread larger than instrument precision, so dispersion (range or standard deviation) must be addressed, not only instrument uncertainty; propagate only relevant uncertainties and explain omission of negligible ones; take care with logarithmic quantities (pH, absorbance); outliers must not be silently removed - justify, or show results with and without; error bars must have a stated origin; max/min gradients can give gradient uncertainty; R2 alone does not prove the model; standard deviation only for n >= 5; other statistical tests need >= 10 values and are not recommended; appendices are NOT read, so raw data, sample calculations and graphs must be in the main body.
+May 2026 subject report (DA): mostly middle band. Common problems: raw data not recorded properly (e.g. titres only, without initial and final burette readings); dispersion ignored or hidden; inconsistent decimal places; incomplete table headings; tables split across pages; missing units or uncertainties; qualitative observations not recorded but later used in the evaluation; ALL uncertainties combined instead of only relevant ones; unexplained error bars; ANOVA or similar on fewer than 10 values; processing too simple (averages, subtractions, plotting) for stronger work; "dot-to-dot" graphs joining points; chemically invalid operations such as averaging pH or pKa values directly; maths emphasised over chemical understanding. Non-concordant data through no fault of the student can still reach the top band if the variability is acknowledged and addressed. Two concordant titres are enough unless standard deviation is used.
+
+CONCLUSION (C) - answering the RQ with regard to the analysis and the accepted scientific context.
+1-2: conclusion relevant to the RQ but not supported by the analysis; superficial comparison to the scientific context.
+3-4: conclusion described, relevant, but not fully consistent with the analysis; some relevant comparison to the scientific context.
+5-6: conclusion JUSTIFIED, relevant and fully consistent with the analysis; justified through relevant comparison to the accepted scientific context.
+Clarifications: fully consistent requires interpretation of processed data INCLUDING its uncertainties. Scientific context = published material, published values, textbooks, course notes, cited traceably.
+TSM detail: explain trends/correlations validly; address the RQ in its context; state the result with an acceptable range of values; discuss impact of uncertainties and reliability; address any hypothesis; describe relationships correctly (a negative correlation is not an inverse relationship; use terms such as optimum, plateau, intercept); do not infer a rate from the steepness of a graph if the rate was not calculated; compare with a reference value using percentage difference and propagated uncertainty to distinguish random from systematic error and state the direction of systematic error; discuss whether the trend line fits; if no accepted value exists, judge whether the result is reasonable; explain the outcome with chemistry (models, mechanisms, theory), with traceable references.
+May 2026 subject report (C): students put much less effort into C and Ev than RD and DA. Merely reporting R2 is not enough - discuss what it says about the relationship, model limitations, sources of error, and their likely direction and impact. Scientific context that simply repeats the RD background limits access to the middle band. Comparison with a literature value is NOT required for the top band; relevant chemical principles, models, mechanisms or trends used effectively are acceptable.
+
+EVALUATION (EV) - evaluation of the methodology and suggested improvements.
+1-2: generic methodological weaknesses or limitations stated; realistic improvements stated.
+3-4: specific methodological weaknesses or limitations described; realistic improvements relevant to them described.
+5-6: the RELATIVE IMPACT of specific methodological weaknesses or limitations EXPLAINED; realistic, relevant improvements EXPLAINED.
+Clarifications: generic = applicable to many methodologies. Weaknesses: control of variables, precision of measurement, variation in data. Limitations: conclusion limited by the range of data, confines of the system, assumptions made.
+TSM detail: explain which weaknesses are major vs minor and how each affects the results (and the direction of systematic error); support weaknesses with evidence from the data or observations, not speculation (e.g. "the temperature may have changed" without evidence has little value); careless manipulation and hypothetical events are not weaknesses; consider suitability of range and frequency of data and the relevance of control experiments; "small sample size" or "uncalibrated pH meter" are generic and should have been dealt with in trials; well-known limitations (heat loss in calorimetry, end-point judgement) only add value if the student tried to minimise them in the design; improvements must be specific, feasible in a school lab and linked to each weakness, explaining how they improve quality, reliability or validity - not "take more measurements" or "use more precise equipment" without a specific link.
+May 2026 subject report (EV): acknowledging a real weakness (e.g. unrecognised interferences) is better than ignoring an obvious flaw. Each weakness that is not just poor planning needs a realistic, specific improvement; the best explain how it fixes the limitation.
+
+GENERAL (TSM and subject report): maximum 3,000 words (excluding tables, graphs, headings, references); examiners need not read beyond 3,000. Many reports are far longer than necessary. No cover page or table of contents. Clear informative title reflecting the RQ. Specific facts and values need traceable citations (URL and retrieval date for online sources). Appendices are not considered (except consent forms). Investigations must be chemistry-focused (health/sensory links rarely give enough chemical data); natural products are often too complex; routine classroom practicals and outcomes known in advance limit marks. Describe vs explain is the single most important distinction between 3-4 and 5-6 in RD, C and EV. Align processing with the variables and chemistry in the context. Spelling and language are not penalised unless meaning is ambiguous.
+
+=== HOW MARKS ARE DECIDED (TSM) ===
+Read the whole report; evidence for a criterion can appear anywhere in the main body. Best-fit, holistic judgement - not an average of strands. Start at the lowest descriptor and work up. Not every descriptor in a band must be met. Whole numbers only. A zero only if there is no evidence at all.
+`;
+
+const CRITS = [
+  {id:"RD", name:"Research design", color:"--rd", strands:"RD1 research question & context · RD2 methodological considerations · RD3 reproducible method"},
+  {id:"DA", name:"Data analysis",   color:"--da", strands:"DA1 clear & precise recording/communication · DA2 uncertainties · DA3 relevant, accurate processing"},
+  {id:"C",  name:"Conclusion",      color:"--c",  strands:"C1 justified & consistent with analysis incl. uncertainties · C2 comparison to scientific context"},
+  {id:"EV", name:"Evaluation",      color:"--ev", strands:"EV1 relative impact of specific weaknesses/limitations · EV2 realistic, linked improvements"},
+];
+const HL_CLASS = {RD:"RD",DA:"DA",C:"C",EV:"EV",GEN:"GEN"};
+const HEX = {RD:"#2f6fdc",DA:"#118a6b",C:"#c27a06",EV:"#9a3fb5",GEN:"#5b6678"};
+
+/* ---------------- State ---------------- */
+let pdfBytes = null, pdfDoc = null, fileName = "", pagesData = [], result = null, ctl = null;
+let sampleFn = null, downloadsApi = null, imgLimits = null;
+const hiddenCrits = new Set();
+
+const $ = s => document.querySelector(s);
+const el = (tag, attrs={}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v;
+    else if (k === "style") e.setAttribute("style", v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null) e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return e;
+};
+
+/* ---------------- Capabilities ---------------- */
+let capsChecked = false;
+async function connectClaude(){
+  try {
+    if (!window.claude || typeof claude.use !== "function") return false;
+    if (!sampleFn) sampleFn = await claude.use("sample");
+    if (!downloadsApi) downloadsApi = await claude.use("downloads").catch(() => null);
+    if (sampleFn && !imgLimits) imgLimits = (await sampleFn.limits().catch(() => null))?.images || null;
+  } catch (e) {}
+  return !!sampleFn;
+}
+(async () => {
+  const ok = await connectClaude();
+  capsChecked = true;
+  $("#aiNote").textContent = ok ? "Marking takes one to three minutes." :
+    "Claude isn't connected in this view. Click Generate feedback to retry, or use the chat option below.";
+  if (!imgLimits) { $("#useImages").checked = false; $("#useImages").disabled = true;
+    $("#useImages").parentElement.title = "Page images are not available in this view; text only."; }
+  else { $("#useImages").disabled = false; $("#useImages").checked = true; }
+  updateGo();
+})();
+
+function updateGo(){
+  $("#goBtn").disabled = !pdfDoc;
+  $("#manual").hidden = !pdfDoc;
+}
+
+/* ---------------- PDF loading ---------------- */
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; // worker script is already loaded above, so pdf.js runs it on the main thread
+
+const drop = $("#drop"), fileInput = $("#file");
+drop.addEventListener("click", () => fileInput.click());
+drop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }});
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
+fileInput.addEventListener("change", () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); });
+
+async function loadFile(f){
+  if (!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)) { showStatus("That file isn't a PDF. Export the report as PDF and try again.", true); return; }
+  showStatus("Reading " + f.name + "…");
+  try {
+    const buf = new Uint8Array(await f.arrayBuffer());
+    pdfBytes = buf.slice();
+    pdfDoc = await pdfjsLib.getDocument({data: buf}).promise;
+    fileName = f.name;
+    await extractAll();
+    await renderPages();
+    $("#viewer").hidden = false;
+    const words = pagesData.reduce((n,p) => n + (p.text.match(/[A-Za-z]{2,}/g) || []).length, 0);
+    $("#dropTitle").textContent = f.name;
+    $("#dropSub").textContent = pdfDoc.numPages + " pages · about " + words.toLocaleString() + " words of text in total (incl. tables and references). Click to choose a different file.";
+    if (words < 150) showStatus("Very little text was found. If this PDF is a scan, export it from Word/Docs instead so the text can be read.", true);
+    else hideStatus();
+    updateGo();
+  } catch (e) {
+    console.error(e);
+    showStatus("This PDF couldn't be opened. If it's password-protected, remove the password and export again.", true);
+  }
+}
+
+async function extractAll(){
+  pagesData = [];
+  for (let p = 1; p <= pdfDoc.numPages; p++) {
+    const page = await pdfDoc.getPage(p);
+    const tc = await page.getTextContent();
+    const items = tc.items.filter(i => i.str != null);
+    // flat string with item ranges (for highlight mapping)
+    let flat = "", ranges = [];
+    for (let i = 0; i < items.length; i++) {
+      const s = items[i].str;
+      ranges.push([flat.length, flat.length + s.length]);
+      flat += s + (items[i].hasEOL ? "\n" : " ");
+    }
+    // normalised (alphanumeric only) with index map back to flat
+    let norm = "", map = [];
+    for (let i = 0; i < flat.length; i++) {
+      const ch = normChar(flat[i]);
+      if (ch) { norm += ch; map.push(i); }
+    }
+    // readable text grouped by lines (y position)
+    const lines = [];
+    for (const it of items) {
+      if (!it.str.trim()) continue;
+      const y = Math.round(it.transform[5]);
+      let line = lines.find(l => Math.abs(l.y - y) <= 3);
+      if (!line) { line = {y, parts: []}; lines.push(line); }
+      line.parts.push({x: it.transform[4], s: it.str});
+    }
+    lines.sort((a,b) => b.y - a.y);
+    const text = lines.map(l => l.parts.sort((a,b) => a.x - b.x).map(x => x.s).join(" ").replace(/\s+/g," ").trim()).join("\n");
+    pagesData.push({p, items, ranges, flat, norm, map, text, view: page.view});
+  }
+}
+function normChar(c){
+  c = c.toLowerCase();
+  if (/[a-z0-9]/.test(c)) return c;
+  if (c === "µ" || c === "μ") return "u";
+  return "";
+}
+function normStr(s){ let o = ""; for (const c of s) o += normChar(c); return o; }
+
+const RENDER_SCALE = 1.7;
+async function renderPages(){
+  const wrap = $("#pages"); wrap.innerHTML = "";
+  for (const pd of pagesData) {
+    const page = await pdfDoc.getPage(pd.p);
+    const vp = page.getViewport({scale: RENDER_SCALE});
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.floor(vp.width); canvas.height = Math.floor(vp.height);
+    await page.render({canvasContext: canvas.getContext("2d"), viewport: vp}).promise;
+    const div = el("div", {class: "page", id: "page-" + pd.p});
+    div.append(canvas, el("span", {class: "pnum"}, "p. " + pd.p));
+    wrap.append(div);
+    pd.canvas = canvas; pd.vp = vp; pd.div = div;
+  }
+}
+
+/* ---------------- Images for Claude ---------------- */
+async function pageImages(){
+  if (!imgLimits || !$("#useImages").checked) return {blobs: [], pages: []};
+  const max = imgLimits.maxCount || 0;
+  if (!max) return {blobs: [], pages: []};
+  let chosen = pagesData.map(pd => {
+    const t = pd.text, digits = (t.match(/[0-9]/g) || []).length;
+    return {p: pd.p, score: digits / Math.max(t.length, 1) + (t.length < 500 ? 0.5 : 0) + (/table|graph|figure|fig\./i.test(t) ? 0.2 : 0)};
+  });
+  if (chosen.length > max) chosen = chosen.sort((a,b) => b.score - a.score).slice(0, max);
+  chosen.sort((a,b) => a.p - b.p);
+  const blobs = [];
+  for (const c of chosen) {
+    const src = pagesData[c.p - 1].canvas;
+    const k = Math.min(1, Math.sqrt(1150000 / (src.width * src.height)));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(src.width * k); cv.height = Math.round(src.height * k);
+    const g = cv.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0,0,cv.width,cv.height);
+    g.drawImage(src, 0, 0, cv.width, cv.height);
+    const b = await new Promise(r => cv.toBlob(r, "image/jpeg", 0.85));
+    if (b && (!imgLimits.maxInputBytes || b.size <= imgLimits.maxInputBytes)) blobs.push(b);
+  }
+  return {blobs, pages: chosen.map(c => c.p).slice(0, blobs.length)};
+}
+
+/* ---------------- Prompt ---------------- */
+function buildPrompt(imagePages, manual){
+  const level = $("#level").value, stage = $("#stage").value;
+  const notes = $("#tnotes").value.trim();
+  let report = pagesData.map(pd => `[[PAGE ${pd.p}]]\n${pd.text}`).join("\n\n");
+  if (report.length > 180000) report = report.slice(0, 180000) + "\n[...text truncated...]";
+  return `You are an experienced IB Diploma Programme Chemistry teacher and moderator. You are giving formative feedback on a student's internal assessment (scientific investigation) report so that their teacher can hand it to the student. Mark against the IB criteria and guidance below, citing that guidance.
+
+${GUIDANCE}
+
+=== MARKING STANCE: BE CONSERVATIVE ===
+- These are ESTIMATED marks for a draft. Award only what is clearly evidenced in the main body of the report. Do not infer intentions or give credit for what the student "probably did".
+- Content in appendices earns no credit (examiners do not read appendices).
+- If the report exceeds about 3,000 words of prose, assume content after that point may not be read and say so.
+- When work sits between two marks or two bands, choose the LOWER one. Use the top band (5-6) only when the work clearly EXPLAINS (not just describes) as the 5-6 descriptors require. A 6 should be rare.
+- The total estimate should err low rather than high; moderators most often place work in the middle band.
+
+=== WHAT THE FEEDBACK MUST DO ===
+- Every action must be SPECIFIC to this report: point to the exact place, say what is wrong or missing, and say exactly what the student should change or add (e.g. "Add the initial and final burette readings to Table 2 and show the titre as the difference", not "improve your tables").
+- Tie each action to a strand (RD1, RD2, RD3, DA1, DA2, DA3, C1, C2, EV1, EV2) and to the guidance it comes from (e.g. "Guide RD clarification", "TSM - Considering uncertainties", "May 2026 subject report, DA1").
+- Write "issue" and "action" in the second person, addressed to the student, in plain, encouraging but honest language. Do not rewrite the report for them or supply their data, values or conclusions; tell them what to do.
+- Prioritise: "high" = would move the mark up a band or is a major omission; "medium" = needed for the top of the current band; "low" = polish.
+- Also check chemistry accuracy where you can see it (balanced equations with state symbols, IUPAC names, units, calculation errors, invalid operations such as averaging pH) and flag any errors.
+- "quote": copy 5 to 20 CONSECUTIVE words EXACTLY as they appear in the report text below (same spelling, numbers and symbols; do not paraphrase, do not join text from different places, do not include the [[PAGE]] marker). Choose the passage the action refers to. If the problem is something MISSING, quote the nearest relevant passage (e.g. the heading or sentence where it should go); if nothing fits, use "". Give "page" as the page number from the [[PAGE n]] markers (0 if no quote).
+- Give 3 to 7 actions per criterion, most important first, plus up to 4 report-wide "general" actions (length, appendices, citations, cover page, title, chemistry focus).
+- "markRationale" is for the TEACHER: name the band, quote the descriptor words that fit, and say what specifically keeps it from the next mark up.
+
+=== CONTEXT ===
+Level: ${level}. Stage: ${stage}. File: ${fileName}.
+${notes ? "Teacher's notes: " + notes : "No teacher notes."}
+${manual === "pdf" ? "The student's PDF is attached. Use it to check tables, graphs (axes, units, titles, trend lines, error bars) and equations that the extracted text may garble, but take quotes only from the text below." : manual ? "If the student's PDF is attached to this message, use it to check tables, graphs (axes, units, titles, trend lines, error bars) and equations that the extracted text may garble, but take quotes only from the text below. If it is not attached, do not penalise layout you cannot see." : imagePages.length ? "Images of pages " + imagePages.join(", ") + " are attached so you can check tables, graphs (axes, units, titles, trend lines, error bars) and equations that the extracted text may garble. Use them, but take quotes only from the text below." : "No page images are attached; tables and graphs are only available as extracted text, so do not penalise layout you cannot see, and say when you could not verify a graph."}
+
+=== STUDENT REPORT TEXT (extracted from the PDF; [[PAGE n]] marks page starts) ===
+${report}
+=== END OF REPORT ===
+
+Reply with ONLY one JSON object, no other text, in exactly this shape:
+{
+ "title": "short title of the investigation",
+ "researchQuestion": "the RQ as written, or \\"\\" if none",
+ "investigationType": "experimental | database | simulation | hybrid",
+ "wordCountEstimate": 2800,
+ "overview": "2-3 sentences to the student summarising where the report stands overall",
+ "topPriorities": ["the single most important change", "second", "third"],
+ "general": [ {"issue":"...","action":"...","why":"...","quote":"...","page":3,"priority":"high"} ],
+ "criteria": {
+  "RD": {"mark": 4, "band": "3-4", "markRationale": "...", "strengths": ["specific strength", "..."],
+         "actions": [ {"strand":"RD2","priority":"high","issue":"...","action":"...","why":"...","quote":"...","page":2} ]},
+  "DA": { same shape },
+  "C":  { same shape },
+  "EV": { same shape }
+ }
+}`;
+}
+
+/* ---------------- Run ---------------- */
+$("#goBtn").addEventListener("click", () => run(false));
+$("#stopBtn").addEventListener("click", () => ctl?.abort());
+$("#newBtn").addEventListener("click", () => {
+  result = null; $("#results").hidden = true; $("#welcome").hidden = false; $("#newBtn").hidden = true;
+  $("#setup").hidden = false; pdfDoc = null; pagesData = []; $("#pages").innerHTML = ""; $("#viewer").hidden = true;
+  $("#dropTitle").textContent = "Drop the student's IA report (PDF) here";
+  $("#dropSub").textContent = "or click to choose a file.";
+  fileInput.value = ""; hideStatus(); updateGo();
+});
+
+async function run(fresh){
+  if (!pdfDoc) return;
+  let useApi = false;
+  if (!sampleFn && window.claude) {
+    showStatus("Connecting to Claude…");
+    if (await connectClaude() && imgLimits) $("#useImages").disabled = false;
+  }
+  if (!sampleFn) {
+    if (apiKey()) useApi = true;
+    else {
+      showStatus(window.claude
+        ? "Claude didn't connect in this view. Reload the page and try again, or use 'Mark in a Claude chat instead' below."
+        : "Add your Anthropic API key under 'One-click marking setup' to mark with one click, or use 'Mark in a Claude chat instead' below.", true);
+      if (!window.claude) $("#apiSetup").open = true;
+      $("#manual").open = true;
+      return;
+    }
+  }
+  $("#setup").hidden = false;
+  $("#goBtn").disabled = true; $("#stopBtn").hidden = false;
+  const t0 = Date.now();
+  let streamed = "";
+  const stageNames = [["RD","Research design"],["DA","Data analysis"],["C","Conclusion"],["EV","Evaluation"]];
+  const tick = () => {
+    const secs = Math.round((Date.now() - t0) / 1000);
+    const st = $("#status"); st.className = "status show";
+    st.innerHTML = "";
+    st.append(el("div", {}, streamed ? `Writing feedback… ${secs}s` : `Claude is reading the report… ${secs}s`));
+    const stages = el("div", {class: "stages"});
+    stageNames.forEach(([k,n]) => stages.append(el("span", {class: "stage" + (new RegExp('"' + k + '"\\s*:\\s*\\{').test(streamed) ? " done" : "")}, n)));
+    st.append(stages);
+  };
+  const timer = setInterval(tick, 1000); tick();
+  ctl = new AbortController();
+  try {
+    let data;
+    if (useApi) {
+      const sendPdf = pdfBytes && pdfBytes.length < 30e6 && pdfDoc.numPages <= 100;
+      const prompt = buildPrompt([], sendPdf ? "pdf" : "");
+      data = await callApi(prompt, sendPdf ? pdfBytes : null, ctl.signal, t => { streamed = t; });
+    } else {
+      const {blobs, pages} = await pageImages();
+      const prompt = buildPrompt(pages);
+      const opts = {modelTier: "complex", signal: ctl.signal, onText: ({text}) => { streamed = text; }};
+      if (blobs.length) opts.images = blobs;
+      if (fresh) opts.cache = false;
+      data = await sampleFn.json(prompt, opts);
+    }
+    clearInterval(timer);
+    result = sanitize(data);
+    hideStatus();
+    showResults();
+  } catch (e) {
+    clearInterval(timer);
+    const msg = {
+      cancelled: "Stopped. Click Generate feedback to start again.",
+      not_granted: "Claude wasn't allowed to run for this page, so feedback can't be generated.",
+      sampling_disabled: "Claude isn't available for this account here.",
+      rate_limited: "You've hit a usage limit. Wait a few minutes and try again.",
+      prompt_too_large: "This report is too long to send in one go. Remove appendices or the bibliography from the PDF and try again.",
+      image_rejected: "The page images were rejected. Untick 'Send page images' and try again.",
+      images_unavailable: "Page images can't be sent here. Untick 'Send page images' and try again.",
+      invalid_json: "The feedback came back in an unreadable format. Click Generate feedback to try again.",
+      session_expired: "Your Claude session has expired. Sign in again and retry.",
+      refused: "Claude declined to mark this file. Check it is the right document.",
+      api_auth: "Anthropic rejected the API key. Check it under 'One-click marking setup'.",
+      api_rate: "The API account hit a rate limit. Wait a minute and try again.",
+      api_overloaded: "Anthropic's service is busy right now. Try again in a few minutes.",
+      api_billing: "The API account has no credit left. Add credit at console.anthropic.com.",
+      api_truncated: "The feedback was cut off before it finished. Try again.",
+      api_network: "Couldn't reach Anthropic. Check your internet connection (some school networks block it).",
+      api_error: "Anthropic returned an error: " + (e?.message || "unknown") + ".",
+    }[e?.code] || "Something went wrong while marking (" + (e?.code || "error") + "). Try again.";
+    showStatus(msg, e?.code !== "cancelled");
+  } finally {
+    $("#stopBtn").hidden = true; updateGo();
+  }
+}
+
+function sanitize(d){
+  const s = v => (v == null ? "" : String(v));
+  const out = {
+    title: s(d?.title), researchQuestion: s(d?.researchQuestion), investigationType: s(d?.investigationType),
+    wordCountEstimate: Number(d?.wordCountEstimate) || 0, overview: s(d?.overview),
+    topPriorities: Array.isArray(d?.topPriorities) ? d.topPriorities.map(s) : [],
+    general: [], criteria: {}
+  };
+  const act = (a, crit) => ({crit, strand: s(a?.strand) || (crit === "GEN" ? "General" : crit), priority: ["high","medium","low"].includes(a?.priority) ? a.priority : "medium",
+    issue: s(a?.issue), action: s(a?.action), why: s(a?.why), quote: s(a?.quote), page: Number(a?.page) || 0});
+  out.general = (Array.isArray(d?.general) ? d.general : []).map(a => act(a, "GEN"));
+  for (const c of CRITS) {
+    const cc = d?.criteria?.[c.id] || {};
+    let mark = Math.round(Number(cc.mark)); if (!(mark >= 0 && mark <= 6)) mark = 0;
+    out.criteria[c.id] = {mark, aiMark: mark, band: bandOf(mark), markRationale: s(cc.markRationale),
+      strengths: (Array.isArray(cc.strengths) ? cc.strengths : []).map(s),
+      actions: (Array.isArray(cc.actions) ? cc.actions : []).map(a => act(a, c.id))};
+  }
+  return out;
+}
+const bandOf = m => m === 0 ? "0" : m <= 2 ? "1–2" : m <= 4 ? "3–4" : "5–6";
+
+/* ---------------- Locating quotes in the PDF ---------------- */
+function findQuote(q, pageHint){
+  const nq = normStr(q);
+  if (nq.length < 12) return null;
+  const order = [];
+  if (pageHint >= 1 && pageHint <= pagesData.length) order.push(pageHint - 1);
+  for (let i = 0; i < pagesData.length; i++) if (i !== pageHint - 1) order.push(i);
+  const tryNeedle = needle => {
+    for (const i of order) { const k = pagesData[i].norm.indexOf(needle); if (k >= 0) return {pi: i, start: k, end: k + needle.length}; }
+    return null;
+  };
+  let hit = tryNeedle(nq);
+  if (hit) return hit;
+  // fallback: windows of words
+  const words = q.split(/\s+/).filter(Boolean);
+  for (const w of [10, 7, 5]) {
+    if (words.length < w) continue;
+    const cands = [words.slice(0, w), words.slice(-w), words.slice(Math.floor((words.length - w) / 2), Math.floor((words.length - w) / 2) + w)];
+    for (const c of cands) { const n = normStr(c.join(" ")); if (n.length >= 15) { hit = tryNeedle(n); if (hit) return hit; } }
+  }
+  return null;
+}
+function rectsFor(hit){
+  const pd = pagesData[hit.pi];
+  const fs = pd.map[hit.start], fe = pd.map[hit.end - 1] + 1;
+  const rects = [];
+  pd.ranges.forEach(([s,e], i) => {
+    if (e <= fs || s >= fe || e === s) return;
+    const it = pd.items[i];
+    const tx = pdfjsLib.Util.transform(pd.vp.transform, it.transform);
+    const h = Math.hypot(tx[2], tx[3]);
+    const w = it.width * RENDER_SCALE;
+    const f0 = (Math.max(s, fs) - s) / (e - s), f1 = (Math.min(e, fe) - s) / (e - s);
+    rects.push({x: tx[4] + w * f0, y: tx[5] - h * 0.95, w: Math.max(w * (f1 - f0), 4), h: h * 1.2});
+  });
+  return {pd, rects};
+}
+
+let allActions = [];
+function placeHighlights(){
+  document.querySelectorAll(".hl,.marker").forEach(n => n.remove());
+  allActions = [];
+  let n = 0;
+  const push = a => { a.n = ++n; allActions.push(a); };
+  result.general.forEach(push);
+  CRITS.forEach(c => result.criteria[c.id].actions.forEach(push));
+  for (const a of allActions) {
+    a.located = false;
+    if (!a.quote) continue;
+    const hit = findQuote(a.quote, a.page);
+    if (!hit) continue;
+    const {pd, rects} = rectsFor(hit);
+    if (!rects.length) continue;
+    a.located = true; a.locPage = pd.p;
+    const W = pd.vp.width, H = pd.vp.height;
+    rects.forEach((r, idx) => {
+      const d = el("div", {class: "hl " + HL_CLASS[a.crit], "data-n": a.n, title: `${a.n}. ${a.strand}: ${a.issue}`,
+        style: `left:${r.x / W * 100}%;top:${r.y / H * 100}%;width:${r.w / W * 100}%;height:${r.h / H * 100}%`,
+        onclick: () => focusCard(a)});
+      pd.div.append(d);
+      if (idx === 0) {
+        const m = el("div", {class: "marker hl-marker " + HL_CLASS[a.crit], "data-n": a.n, title: a.issue,
+          style: `top:${r.y / H * 100}%;background:${HEX[a.crit]}`, onclick: () => focusCard(a)}, String(a.n));
+        m.classList.add("hl"); m.style.mixBlendMode = "normal"; m.style.left = "0"; m.style.transform = "translateX(-110%)"; m.style.width = "20px"; m.style.height = "20px"; m.style.borderRadius = "50%"; m.style.borderBottom = "none";
+        pd.div.append(m);
+      }
+    });
+  }
+}
+
+/* ---------------- Results UI ---------------- */
+function total(){ return CRITS.reduce((t,c) => t + result.criteria[c.id].mark, 0); }
+
+function showResults(){
+  $("#welcome").hidden = true; $("#newBtn").hidden = false;
+  $("#setup").hidden = true;
+  placeHighlights();
+  buildLegend();
+  renderResults("OV");
+}
+
+function buildLegend(){
+  const lg = $("#legend"); lg.innerHTML = "";
+  lg.append(el("span", {class: "note"}, fileName + " ·"));
+  [...CRITS, {id: "GEN", name: "General", color: "--gen"}].forEach(c => {
+    const count = allActions.filter(a => a.crit === c.id && a.located).length;
+    const chip = el("span", {class: "chip" + (hiddenCrits.has(c.id) ? " off" : ""), role: "button", tabindex: "0", "aria-pressed": String(!hiddenCrits.has(c.id)),
+      onclick: () => { hiddenCrits.has(c.id) ? hiddenCrits.delete(c.id) : hiddenCrits.add(c.id);
+        $("#pages").classList.toggle("hidden-crit-" + c.id, hiddenCrits.has(c.id)); buildLegend(); }},
+      el("span", {class: "sw", style: `background:${HEX[c.id]}`}), `${c.name} (${count})`);
+    chip.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); chip.click(); }});
+    lg.append(chip);
+  });
+}
+
+let currentTab = "OV";
+function renderResults(tab){
+  currentTab = tab || currentTab;
+  const R = $("#results"); R.hidden = false; R.innerHTML = "";
+  // summary
+  const tiles = el("div", {class: "crit-tiles"});
+  CRITS.forEach(c => {
+    const cc = result.criteria[c.id];
+    tiles.append(el("div", {class: "tile", style: `--tc:var(${c.color})`, onclick: () => renderResults(c.id), role: "button", tabindex: "0"},
+      el("div", {class: "nm"}, c.name), el("div", {class: "mk"}, `${cc.mark}/6`), el("div", {class: "bd"}, "band " + cc.band)));
+  });
+  const flags = el("div", {class: "flags"});
+  const wc = result.wordCountEstimate;
+  if (wc) flags.append(el("span", {class: "flag" + (wc > 3000 ? " bad" : wc > 2700 ? " warn" : "")}, `≈${wc.toLocaleString()} words${wc > 3000 ? " (over 3,000)" : ""}`));
+  if (result.investigationType) flags.append(el("span", {class: "flag"}, result.investigationType));
+  flags.append(el("span", {class: "flag"}, $("#level").value + " · " + $("#stage").value));
+  const unloc = allActions.filter(a => a.quote && !a.located).length;
+  if (unloc) flags.append(el("span", {class: "flag warn", title: "These actions quote text that couldn't be matched in the PDF"}, `${unloc} not located in PDF`));
+  R.append(el("div", {class: "summary"},
+    el("div", {class: "total"}, el("div", {class: "big"}, String(total())), el("div", {class: "of"}, "estimated / 24"), el("div", {class: "of"}, Math.round(total() / 24 * 100) + "%")),
+    tiles, flags));
+
+  // tabs
+  const tabs = el("div", {class: "tabs", role: "tablist"});
+  const tabDefs = [["OV","Overview","--accent"], ...CRITS.map(c => [c.id, c.name, c.color]), ["ST","Student copy","--accent"]];
+  tabDefs.forEach(([id, name, col]) => tabs.append(el("button", {class: "tab", role: "tab", "aria-selected": String(currentTab === id), style: `--tc:var(${col})`, onclick: () => renderResults(id)}, name)));
+  R.append(tabs);
+
+  if (currentTab === "OV") R.append(overviewPanel());
+  else if (currentTab === "ST") R.append(studentPanel());
+  else R.append(critPanel(CRITS.find(c => c.id === currentTab)));
+}
+
+function overviewPanel(){
+  const p = el("div", {class: "panel active"});
+  p.append(el("h2", {}, result.title || "Overview"));
+  if (result.researchQuestion) p.append(el("p", {class: "lede"}, "RQ: " + result.researchQuestion));
+  p.append(editable(el("p", {}, result.overview), v => result.overview = v));
+  if (result.topPriorities.length) {
+    p.append(el("h3", {class: "sec"}, "Top priorities"));
+    const ol = el("ol");
+    result.topPriorities.forEach((t, i) => ol.append(editable(el("li", {}, t), v => result.topPriorities[i] = v)));
+    p.append(ol);
+  }
+  p.append(el("h3", {class: "sec"}, "Report-wide issues"));
+  if (!result.general.length) p.append(el("p", {class: "note"}, "None flagged."));
+  result.general.forEach(a => p.append(card(a, {color: "--gen"})));
+  p.append(el("p", {class: "note"}, "Estimated marks are deliberately conservative: where the work sits between two marks, the lower one is given. Use the − / + controls on each criterion tab to apply your own judgement before sharing."));
+  p.append(el("button", {class: "btn small", onclick: () => run(true)}, "Re-mark from scratch"));
+  return p;
+}
+
+function critPanel(c){
+  const cc = result.criteria[c.id];
+  const p = el("div", {class: "panel active", style: `--tc:var(${c.color})`});
+  p.append(el("h2", {}, c.name));
+  p.append(el("p", {class: "lede"}, c.strands));
+  const stepper = el("span", {class: "stepper"},
+    el("button", {"aria-label": "Lower mark", onclick: () => { cc.mark = Math.max(0, cc.mark - 1); cc.band = bandOf(cc.mark); renderResults(); }}, "−"),
+    el("span", {}, `${cc.mark}/6`),
+    el("button", {"aria-label": "Raise mark", onclick: () => { cc.mark = Math.min(6, cc.mark + 1); cc.band = bandOf(cc.mark); renderResults(); }}, "+"));
+  p.append(el("div", {class: "markrow"}, stepper, el("span", {class: "band"}, "Band " + cc.band),
+    cc.mark !== cc.aiMark ? el("span", {class: "note"}, `(estimate was ${cc.aiMark})`) : null));
+  if (cc.markRationale) p.append(el("div", {class: "teacher"}, el("b", {}, "Why this mark (teacher view)"), editable(el("div", {}, cc.markRationale), v => cc.markRationale = v)));
+  if (cc.strengths.length) {
+    p.append(el("h3", {class: "sec"}, "What's working"));
+    const ul = el("ul", {class: "strengths"});
+    cc.strengths.forEach((s, i) => ul.append(editable(el("li", {}, s), v => cc.strengths[i] = v)));
+    p.append(ul);
+  }
+  p.append(el("h3", {class: "sec"}, "What to change"));
+  cc.actions.forEach(a => p.append(card(a, {color: c.color})));
+  if (!cc.actions.length) p.append(el("p", {class: "note"}, "No actions."));
+  return p;
+}
+
+function card(a, {color}){
+  const pc = a.priority === "high" ? "--high" : a.priority === "medium" ? "--med" : "--low";
+  const list = a.crit === "GEN" ? result.general : result.criteria[a.crit].actions;
+  const c = el("div", {class: "card", id: "card-" + a.n, style: `--pc:var(${pc});--tc:var(${color})`});
+  c.append(el("div", {class: "meta"}, el("span", {class: "num", style: `background:${HEX[a.crit]}`}, String(a.n)), el("span", {class: "tag"}, a.strand), el("span", {class: "prio"}, a.priority)));
+  c.append(editable(el("div", {class: "issue"}, a.issue), v => a.issue = v));
+  c.append(editable(el("div", {class: "action"}, a.action), v => a.action = v));
+  if (a.why) c.append(editable(el("div", {class: "why"}, a.why), v => a.why = v));
+  if (a.quote) c.append(el("div", {class: "q"}, "“" + a.quote + "”" + (a.page ? ` (p. ${a.page})` : "")));
+  const tools = el("div", {class: "tools"});
+  if (a.located) tools.append(el("button", {class: "link", onclick: () => goToHighlight(a)}, `Show in report (p. ${a.locPage})`));
+  else if (a.quote) tools.append(el("span", {class: "link none"}, "Passage not found in PDF"));
+  tools.append(el("button", {class: "del", title: "Remove this action", onclick: () => {
+    const i = list.indexOf(a); if (i >= 0) list.splice(i, 1);
+    document.querySelectorAll(`[data-n="${a.n}"]`).forEach(n => n.remove());
+    renderResults(); }}, "Remove"));
+  c.append(tools);
+  return c;
+}
+
+function editable(node, onchange){
+  node.contentEditable = "true"; node.spellcheck = true;
+  node.addEventListener("input", () => onchange(node.innerText.trim()));
+  return node;
+}
+
+function goToHighlight(a){
+  const first = document.querySelector(`.hl[data-n="${a.n}"]:not(.hl-marker)`);
+  if (!first) return;
+  if (hiddenCrits.has(a.crit)) { hiddenCrits.delete(a.crit); $("#pages").classList.remove("hidden-crit-" + a.crit); buildLegend(); }
+  first.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center"});
+  document.querySelectorAll(`.hl[data-n="${a.n}"]:not(.hl-marker)`).forEach(h => { h.classList.add("flash"); setTimeout(() => h.classList.remove("flash"), 1800); });
+}
+function focusCard(a){
+  renderResults(a.crit === "GEN" ? "OV" : a.crit);
+  const c = document.getElementById("card-" + a.n);
+  if (c) { c.scrollIntoView({behavior: "smooth", block: "center"}); c.classList.add("flash"); setTimeout(() => c.classList.remove("flash"), 1800); }
+}
+
+/* ---------------- Student copy ---------------- */
+let includeMarks = false, includeQuotes = true;
+function studentPanel(){
+  const p = el("div", {class: "panel active"});
+  p.append(el("h2", {}, "Student copy"));
+  p.append(el("p", {class: "lede"}, "This is what the student sees. Edits you made on the other tabs are included."));
+  const opts = el("div", {class: "row", style: "margin-bottom:10px"},
+    el("label", {class: "check"}, Object.assign(el("input", {type: "checkbox", id: "incMarks"}), {checked: includeMarks, onchange: e => { includeMarks = e.target.checked; renderResults(); }}), "Include estimated marks"),
+    el("label", {class: "check"}, Object.assign(el("input", {type: "checkbox", id: "incQuotes"}), {checked: includeQuotes, onchange: e => { includeQuotes = e.target.checked; renderResults(); }}), "Include quoted passages"));
+  p.append(opts);
+  const btns = el("div", {class: "row", style: "margin-bottom:12px;align-items:center"});
+  const msg = el("span", {class: "note"});
+  const box = el("textarea", {class: "copybox", "aria-label": "Feedback text to copy", readonly: true});
+  btns.append(el("button", {class: "btn primary", onclick: async () => {
+    const txt = studentText();
+    try { await navigator.clipboard.writeText(txt); msg.textContent = "Copied. Paste it into your LMS, email or a comment."; }
+    catch { box.style.display = "block"; box.value = txt; box.select(); msg.textContent = "Copy was blocked here. The text is selected below: press Ctrl/Cmd + C."; }
+  }}, "Copy feedback text"));
+  if (downloadsApi || !window.claude) btns.append(el("button", {class: "btn", onclick: async () => {
+    try {
+      const base = (fileName.replace(/\.pdf$/i, "") || "IA") + " - feedback";
+      if (downloadsApi) await downloadsApi.save({filename: base + ".html", data: studentHtml(true)});
+      else { const a = el("a", {href: URL.createObjectURL(new Blob([studentHtml(true)], {type: "text/html"})), download: base + ".html"}); document.body.append(a); a.click(); a.remove(); }
+      msg.textContent = "Saved. The .html file opens in Word or Google Docs for editing.";
+    } catch (e) { msg.textContent = "The download was cancelled or isn't available here."; }
+  }}, "Download for Word (.html)"));
+  btns.append(msg);
+  p.append(btns, box);
+  const prev = el("div", {class: "student-preview"}); prev.innerHTML = studentHtml(false);
+  p.append(prev);
+  return p;
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function studentHtml(full){
+  const name = $("#sname").value.trim();
+  let h = `<h3 style="margin:0 0 6px;font-family:Georgia,serif">Chemistry IA feedback${name ? " – " + esc(name) : ""}</h3>`;
+  if (result.title) h += `<p style="margin:0 0 8px;color:#555">${esc(result.title)}</p>`;
+  if (includeMarks) h += `<p><b>Estimated mark: ${total()}/24</b> (${CRITS.map(c => `${c.name} ${result.criteria[c.id].mark}/6`).join(" · ")}). These are cautious estimates for a draft, not final marks.</p>`;
+  if (result.overview) h += `<p>${esc(result.overview)}</p>`;
+  if (result.topPriorities.length) h += `<h4>Your top priorities</h4><ol>${result.topPriorities.map(t => `<li>${esc(t)}</li>`).join("")}</ol>`;
+  const actHtml = a => `<li><b>${esc(a.issue)}</b><br>${esc(a.action)}${includeQuotes && a.quote ? `<br><i style="color:#666">In your report${a.page ? " (p. " + a.page + ")" : ""}: “${esc(a.quote)}”</i>` : ""}</li>`;
+  for (const c of CRITS) {
+    const cc = result.criteria[c.id];
+    h += `<h4>${c.name}${includeMarks ? ` – ${cc.mark}/6` : ""}</h4>`;
+    if (cc.strengths.length) h += `<p><b>What's working:</b> ${cc.strengths.map(esc).join("; ")}</p>`;
+    if (cc.actions.length) h += `<p style="margin-bottom:2px"><b>What to change:</b></p><ol>${cc.actions.map(actHtml).join("")}</ol>`;
+  }
+  if (result.general.length) h += `<h4>Across the whole report</h4><ol>${result.general.map(actHtml).join("")}</ol>`;
+  if (full) h = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>IA feedback</title></head><body style="font-family:Calibri,Arial,sans-serif;font-size:11pt;max-width:720px">${h}</body></html>`;
+  return h;
+}
+function studentText(){
+  const name = $("#sname").value.trim();
+  const L = [];
+  L.push("Chemistry IA feedback" + (name ? " – " + name : ""));
+  if (result.title) L.push(result.title);
+  L.push("");
+  if (includeMarks) { L.push(`Estimated mark: ${total()}/24 (${CRITS.map(c => `${c.name} ${result.criteria[c.id].mark}/6`).join(", ")}). Cautious estimates for a draft, not final marks.`); L.push(""); }
+  if (result.overview) { L.push(result.overview); L.push(""); }
+  if (result.topPriorities.length) { L.push("YOUR TOP PRIORITIES"); result.topPriorities.forEach((t,i) => L.push(`${i+1}. ${t}`)); L.push(""); }
+  const actT = (a, i) => { L.push(`${i+1}. ${a.issue}`); L.push(`   Change: ${a.action}`); if (includeQuotes && a.quote) L.push(`   In your report${a.page ? " (p. " + a.page + ")" : ""}: "${a.quote}"`); };
+  for (const c of CRITS) {
+    const cc = result.criteria[c.id];
+    L.push(c.name.toUpperCase() + (includeMarks ? ` – ${cc.mark}/6` : ""));
+    if (cc.strengths.length) L.push("What's working: " + cc.strengths.join("; "));
+    if (cc.actions.length) { L.push("What to change:"); cc.actions.forEach(actT); }
+    L.push("");
+  }
+  if (result.general.length) { L.push("ACROSS THE WHOLE REPORT"); result.general.forEach(actT); }
+  return L.join("\n");
+}
+
+
+/* ---------------- Standalone: Anthropic API ---------------- */
+const KEY_STORE = "iaFeedback.apiKey", MODEL_STORE = "iaFeedback.model";
+function store(k, v){ try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} }
+function load(k){ try { return localStorage.getItem(k); } catch { return null; } }
+function apiKey(){ return $("#apiKey").value.trim(); }
+(function initApiSetup(){
+  if (window.claude) return;               // inside Claude the built-in connection is used instead
+  $("#apiSetup").hidden = false;
+  const k = load(KEY_STORE), m = load(MODEL_STORE);
+  if (k) { $("#apiKey").value = k; $("#rememberKey").checked = true; $("#apiSummary").textContent = "One-click marking: API key saved on this device"; }
+  else $("#apiSetup").open = true;
+  if (m) $("#apiModel").value = m;
+  $("#aiNote").textContent = "Marking takes one to three minutes.";
+  $("#useImages").parentElement.hidden = true;   // the whole PDF is sent, so graphs and tables are always read
+  const save = () => { store(MODEL_STORE, $("#apiModel").value); store(KEY_STORE, $("#rememberKey").checked && apiKey() ? apiKey() : null); };
+  $("#apiKey").addEventListener("change", save); $("#rememberKey").addEventListener("change", save); $("#apiModel").addEventListener("change", save);
+  $("#forgetKey").addEventListener("click", () => { $("#apiKey").value = ""; $("#rememberKey").checked = false; store(KEY_STORE, null);
+    $("#apiSummary").textContent = "One-click marking setup (Anthropic API key)"; });
+})();
+
+function toBase64(bytes){
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function parseJsonLoose(raw){
+  const tries = [raw, (raw.match(/```(?:json)?\s*([\s\S]*?)```/) || [])[1], raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1)];
+  for (const t of tries) { if (!t) continue; try { return JSON.parse(t); } catch {} }
+  return null;
+}
+async function callApi(prompt, pdf, signal, onText){
+  const content = [];
+  if (pdf) content.push({type: "document", source: {type: "base64", media_type: "application/pdf", data: toBase64(pdf)}});
+  content.push({type: "text", text: prompt});
+  let res;
+  try {
+    res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", signal,
+      headers: {"content-type": "application/json", "x-api-key": apiKey(), "anthropic-version": "2023-06-01",
+                "anthropic-dangerous-direct-browser-access": "true"},
+      body: JSON.stringify({model: $("#apiModel").value, max_tokens: 16000, stream: true, messages: [{role: "user", content}]})
+    });
+  } catch (e) {
+    if (e?.name === "AbortError") throw {code: "cancelled"};
+    throw {code: "api_network"};
+  }
+  if (!res.ok) {
+    let msg = ""; try { msg = (await res.json())?.error?.message || ""; } catch {}
+    if (res.status === 401 || res.status === 403) throw {code: "api_auth", message: msg};
+    if (res.status === 429) throw {code: "api_rate", message: msg};
+    if (res.status === 529 || res.status === 503) throw {code: "api_overloaded", message: msg};
+    if (/credit balance/i.test(msg)) throw {code: "api_billing", message: msg};
+    throw {code: "api_error", message: msg || ("HTTP " + res.status)};
+  }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "", text = "", stop = "";
+  try {
+    for (;;) {
+      const {value, done} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+        const line = chunk.split("\n").find(l => l.startsWith("data:"));
+        if (!line) continue;
+        let ev; try { ev = JSON.parse(line.slice(5)); } catch { continue; }
+        if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") { text += ev.delta.text; onText(text); }
+        else if (ev.type === "message_delta" && ev.delta?.stop_reason) stop = ev.delta.stop_reason;
+        else if (ev.type === "error") {
+          const t = ev.error?.type || "";
+          throw {code: t === "overloaded_error" ? "api_overloaded" : t === "rate_limit_error" ? "api_rate" : "api_error", message: ev.error?.message};
+        }
+      }
+    }
+  } catch (e) {
+    if (e?.name === "AbortError") throw {code: "cancelled"};
+    if (e?.code) throw e;
+    throw {code: "api_network"};
+  }
+  const data = parseJsonLoose(text);
+  if (!data || !data.criteria) throw {code: stop === "max_tokens" ? "api_truncated" : "invalid_json", text};
+  return data;
+}
+
+/* ---------------- Manual (chat) route ---------------- */
+$("#copyPrompt").addEventListener("click", async () => {
+  const txt = buildPrompt([], true);
+  try { await navigator.clipboard.writeText(txt); $("#copyMsg").textContent = "Copied (" + Math.round(txt.length / 1000) + "k characters). Paste it into a new Claude chat."; }
+  catch { const b = $("#promptBox"); b.style.display = "block"; b.value = txt; b.focus(); b.select();
+    $("#copyMsg").textContent = "Copy was blocked here. The prompt is selected below: press Ctrl/Cmd + C."; }
+});
+$("#showReply").addEventListener("click", () => {
+  const raw = $("#replyBox").value.trim();
+  const data = parseJsonLoose(raw);
+  if (!data || typeof data !== "object" || !data.criteria) {
+    showStatus("That reply couldn't be read. Paste Claude's whole reply, starting with { and ending with }.", true); return;
+  }
+  result = sanitize(data); hideStatus(); showResults();
+});
+
+/* ---------------- Status helpers ---------------- */
+function showStatus(t, err){ const s = $("#status"); s.className = "status show" + (err ? " err" : ""); s.textContent = t; }
+function hideStatus(){ const s = $("#status"); s.className = "status"; s.textContent = ""; }
+</script>
+</body>
+</html>
