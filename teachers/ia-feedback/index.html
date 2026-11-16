@@ -264,6 +264,7 @@ h3.sec{font-family:var(--font-body);font-size:12px;text-transform:uppercase;lett
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script>
 "use strict";
 /* ---------------- Guidance digest (condensed from the uploaded IB documents) ---------------- */
@@ -672,7 +673,7 @@ function findQuote(q, pageHint){
 function rectsFor(hit){
   const pd = pagesData[hit.pi];
   const fs = pd.map[hit.start], fe = pd.map[hit.end - 1] + 1;
-  const rects = [];
+  const rects = [], pdfRects = [];
   pd.ranges.forEach(([s,e], i) => {
     if (e <= fs || s >= fe || e === s) return;
     const it = pd.items[i];
@@ -681,8 +682,10 @@ function rectsFor(hit){
     const w = it.width * RENDER_SCALE;
     const f0 = (Math.max(s, fs) - s) / (e - s), f1 = (Math.min(e, fe) - s) / (e - s);
     rects.push({x: tx[4] + w * f0, y: tx[5] - h * 0.95, w: Math.max(w * (f1 - f0), 4), h: h * 1.2});
+    const ph = Math.hypot(it.transform[2], it.transform[3]) || 10, pw = it.width;
+    pdfRects.push({x: it.transform[4] + pw * f0, y: it.transform[5] - ph * 0.25, w: Math.max(pw * (f1 - f0), 2), h: ph * 1.2});
   });
-  return {pd, rects};
+  return {pd, rects, pdfRects};
 }
 
 let allActions = [];
@@ -698,9 +701,9 @@ function placeHighlights(){
     if (!a.quote) continue;
     const hit = findQuote(a.quote, a.page);
     if (!hit) continue;
-    const {pd, rects} = rectsFor(hit);
+    const {pd, rects, pdfRects} = rectsFor(hit);
     if (!rects.length) continue;
-    a.located = true; a.locPage = pd.p;
+    a.located = true; a.locPage = pd.p; a.pdfRects = pdfRects;
     const W = pd.vp.width, H = pd.vp.height;
     rects.forEach((r, idx) => {
       const d = el("div", {class: "hl " + HL_CLASS[a.crit], "data-n": a.n, title: `${a.n}. ${a.strand}: ${a.issue}`,
@@ -758,6 +761,8 @@ function renderResults(tab){
   if (wc) flags.append(el("span", {class: "flag" + (wc > 3000 ? " bad" : wc > 2700 ? " warn" : "")}, `≈${wc.toLocaleString()} words${wc > 3000 ? " (over 3,000)" : ""}`));
   if (result.investigationType) flags.append(el("span", {class: "flag"}, result.investigationType));
   flags.append(el("span", {class: "flag"}, $("#level").value + " · " + $("#stage").value));
+  const pdfMsg = el("span", {class: "note"});
+  flags.append(el("button", {class: "btn small primary", style: "margin-left:auto", onclick: () => downloadPdf(pdfMsg)}, "Download PDF"), pdfMsg);
   const unloc = allActions.filter(a => a.quote && !a.located).length;
   if (unloc) flags.append(el("span", {class: "flag warn", title: "These actions quote text that couldn't be matched in the PDF"}, `${unloc} not located in PDF`));
   R.append(el("div", {class: "summary"},
@@ -865,12 +870,14 @@ function studentPanel(){
   p.append(el("p", {class: "lede"}, "This is what the student sees. Edits you made on the other tabs are included."));
   const opts = el("div", {class: "row", style: "margin-bottom:10px"},
     el("label", {class: "check"}, Object.assign(el("input", {type: "checkbox", id: "incMarks"}), {checked: includeMarks, onchange: e => { includeMarks = e.target.checked; renderResults(); }}), "Include estimated marks"),
-    el("label", {class: "check"}, Object.assign(el("input", {type: "checkbox", id: "incQuotes"}), {checked: includeQuotes, onchange: e => { includeQuotes = e.target.checked; renderResults(); }}), "Include quoted passages"));
+    el("label", {class: "check"}, Object.assign(el("input", {type: "checkbox", id: "incQuotes"}), {checked: includeQuotes, onchange: e => { includeQuotes = e.target.checked; renderResults(); }}), "Include quoted passages"),
+    el("label", {class: "check"}, Object.assign(el("input", {type: "checkbox", id: "incAnn"}), {checked: includeAnnotated, onchange: e => { includeAnnotated = e.target.checked; }}), "Add the annotated report to the PDF"));
   p.append(opts);
   const btns = el("div", {class: "row", style: "margin-bottom:12px;align-items:center"});
   const msg = el("span", {class: "note"});
   const box = el("textarea", {class: "copybox", "aria-label": "Feedback text to copy", readonly: true});
-  btns.append(el("button", {class: "btn primary", onclick: async () => {
+  btns.append(el("button", {class: "btn primary", onclick: () => downloadPdf(msg)}, "Download PDF"));
+  btns.append(el("button", {class: "btn", onclick: async () => {
     const txt = studentText();
     try { await navigator.clipboard.writeText(txt); msg.textContent = "Copied. Paste it into your LMS, email or a comment."; }
     catch { box.style.display = "block"; box.value = txt; box.select(); msg.textContent = "Copy was blocked here. The text is selected below: press Ctrl/Cmd + C."; }
@@ -1013,6 +1020,193 @@ async function callApi(prompt, pdf, signal, onText){
   const data = parseJsonLoose(text);
   if (!data || !data.criteria) throw {code: stop === "max_tokens" ? "api_truncated" : "invalid_json", text};
   return data;
+}
+
+/* ---------------- PDF export (feedback + annotated report) ---------------- */
+let includeAnnotated = true;
+const WINANSI_EXTRA = "–—‘’“”•…€™‚„†‡ˆ‰Š‹ŒŽ˜šœžŸ";
+const PDF_MAP = {"≈":"~","≤":"<=","≥":">=","→":"->","←":"<-","⇌":"<=>","⟶":"->","−":"-","‐":"-","‑":"-","′":"'","″":"\"",
+  "Δ":"delta ","∆":"delta ","√":"sqrt","∑":"sum","∞":"inf","α":"alpha","β":"beta","λ":"lambda","θ":"theta","σ":"sigma","π":"pi","ε":"epsilon",
+  "⁰":"0","¹":"1","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9","⁺":"+","⁻":"-","₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9",
+  " ":" "," ":" "," ":" ","​":"","\t":" "};
+function pdfSafe(t){
+  let o = "";
+  for (const ch of String(t ?? "")) {
+    if (PDF_MAP[ch] != null) o += PDF_MAP[ch];
+    else if (ch === "\n" || (ch >= " " && ch <= "~") || (ch >= "¡" && ch <= "ÿ") || WINANSI_EXTRA.includes(ch)) o += ch;
+    else o += "?";
+  }
+  return o;
+}
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return PDFLib.rgb((n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255); };
+
+async function buildPdf(){
+  const {PDFDocument, StandardFonts, rgb} = PDFLib;
+  const doc = await PDFDocument.create();
+  const F = await doc.embedFont(StandardFonts.Helvetica), B = await doc.embedFont(StandardFonts.HelveticaBold), I = await doc.embedFont(StandardFonts.HelveticaOblique);
+  const W = 595.28, H = 841.89, M = 50, CW = W - 2 * M;
+  const INK = rgb(0.11, 0.14, 0.2), MUTED = rgb(0.38, 0.42, 0.49), LINE = rgb(0.85, 0.88, 0.92);
+  let page, y;
+  const fbPages = [];
+  const newPage = () => { page = doc.addPage([W, H]); fbPages.push(page); y = H - M; };
+  const need = h => { if (y - h < M + 20) newPage(); };
+  const wrap = (text, font, size, maxW) => {
+    const out = [];
+    for (const para of pdfSafe(text).split("\n")) {
+      let line = "";
+      for (let word of para.split(/ +/)) {
+        while (font.widthOfTextAtSize(word, size) > maxW) {      // break very long tokens
+          let k = word.length; while (k > 1 && font.widthOfTextAtSize(word.slice(0, k), size) > maxW) k--;
+          if (line) { out.push(line); line = ""; }
+          out.push(word.slice(0, k)); word = word.slice(k);
+        }
+        const t = line ? line + " " + word : word;
+        if (font.widthOfTextAtSize(t, size) > maxW && line) { out.push(line); line = word; } else line = t;
+      }
+      out.push(line);
+    }
+    return out;
+  };
+  const para = (text, {font = F, size = 10.5, color = INK, x = M, w = CW, gap = 4, lh = 1.35} = {}) => {
+    if (!text) return;
+    for (const ln of wrap(text, font, size, w)) { need(size * lh); page.drawText(ln, {x, y: y - size, size, font, color}); y -= size * lh; }
+    y -= gap;
+  };
+  const labelled = (label, text, opts = {}) => {      // "Change: ..." with a bold lead-in on the first line
+    const size = opts.size || 10.5, x = opts.x || M, w = opts.w || CW, lh = 1.35;
+    const lw = B.widthOfTextAtSize(pdfSafe(label) + " ", size);
+    const first = wrap(text, F, size, w - lw)[0] || "";
+    const rest = pdfSafe(text).slice(first.length).trim();
+    need(size * lh);
+    page.drawText(pdfSafe(label), {x, y: y - size, size, font: B, color: opts.labelColor || INK});
+    page.drawText(first, {x: x + lw, y: y - size, size, font: F, color: INK});
+    y -= size * lh;
+    if (rest) para(rest, {x, w, size, gap: 0});
+    y -= opts.gap ?? 3;
+  };
+  const name = $("#sname").value.trim();
+
+  // ---- Feedback pages
+  newPage();
+  page.drawRectangle({x: 0, y: H - 8, width: W, height: 8, color: hexRgb("#1f4fa8")});
+  para("Chemistry IA feedback" + (name ? " - " + name : ""), {font: B, size: 20, gap: 2});
+  para([$("#level").value, $("#stage").value, new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"})].join("  |  "), {size: 9.5, color: MUTED, gap: 6});
+  if (result.title) para(result.title, {font: I, size: 11, color: MUTED, gap: 2});
+  if (result.researchQuestion) para("Research question: " + result.researchQuestion, {size: 10, color: MUTED, gap: 8});
+
+  if (includeMarks) {
+    need(62);
+    const bw = (CW - 3 * 8 - 70) / 4;
+    page.drawRectangle({x: M, y: y - 54, width: 62, height: 54, borderColor: LINE, borderWidth: 1});
+    page.drawText(String(total()), {x: M + 31 - B.widthOfTextAtSize(String(total()), 22) / 2, y: y - 30, size: 22, font: B, color: INK});
+    page.drawText("of 24 (est.)", {x: M + 31 - F.widthOfTextAtSize("of 24 (est.)", 8) / 2, y: y - 46, size: 8, font: F, color: MUTED});
+    CRITS.forEach((c, i) => {
+      const bx = M + 70 + i * (bw + 8), cc = result.criteria[c.id];
+      page.drawRectangle({x: bx, y: y - 54, width: bw, height: 54, borderColor: LINE, borderWidth: 1});
+      page.drawRectangle({x: bx, y: y - 3, width: bw, height: 3, color: hexRgb(HEX[c.id])});
+      page.drawText(c.name, {x: bx + 7, y: y - 16, size: 8.5, font: F, color: MUTED});
+      page.drawText(`${cc.mark}/6`, {x: bx + 7, y: y - 36, size: 16, font: B, color: INK});
+      page.drawText("band " + pdfSafe(cc.band), {x: bx + 7, y: y - 48, size: 7.5, font: F, color: MUTED});
+    });
+    y -= 64;
+    para("Estimated marks for a draft, given cautiously. They are not final IB marks.", {size: 8.5, font: I, color: MUTED, gap: 8});
+  }
+
+  para(result.overview, {gap: 8});
+  if (result.topPriorities.length) {
+    para("Your top priorities", {font: B, size: 12.5, gap: 3});
+    result.topPriorities.forEach((t, i) => labelled(`${i + 1}.`, t, {x: M + 4, w: CW - 4}));
+    y -= 6;
+  }
+  if (includeAnnotated) para("The numbered points below match the numbered highlights in your annotated report, which follows this feedback.", {size: 9.5, font: I, color: MUTED, gap: 8});
+
+  const action = (a, color) => {
+    need(40);
+    const cx = M + 9, cy = y - 7;
+    page.drawCircle({x: cx, y: cy, size: 8, color});
+    const n = String(a.n);
+    page.drawText(n, {x: cx - B.widthOfTextAtSize(n, 8) / 2, y: cy - 2.8, size: 8, font: B, color: rgb(1, 1, 1)});
+    const x = M + 24, w = CW - 24;
+    para(a.issue, {font: B, x, w, gap: 2});
+    labelled("Change:", a.action, {x, w, labelColor: color});
+    if (includeQuotes && a.quote) para(`In your report${a.page ? " (p. " + a.page + ")" : ""}: "${a.quote}"`, {font: I, size: 9.5, color: MUTED, x, w, gap: 2});
+    y -= 7;
+  };
+  for (const c of CRITS) {
+    const cc = result.criteria[c.id], color = hexRgb(HEX[c.id]);
+    need(120); y -= 6;
+    page.drawRectangle({x: M, y: y - 18, width: 4, height: 18, color});
+    page.drawText(c.name + (includeMarks ? `  -  ${cc.mark}/6` : ""), {x: M + 12, y: y - 14, size: 14, font: B, color: INK});
+    y -= 26;
+    if (cc.strengths.length) {
+      para("What's working", {font: B, size: 10.5, color: MUTED, gap: 2});
+      cc.strengths.forEach(s => labelled("•", s, {x: M + 4, w: CW - 4, gap: 1}));
+      y -= 5;
+    }
+    if (cc.actions.length) { para("What to change", {font: B, size: 10.5, color: MUTED, gap: 4}); cc.actions.forEach(a => action(a, color)); }
+  }
+  if (result.general.length) {
+    need(60); y -= 6;
+    page.drawRectangle({x: M, y: y - 18, width: 4, height: 18, color: hexRgb(HEX.GEN)});
+    page.drawText("Across the whole report", {x: M + 12, y: y - 14, size: 14, font: B, color: INK});
+    y -= 26;
+    result.general.forEach(a => action(a, hexRgb(HEX.GEN)));
+  }
+  fbPages.forEach((p, i) => {
+    const t = `Feedback page ${i + 1} of ${fbPages.length}`;
+    p.drawLine({start: {x: M, y: M - 4}, end: {x: W - M, y: M - 4}, thickness: 0.5, color: LINE});
+    p.drawText(t, {x: W - M - F.widthOfTextAtSize(t, 8), y: M - 16, size: 8, font: F, color: MUTED});
+    p.drawText(pdfSafe(fileName), {x: M, y: M - 16, size: 8, font: F, color: MUTED});
+  });
+
+  // ---- Annotated copy of the student's report
+  if (includeAnnotated && pdfBytes) {
+    const src = await PDFDocument.load(pdfBytes, {ignoreEncryption: true});
+    const copied = await doc.copyPages(src, src.getPageIndices());
+    copied.forEach(p => doc.addPage(p));
+    const shown = allActions.filter(a => a.located && a.pdfRects?.length && (a.crit === "GEN" ? result.general : result.criteria[a.crit].actions).includes(a));
+    for (const a of shown) {
+      const pg = copied[a.locPage - 1]; if (!pg) continue;
+      const color = hexRgb(HEX[a.crit]);
+      a.pdfRects.forEach((r, i) => {
+        pg.drawRectangle({x: r.x, y: r.y, width: r.w, height: r.h, color, opacity: 0.22});
+        pg.drawLine({start: {x: r.x, y: r.y}, end: {x: r.x + r.w, y: r.y}, thickness: 1.2, color});
+        if (i === 0) {
+          const cx = Math.max(r.x - 11, 9), cy = r.y + r.h / 2, n = String(a.n);
+          pg.drawCircle({x: cx, y: cy, size: 8, color, borderColor: rgb(1, 1, 1), borderWidth: 1});
+          pg.drawText(n, {x: cx - B.widthOfTextAtSize(n, 8) / 2, y: cy - 2.8, size: 8, font: B, color: rgb(1, 1, 1)});
+        }
+      });
+    }
+    if (copied[0]) {
+      const p0 = copied[0], {width: pw, height: ph} = p0.getSize(), txt = "Annotated report: numbers match your feedback.  Blue = Research design   Green = Data analysis   Amber = Conclusion   Purple = Evaluation   Grey = whole report";
+      const sz = 7, tw = F.widthOfTextAtSize(txt, sz);
+      const box = p0.getCropBox ? p0.getCropBox() : {x: 0, y: 0, width: pw, height: ph};
+      p0.drawRectangle({x: box.x + 6, y: box.y + box.height - 16, width: Math.min(tw + 10, box.width - 12), height: 12, color: rgb(1, 1, 1), opacity: 0.92, borderColor: LINE, borderWidth: 0.5});
+      p0.drawText(txt, {x: box.x + 11, y: box.y + box.height - 12.5, size: sz, font: F, color: INK, maxWidth: box.width - 22});
+    }
+  }
+  doc.setTitle("Chemistry IA feedback" + (name ? " - " + name : ""));
+  return await doc.save();
+}
+
+async function downloadPdf(msgEl){
+  if (!window.PDFLib) { msgEl.textContent = "The PDF tool didn't load. Check your internet connection and reload the page."; return; }
+  msgEl.textContent = "Building the PDF…";
+  try {
+    const bytes = await buildPdf();
+    const name = $("#sname").value.trim();
+    const base = (name || fileName.replace(/\.pdf$/i, "") || "IA") + " - IA feedback.pdf";
+    const blob = new Blob([bytes], {type: "application/pdf"});
+    if (downloadsApi) await downloadsApi.save({filename: base, data: blob});
+    else { const a = el("a", {href: URL.createObjectURL(blob), download: base}); document.body.append(a); a.click(); a.remove(); }
+    msgEl.textContent = "PDF saved as \"" + base + "\".";
+  } catch (e) {
+    console.error(e);
+    msgEl.textContent = e?.code === "declined" ? "Download cancelled." :
+      e?.code ? "The download isn't available here (" + e.code + "). Use Copy feedback text instead." :
+      "The PDF couldn't be built (" + (e?.message || "error") + "). Untick 'Add the annotated report' and try again.";
+  }
 }
 
 /* ---------------- Manual (chat) route ---------------- */
