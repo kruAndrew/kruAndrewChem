@@ -25,3 +25,14 @@ Google Drive links (slides, question packs, notes)
 Le Chatelier simulator
   simulators/lechatelier.html is a "coming soon" placeholder. Replace it with your own
   lechatelier.html file and keep the same name.
+
+Teacher tools (teachers/)
+  teachers/                   a small staff page, not linked from the student hub.
+  teachers/ia-feedback/       Chemistry IA Feedback: upload a student's IA PDF and get feedback
+                              for each criterion, an estimated mark /24 and highlighted passages.
+  Address: https://YOUR-USERNAME.github.io/REPO-NAME/teachers/ia-feedback/
+  Marking: each teacher pastes their own Anthropic API key (console.anthropic.com) under
+  "One-click marking setup". The key stays in that browser and is sent only to Anthropic.
+  Without a key, use "Mark in a Claude chat instead" (copy the prompt, paste Claude's reply back).
+  GitHub Pages can't password-protect a page: the teachers/ area is unlisted and hidden from
+  search engines, but anyone with the address can open it. It holds no key and no student data.
