@@ -128,6 +128,14 @@
   .simcard .acts a.ws{background:#fff7ed;color:#9a3412;border-color:#fdba74}
   .simcard .acts a:hover{filter:brightness(.95)}
   /* mock cards */
+  /* chem dive */
+  .divegrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px;align-items:start}
+  @media (max-width:800px){ .divegrid{grid-template-columns:minmax(0,1fr)} }
+  .simcard .acts a.go.hl{background:var(--hl);border-color:var(--hl)}
+  .lbcard table{box-shadow:none}
+  .lbcard td.n,.lbcard th.n{text-align:right;white-space:nowrap}
+  .lbcard td.r{width:3em;font-family:var(--display);font-weight:800;color:var(--accent)}
+  .lbcard tr.top1 td.r{color:#b45309}
   .mock{display:flex;flex-direction:column;gap:8px}
   .mock .lvl{font-size:.72rem;font-weight:800;letter-spacing:.06em;padding:2px 9px;border-radius:999px;align-self:flex-start}
   .mock .lvl.SL{background:var(--struct-soft);color:var(--struct)} .mock .lvl.HL{background:var(--hl-soft);color:var(--hl)}
@@ -154,6 +162,7 @@
   <a href="#practice"><span class="ic">✏️</span>Practice questions</a>
   <a href="#mocks"><span class="ic">📄</span>Mock papers</a>
   <a href="#simulators"><span class="ic">🧪</span>Simulators</a>
+  <a href="#dive"><span class="ic">🤿</span>Chem Dive</a>
 </div></nav>
 
 <main class="wrap">
@@ -198,9 +207,31 @@
     <p class="lead">Interactive models to explore and practise with. They work on laptops, tablets and phones. Each one has a 2-page worksheet (📄) that walks you through the concept and how the settings link together. Open it beside the simulator, or print it on A4.</p>
     <div class="simgrid" id="simList"></div>
   </section>
+
+  <section id="dive">
+    <h2>Chem Dive</h2>
+    <p class="lead">A daily chemistry game. Every day there are seven new prompts from across the course, the same for the whole class. Name a correct answer in 25 seconds: obvious answers keep you near the surface, rarer correct chemistry sinks you deeper. One scored dive a day for SL and one for HL.</p>
+    <div class="divegrid">
+      <div class="simcard">
+        <a class="thumb" href="simulators/chem-dive.html"><img src="images/chem-dive.jpg" alt="Screenshot of IB Chem Dive"><span class="play">Play ▸</span></a>
+        <div class="body">
+          <h3>Today's dive</h3>
+          <p>Play SL or HL. When you finish, you can post your dive to the leaderboard under a display name. There's also an unlimited practice mode that doesn't count.</p>
+          <div class="acts"><a class="go" href="simulators/chem-dive.html?level=SL">▶ Play SL dive</a><a class="go hl" href="simulators/chem-dive.html?level=HL">▶ Play HL dive</a></div>
+        </div>
+      </div>
+      <div class="card lbcard">
+        <h3>All-time leaderboard</h3>
+        <p class="small" style="margin:0 0 10px">Each diver's deepest single daily dive.</p>
+        <div class="seg" id="lbSeg"><button data-l="SL" class="on">SL</button><button data-l="HL">HL</button></div>
+        <div id="diveLB"><p class="small">Loading…</p></div>
+      </div>
+    </div>
+  </section>
 </main>
 <footer id="foot"></footer>
 
+<script src="simulators/chem-dive-config.js"></script>
 <script>
 /* =====================================================================
    EDIT HERE
@@ -497,8 +528,7 @@ const SIMS = [
   ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature or pressure, or by adding a catalyst. Watch the concentration–time graph and Q vs K respond.", "images/lechatelier.jpg", "simulators/worksheets/lechatelier.html"],
   ["Atom Economy Challenge", "simulators/atom-economy.html", "R2.1 How much? The amount of chemical change", "Calculate the atom economy of five reactions, from aspirin synthesis to the Haber process, with hints, instant feedback and worked answers. Go back to any question you have already done.", "images/atom-economy.jpg"],
   ["Redox Rush", "simulators/redox-rush.html", "R3.2 Electron transfer reactions", "An arcade game for practising oxidation states: five levels from binary compounds to individual carbon atoms, mixed-valence oxides and complexes, plus a 60-second Blitz. The HL Formal Charge Lab adds Lewis structures and choosing the preferred structure.", "images/redox-rush.jpg", "simulators/worksheets/redox-rush.html"],
-  ["Coloured Complexes", "simulators/ligand-field.html", "S3.1 The periodic table: transition elements (HL)", "Choose a period 4 transition metal ion, its oxidation state and a ligand. See white light pass through a 3D space-filling model of the complex, watch the d orbitals split and an electron jump across Δₒ, and use the data-booklet colour wheel to link the colour absorbed to the colour seen.", "images/ligand-field.jpg", "simulators/worksheets/ligand-field.html"],
-  ["IB Chem Dive", "simulators/chem-dive.html", "Daily game · all topics", "A new set of seven prompts every day, the same for the whole class. Name a correct answer in 25 seconds: obvious answers keep you near the surface, rarer correct chemistry sinks you deeper. SL and HL dives, feedback on common wrong answers, and an unlimited practice mode.", "images/chem-dive.jpg"]
+  ["Coloured Complexes", "simulators/ligand-field.html", "S3.1 The periodic table: transition elements (HL)", "Choose a period 4 transition metal ion, its oxidation state and a ligand. See white light pass through a 3D space-filling model of the complex, watch the d orbitals split and an electron jump across Δₒ, and use the data-booklet colour wheel to link the colour absorbed to the colour seen.", "images/ligand-field.jpg", "simulators/worksheets/ligand-field.html"]
 ];
 /* =====================================================================
    END OF EDIT AREA. You don't need to change anything below this line.
@@ -515,7 +545,7 @@ function thisWeek(rows){ const now=new Date(); let wk=0;
   for(const r of rows){ if(typeof r==="string") continue; wk++; const st=new Date(r[0]+"T00:00:00"); if(now>=st && now<new Date(st.getTime()+7*864e5)) return {wk,topic:r[1]||"To be confirmed",a:r[2]==="A"}; }
   return null; }
 /* tabs */
-const tabs = ["schedule","notes","slides","practice","mocks","simulators"];
+const tabs = ["schedule","notes","slides","practice","mocks","simulators","dive"];
 function showTab(){
   const t = tabs.includes(location.hash.slice(1)) ? location.hash.slice(1) : "schedule";
   tabs.forEach(id => $("#"+id).classList.toggle("active", id===t));
@@ -587,6 +617,25 @@ $("#mockFolder").innerHTML = `Try the paper under timed conditions before you op
 
 /* simulators */
 $("#simList").innerHTML = SIMS.map(s => `<div class="simcard"><a class="thumb" href="${s[1]}">${s[4]?`<img src="${s[4]}" alt="Screenshot of the ${esc(s[0])} simulator" loading="lazy">`:""}<span class="play">Open ▸</span></a><div class="body">${chip(s[2].split(" ")[0])}<a class="t" href="${s[1]}"><h3>${esc(s[0])}</h3></a><p>${esc(s[3])}</p><div class="acts"><a class="go" href="${s[1]}">▶ Open simulator</a>${s[5]?`<a class="ws" href="${s[5]}">📄 Worksheet</a>`:""}</div></div></div>`).join("");
+
+/* chem dive leaderboard */
+(function(){
+  const url=(window.CHEMDIVE_SCORES_URL||"").trim(), box=$("#diveLB");
+  async function load(lvl){
+    document.querySelectorAll("#lbSeg button").forEach(b=>b.classList.toggle("on",b.dataset.l===lvl));
+    if(!url){box.innerHTML=`<p class="small">The leaderboard isn't switched on yet.</p>`;return;}
+    box.innerHTML=`<p class="small">Loading…</p>`;
+    try{
+      const d=await (await fetch(url+"?level="+lvl+"&limit=20")).json(); if(!d.ok) throw 0;
+      box.innerHTML = d.top.length ? `<table><thead><tr><th>#</th><th>Diver</th><th class="n">Deepest</th><th class="n">Dives</th></tr></thead><tbody>${
+        d.top.map(x=>`<tr class="${x.rank===1?"top1":""}"><td class="r">${Number(x.rank)}</td><td>${esc(x.name)}</td><td class="n">${Number(x.depth).toLocaleString()} m</td><td class="n">${Number(x.dives)}</td></tr>`).join("")
+      }</tbody></table>` : `<p class="small">No ${lvl} dives posted yet. Be the first.</p>`;
+    }catch(e){ box.innerHTML=`<p class="small">Couldn't load the leaderboard right now.</p>`; }
+  }
+  document.querySelectorAll("#lbSeg button").forEach(b=>b.onclick=()=>load(b.dataset.l));
+  let loaded=false; const go=()=>{ if(location.hash==="#dive"&&!loaded){loaded=true;load("SL");} };
+  addEventListener("hashchange",go); go();
+})();
 </script>
 </body>
 </html>

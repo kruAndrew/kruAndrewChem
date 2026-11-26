@@ -26,10 +26,14 @@ Le Chatelier simulator
   simulators/lechatelier.html is a "coming soon" placeholder. Replace it with your own
   lechatelier.html file and keep the same name.
 
-IB Chem Dive (simulators/chem-dive.html)
+IB Chem Dive (simulators/chem-dive.html, "Chem Dive" tab on the hub)
   A daily answer game: seven prompts a day, the same for everyone, picked automatically from the
-  date. Scores are saved in each student's own browser. To add or change prompts, rarity zones or
-  feedback on wrong answers, edit the list called P near the top of the script in that file.
+  date. To add or change prompts, rarity zones or feedback on wrong answers, edit the list called
+  P near the top of the script in that file.
+  Leaderboard: scores go to the Google Sheet "Chem Dive leaderboard scores" (DP Chem folder)
+  through an Apps Script web app. Setup steps are at the top of teachers/chem-dive-leaderboard.gs.
+  Paste the web app URL into simulators/chem-dive-config.js. Leave it "" to switch the
+  leaderboard off. To remove a dive, type x in its Hide column; type player to hide a student.
 
 Teacher tools (teachers/)
   teachers/                   a small staff page, not linked from the student hub.

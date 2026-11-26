@@ -50,7 +50,7 @@ input:focus{outline:none;border-color:var(--glass)}
 table{width:100%;border-collapse:collapse;margin:16px 0;font-size:15px}
 td,th{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 th{color:var(--muted);font-weight:500}
-td.n{text-align:right;white-space:nowrap}
+td.n,th.n{text-align:right;white-space:nowrap}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
 .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:18px 0;padding:0;list-style:none}
 .legend li{background:var(--deep);border-radius:12px;padding:10px 12px;font-size:14px}
@@ -72,6 +72,14 @@ td.n{text-align:right;white-space:nowrap}
  .diver .read{top:auto;bottom:-2px;left:26px;transform:none}
  main{grid-row:3}
 }
+.lb{margin-top:26px;border-top:1px solid var(--line);padding-top:20px}
+.lb h2{font-size:22px;margin:0 0 4px}
+.lb table{margin:10px 0 0}
+.lb tr.me td{background:rgba(127,209,199,.16);font-weight:600}
+.lb td.r{width:3em;color:var(--glass);font-weight:700}
+.namebox{background:var(--deep);border-radius:16px;padding:16px;margin-top:18px}
+.namebox p{margin:0 0 10px}
+.linkbtn{background:none;border:0;color:var(--glass);font:inherit;text-decoration:underline;cursor:pointer;padding:0;min-height:0}
 </style>
 </head>
 <body>
@@ -95,6 +103,7 @@ td.n{text-align:right;white-space:nowrap}
   </div>
  </aside>
 </div>
+<script src="chem-dive-config.js"></script>
 <script>
 {
 const TIERS=[{n:"Surface",p:10},{n:"Reef",p:30},{n:"Twilight zone",p:60},{n:"Midnight zone",p:85},{n:"One in a mole",p:100}];
@@ -418,6 +427,27 @@ function pick(seed,lvl){const r=rngFrom(seed+"|"+lvl);const pool=P.filter(p=>lvl
 // ---------- storage ----------
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let level=store.get("chemdive:level")||"SL";
+{const q=new URLSearchParams(location.search).get("level");if(q==="SL"||q==="HL")level=q}
+// ---------- leaderboard ----------
+const LB=(window.CHEMDIVE_SCORES_URL||"").trim();
+const pid=(()=>{let id=store.get("chemdive:id");if(!id){id=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));store.set("chemdive:id",id)}return id})();
+const getName=()=>store.get("chemdive:name")||"";
+async function lbGet(lvl){const r=await fetch(LB+"?level="+lvl+"&limit=10&id="+encodeURIComponent(pid));return r.json()}
+async function lbPost(rec,lvl){const r=await fetch(LB,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({id:pid,name:getName(),level:lvl,date:rec.key,points:rec.scores.reduce((a,b)=>a+(b||0),0)})});return r.json()}
+function lbRow(x){return `<tr class="${x.me?"me":""}"><td class="r">${Number(x.rank)}</td><td>${esc(x.name)}${x.me?" (you)":""}</td><td class="n">${Number(x.depth).toLocaleString()} m</td><td class="n">${Number(x.dives)}</td></tr>`}
+async function showLB(el,lvl){if(!LB||!el)return;el.innerHTML=`<h2>All-time leaderboard · ${lvl}</h2><p class="msg">Loading…</p>`;
+ try{const d=await lbGet(lvl);if(!d.ok)throw 0;
+  const rows=d.top.map(lbRow).join("")+(d.me&&!d.top.some(x=>x.me)?lbRow(d.me):"");
+  el.innerHTML=`<h2>All-time leaderboard · ${lvl}</h2><p class="msg" style="margin:0">Each diver's deepest single daily dive. ${Number(d.players)} diver${d.players===1?"":"s"} so far.</p>`+
+  (rows?`<table><thead><tr><th>#</th><th>Diver</th><th class="n">Deepest</th><th class="n">Dives</th></tr></thead><tbody>${rows}</tbody></table>`:`<p>No dives posted yet. Be the first.</p>`)+
+  (getName()?`<p class="note">Posting as <b>${esc(getName())}</b>. <button class="linkbtn" id="rn">Change name</button></p>`:"");
+  const rn=el.querySelector("#rn");if(rn)rn.onclick=()=>{store.set("chemdive:name","");if(G&&G.done&&!G.practice)results();else home()}}
+ catch(e){el.innerHTML=`<h2>All-time leaderboard</h2><p class="msg">Couldn't load the leaderboard right now.</p>`}}
+async function post(){const k="chemdive:"+G.key+":"+level,rec=store.get(k);if(!LB||!rec)return;if(rec.posted||!getName())return showLB(document.getElementById("lb"),level);
+ const st=document.getElementById("post");if(st)st.textContent="Posting your dive…";
+ try{const d=await lbPost(rec,level);if(!d.ok)throw new Error(d.error||"");rec.posted=true;store.set(k,rec);const f=document.getElementById("nf");if(f){f.outerHTML='<p class="msg" id="post"></p>'}const s2=document.getElementById("post");if(s2)s2.textContent="Posted to the leaderboard as "+getName()+"."}
+ catch(e){if(st)st.textContent="Couldn't post your dive"+(e.message?": "+e.message:"")+". It will try again next time you open this page."}
+ showLB(document.getElementById("lb"),level)}
 
 // ---------- state & UI ----------
 const app=document.getElementById("app"),diver=document.getElementById("diver"),read=document.getElementById("read"),fill=document.getElementById("fill"),gauge=document.getElementById("gauge");
@@ -446,7 +476,8 @@ function home(){clearInterval(timer);const k=dkey();const saved=store.get("chemd
  <p>Type any correct answer. Obvious ones keep you near the surface; rarer correct chemistry takes you deeper. If an answer is rejected you can try again until the 25 seconds run out.</p>
  <ul class="legend">${TIERS.map(t=>`<li><b>${t.n}</b>${t.p} pts · ${(t.p*10).toLocaleString()} m</li>`).join("")}</ul>
  <div class="row"><button class="btn" id="go">Start today's dive</button><button class="btn ghost" id="pr">Practice dive</button></div>
- <p class="note">One scored dive per day per level, saved on this device. A new dive unlocks at midnight.</p>`;
+ <p class="note">One scored dive per day per level, saved on this device. A new dive unlocks at midnight.</p><section class="lb" id="lb"></section>`;
+ showLB(document.getElementById("lb"),level);
  document.getElementById("go").onclick=()=>start(k,false);document.getElementById("pr").onclick=()=>start("practice-"+Math.random(),true)}
 
 function start(seed,practice){G={key:dkey(),list:pick(seed,level),i:-1,scores:[],answers:[],practice,done:false};next()}
@@ -492,10 +523,14 @@ function results(){clearInterval(timer);const tot=G.scores.reduce((a,b)=>a+b,0);
  </tbody></table>
  <div class="row">${G.practice?"":`<button class="btn" id="cp">Copy result</button>`}<button class="btn ${G.practice?"":"ghost"}" id="pr">Practice dive</button>${G.practice?`<button class="btn ghost" id="hm">Back to today</button>`:""}</div>
  <p class="msg" id="cd"></p>
+ ${!G.practice&&LB?(getName()?`<p class="msg" id="post"></p>`:`<form class="namebox" id="nf"><p><b>Put this dive on the leaderboard.</b> Choose a display name (2–20 characters). Your teacher can see every name.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><input id="nm" maxlength="20" aria-label="Display name" placeholder="Display name"><button class="btn">Post my dive</button></div><p class="msg" id="post"></p></form>`):""}
+ ${G.practice?"":`<section class="lb" id="lb"></section>`}
  <p class="note">Rarity zones reflect how often DP students tend to think of each answer: a teacher's judgement, not live player data. Answers are matched with common spellings, formulae and small typos.</p>`;
  const cp=document.getElementById("cp");if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(shareText());cp.textContent="Copied"}catch(e){cp.textContent="Copy blocked"}};
  document.getElementById("pr").onclick=()=>start("practice-"+Math.random(),true);
  const hm=document.getElementById("hm");if(hm)hm.onclick=home;
+ const nf=document.getElementById("nf");if(nf)nf.onsubmit=e=>{e.preventDefault();const v=document.getElementById("nm").value.replace(/\s+/g," ").trim();if(v.length<2){document.getElementById("post").textContent="Use at least 2 characters.";return}store.set("chemdive:name",v.slice(0,20));const k="chemdive:"+G.key+":"+level,rec=store.get(k);if(rec){rec.posted=false;store.set(k,rec)}post()};
+ if(!G.practice){if(getName())post();else showLB(document.getElementById("lb"),level)}
  if(!G.practice){const cd=document.getElementById("cd");const tick=()=>{const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const s=Math.max(0,(m-n)/1000|0);cd.textContent="Next dive in "+Math.floor(s/3600)+" h "+pad(Math.floor(s%3600/60))+" min";if(s===0)home()};tick();clearInterval(timer);timer=setInterval(tick,30000)}}
 
 ticks();setLevel(level);
