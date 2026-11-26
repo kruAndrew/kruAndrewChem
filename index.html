@@ -14,6 +14,8 @@
   • Slide decks:      ["Deck title", "link"]
   • Practice packs:   Google Doc IDs (the long code in a Docs link
                       between /d/ and /edit). Leave "" if not ready yet.
+                      Two optional extra IDs at the end of a row add a challenge
+                      set (questions, markscheme), as in the R3.2 row.
   • Notes:            ["Title", link, "Checklist" | "Notes" | "Worksheet" | "Practical"]
   • Mock papers:      ["Paper name", "link"]  (leave link "" = coming soon)
   • Simulators:       ["Title", "simulators/file.html", "Topic", "What it does", "images/picture.jpg"]
@@ -399,7 +401,7 @@ const PACKS = [
  ["R2.3","How far? The extent of chemical change","121YySuc35_iUBjzBA2nsrs7padwNSbcmCzC4NJ5n87M","1FKy3hZ0olZ7JL9wn-GyzG2U54j847-gMupJL9MaMWpU","1qsyQwS5mrr0ARGqgdi_pD1YQmHcd9WoX9O6JEw3glTc","1bqbXOEEnveKJ_UaSU31iXy1I6uQYa_B73iOPbqGZyw4"],
  ["R2.2","How fast? The rate of chemical change","16sKRJntU642kVzlxGpktvkPgmg4YQryw3OZtw3hdeco","1qVys4bwrcozlvjg5UodPSKCs2dMoFP7XFeeTdmAciS8","1OuF98oS_k1lVgMl8sh8TeeQ5JIzR-_N2RZ_qb5cqqTs","1ZBGCUVXGzkvYr2B3vUw4BeWlbtz6_tAWMKDTVcL2zfI"],
  ["R3.1","Proton transfer reactions","1xKEB33FZuMWDwxQxhYzFh41Tk0Nx0kgWaZ8lfib7-3A","1zlhVBdyPRtjtBTIyqhJwj5nydTQFn4lONTr3cXAZJik","1y99uzuBcCgUtMPDvzLQtyQWDW-e79l3zQ3onHyIoYLA","16DapE1KJmZGfgy3NAzFWXnGDAEc9qYc1YbDVvPo-F7g"],
- ["R3.2","Electron transfer reactions","1wi3IchZrSHf4vdCgMgVHFk5qxDTPe-OryCO05IYEeu8","1YOYhkuKQbUASTzG_42-srvT-dnP2xATrpwKPWeQJpBo","1pQxFVSrJEf5gkYSJRoyNkvtk4Ci2gb4a-Luz69PZ4qw","1PD1E3apu352vlbiqlfVitf7m0cviLetE2DylCnxelGQ"],
+ ["R3.2","Electron transfer reactions","1wi3IchZrSHf4vdCgMgVHFk5qxDTPe-OryCO05IYEeu8","1YOYhkuKQbUASTzG_42-srvT-dnP2xATrpwKPWeQJpBo","1pQxFVSrJEf5gkYSJRoyNkvtk4Ci2gb4a-Luz69PZ4qw","1PD1E3apu352vlbiqlfVitf7m0cviLetE2DylCnxelGQ","1EP5B10WPm0GL3lut3IRB9I7UX5nYKwol3zka3vHdhNI","1MKZ27fyIKdk6at0G55WPJONo9o764pCayXOrx-RqHC8"],
  ["R3.3","Electron sharing reactions","1yz2eV05jnVQ7apa1B0YuUMBeZ9GSuFqoDDrkmXkKNiE","1QySG3L5FiJw2RQcWwh5gJTdkbrKEk-yGI2AV1c6H5tM","1MbULZcpVxR6DMfkRpARQRtYGtTntH7hmuqaX9e0JS3w","1dXnFCAWe8RQeT_zHqslMTG35349HUDV0n_4Ly_gXNqI"],
  ["R3.4","Electron-pair sharing reactions","1qTZjrxCNkQUeOsTDRvfxnX6Jkh-WcSfBUphXIv0NxjY","1DycGEVYN2YM8qhtK-sp7mhGpUcAikaSbgfxdnwIQFzg","1L9Q992a0AeyqeHlQfwDQffibWyuaAh_Nv2ZvIJw48yg","1huYcoqT7TkP7cn9cG-X0OY_vgfgHxQAPLjklWDHXD64"]
 ];
@@ -462,7 +464,9 @@ const NOTES = [
    ["R3.1 HL test preparation", D("12ahfRfJ8tMYTFBNWqLJc9IQOTjbMwqfQKHWKB3HIHWE"), "Worksheet"]]},
  {code:"R3.2", name:"Electron transfer reactions", items:[
    ["Primary electrochemical cells", D("17JToqQvC5oTNGhwp9gJyD4iP90povVJ1KI52T_XDbpk"), "Worksheet"],
-   ["Electrolysis", D("1WwXmc45YVqvwnJPhopmtzBr7i3d5Z4PrmVUt3Bt4fAQ"), "Worksheet"]]},
+   ["Electrolysis", D("1WwXmc45YVqvwnJPhopmtzBr7i3d5Z4PrmVUt3Bt4fAQ"), "Worksheet"],
+   ["Voltaic and electrolytic cells: labelling", D("1LIX-nG55zu_2CjMLDgTaIDq5C2vCvhYCBMiXp0U2weM"), "Worksheet"],
+   ["Fuel cells: acidic and alkaline", D("1DNwr8J83PsxP9DczgzT4MfAWUTmVMdkWV_wB_XCLo-E"), "Worksheet"]]},
  {code:"R3.4", name:"Electron-pair sharing reactions", items:[
    ["R3.4 Summary notes", D("1ZBojvRd---sh4aKUC4vaXLgwFKdzd8m0X6BD8rquIbc"), "Notes"]]}
 ];
@@ -488,6 +492,7 @@ const SIMS = [
   ["Neutralization Lab", "simulators/neutralization-lab.html", "R3.1 Proton transfer reactions", "Watch acids and bases swap partners to form salts, read the full, ionic and net ionic equations, then practise predicting the products.", "images/neutralization-lab.jpg", "simulators/worksheets/neutralization-lab.html"],
   ["Displacement Reactions", "simulators/displacement.html", "R3.2 Electron transfer reactions", "Add halogens to halide solutions and metals to metal-ion solutions. Predict first, then watch the colour changes and deposits. Rank the halogens by ease of reduction and the metals by ease of oxidation, then work out the order of four unknown metals from exam-style data.", "images/displacement.jpg", "simulators/worksheets/displacement.html"],
   ["Voltaic and Electrolytic Cells", "simulators/cells.html", "R3.2 Electron transfer reactions", "Build voltaic cells from metal half-cells, the standard hydrogen electrode, chlorine, Fe²⁺/Fe³⁺ and acidified MnO₄⁻/Mn²⁺ half-cells, and electrolyse molten and aqueous electrolytes. Watch electrons move through the wire and ions move through the salt bridge and solution, with half-equations and (HL) E⦵cell and ΔG⦵.", "images/cells.jpg", "simulators/worksheets/cells.html"],
+  ["Fuel Cells", "simulators/fuel-cells.html", "R3.2 Electron transfer reactions", "Run hydrogen and methanol fuel cells with acidic (PEM), alkaline (KOH) or molten carbonate electrolytes. Watch ions form at one electrode, cross the electrolyte and get used up at the other, with live half-equations, E⦵cell and ΔG⦵, cell voltage, and running totals of fuel, oxygen, water and CO₂ from n(e⁻) = It/F.", "images/fuel-cells.jpg", D("1DNwr8J83PsxP9DczgzT4MfAWUTmVMdkWV_wB_XCLo-E")],
   ["Le Chatelier's Principle", "simulators/lechatelier.html", "R2.3 How far?", "Disturb the Haber process, Contact process and N₂O₄ ⇌ 2NO₂ equilibria by changing concentration, temperature or pressure, or by adding a catalyst. Watch the concentration–time graph and Q vs K respond.", "images/lechatelier.jpg", "simulators/worksheets/lechatelier.html"],
   ["Atom Economy Challenge", "simulators/atom-economy.html", "R2.1 How much? The amount of chemical change", "Calculate the atom economy of five reactions, from aspirin synthesis to the Haber process, with hints, instant feedback and worked answers. Go back to any question you have already done.", "images/atom-economy.jpg"],
   ["Redox Rush", "simulators/redox-rush.html", "R3.2 Electron transfer reactions", "An arcade game for practising oxidation states: five levels from binary compounds to individual carbon atoms, mixed-valence oxides and complexes, plus a 60-second Blitz. The HL Formal Charge Lab adds Lewis structures and choosing the preferred structure.", "images/redox-rush.jpg", "simulators/worksheets/redox-rush.html"],
@@ -560,7 +565,7 @@ const pk = (id, label, hl) => id === "-" ? "" : id
   : `<span class="pk soon">${label}: coming soon</span>`;
 $("#folderLinks").innerHTML = `All packs in Google Drive: <a href="${FOLDERS.sl}" target="_blank" rel="noopener">SL folder</a> · <a href="${FOLDERS.hl}" target="_blank" rel="noopener">HL folder</a>`;
 $("#packList").innerHTML = `<div class="grid">${PACKS.map(p => `<div class="card topic"><h3>${chip(p[0])}${esc(p[1])}</h3><div class="packs">${
-  pk(p[2],"SL questions")+pk(p[3],"SL markscheme")+pk(p[4],"HL questions",1)+pk(p[5],"HL markscheme",1)}</div></div>`).join("")}</div>`;
+  pk(p[2],"SL questions")+pk(p[3],"SL markscheme")+pk(p[4],"HL questions",1)+pk(p[5],"HL markscheme",1)+(p[6]?pk(p[6],"Challenge set: questions")+pk(p[7],"Challenge set: markscheme"):"")}</div></div>`).join("")}</div>`;
 /* notes */
 function renderNotes(t){
   $("#noteList").innerHTML = NOTES.map(u => {
