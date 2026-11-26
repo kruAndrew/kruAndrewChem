@@ -14,8 +14,9 @@
   • Slide decks:      ["Deck title", "link"]
   • Practice packs:   Google Doc IDs (the long code in a Docs link
                       between /d/ and /edit). Leave "" if not ready yet.
-                      Two optional extra IDs at the end of a row add a challenge
-                      set (questions, markscheme), as in the R3.2 row.
+                      Optional extra IDs at the end of a row: 7th and 8th = extension
+                      questions and markscheme, 9th and 10th = support questions and
+                      markscheme. Use "" for an extension slot if only support exists.
   • Notes:            ["Title", link, "Checklist" | "Notes" | "Worksheet" | "Practical"]
   • Mock papers:      ["Paper name", "link"]  (leave link "" = coming soon)
   • Simulators:       ["Title", "simulators/file.html", "Topic", "What it does", "images/picture.jpg"]
@@ -565,7 +566,7 @@ const pk = (id, label, hl) => id === "-" ? "" : id
   : `<span class="pk soon">${label}: coming soon</span>`;
 $("#folderLinks").innerHTML = `All packs in Google Drive: <a href="${FOLDERS.sl}" target="_blank" rel="noopener">SL folder</a> · <a href="${FOLDERS.hl}" target="_blank" rel="noopener">HL folder</a>`;
 $("#packList").innerHTML = `<div class="grid">${PACKS.map(p => `<div class="card topic"><h3>${chip(p[0])}${esc(p[1])}</h3><div class="packs">${
-  pk(p[2],"SL questions")+pk(p[3],"SL markscheme")+pk(p[4],"HL questions",1)+pk(p[5],"HL markscheme",1)+(p[6]?pk(p[6],"Challenge set: questions")+pk(p[7],"Challenge set: markscheme"):"")}</div></div>`).join("")}</div>`;
+  pk(p[2],"SL questions")+pk(p[3],"SL markscheme")+pk(p[4],"HL questions",1)+pk(p[5],"HL markscheme",1)+(p[6]?pk(p[6],"Extension: questions")+pk(p[7],"Extension: markscheme"):"")+(p[8]?pk(p[8],"Support: questions")+pk(p[9],"Support: markscheme"):"")}</div></div>`).join("")}</div>`;
 /* notes */
 function renderNotes(t){
   $("#noteList").innerHTML = NOTES.map(u => {
