@@ -26,6 +26,11 @@ Le Chatelier simulator
   simulators/lechatelier.html is a "coming soon" placeholder. Replace it with your own
   lechatelier.html file and keep the same name.
 
+IB Chem Dive (simulators/chem-dive.html)
+  A daily answer game: seven prompts a day, the same for everyone, picked automatically from the
+  date. Scores are saved in each student's own browser. To add or change prompts, rarity zones or
+  feedback on wrong answers, edit the list called P near the top of the script in that file.
+
 Teacher tools (teachers/)
   teachers/                   a small staff page, not linked from the student hub.
   teachers/ia-feedback/       Chemistry IA Feedback: upload a student's IA PDF and get feedback

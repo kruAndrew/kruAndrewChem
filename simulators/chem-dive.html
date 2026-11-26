@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IB Chem Dive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: playful but exam-literate; a daily ritual for DP chemists.
+   IDEA: a dive log; every correct answer is a descent, rarer chemistry goes deeper.
+   PICTURE: a full-height ocean depth gauge, 0 to 7000 m, with a diver marker that sinks.
+   COLOUR and TYPE: deep-sea teal ground, sea-glass support, coral accent; Lexend throughout.
+   LAYOUT: game card left, gauge right; below 720px the gauge becomes a bar above the card. */
+:root{color-scheme:dark;--bg:#0a3445;--deep:#041820;--card:#0f4a60;--card2:#13586f;--ink:#effafb;--muted:#a9d3d8;--glass:#7fd1c7;--coral:#ff6b57;--line:rgba(255,255,255,.14)}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:linear-gradient(180deg,var(--bg),var(--deep));min-height:100vh;color:var(--ink);font:16px/1.55 Lexend,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:1100px;margin:0 auto;padding:clamp(20px,4vw,48px) max(4vw,16px);display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:clamp(20px,3vw,40px)}
+header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0;font-weight:700;text-wrap:balance}
+.back{display:inline-block;color:var(--glass);text-decoration:none;font-size:14px;margin-bottom:10px}.back:hover{text-decoration:underline}
+.sub{color:var(--muted);margin:6px 0 0}
+.seg{display:inline-flex;background:var(--deep);border-radius:999px;padding:4px;border:1px solid var(--line)}
+.seg button{min-height:40px;padding:0 18px;border:0;border-radius:999px;background:none;color:var(--muted);font:600 15px Lexend,sans-serif;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--glass);color:#06303b}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:clamp(20px,3vw,34px);box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:14px;flex-wrap:wrap}
+.tag{background:var(--deep);border-radius:8px;padding:2px 10px;color:var(--glass);font-weight:600}
+.q{font-size:clamp(22px,3vw,30px);line-height:1.2;font-weight:600;margin:18px 0 22px;text-wrap:balance}
+.timer{height:10px;background:var(--deep);border-radius:99px;overflow:hidden;margin-bottom:20px}
+.timer i{display:block;height:100%;width:100%;background:var(--glass);transition:width .1s linear}
+.timer.low i{background:var(--coral)}
+form{display:flex;gap:10px;flex-wrap:wrap}
+input{flex:1 1 220px;min-height:52px;font:500 18px Lexend,sans-serif;padding:0 16px;border-radius:14px;border:2px solid var(--line);background:var(--deep);color:var(--ink)}
+input:focus{outline:none;border-color:var(--glass)}
+.btn{min-height:52px;padding:0 22px;border-radius:14px;border:0;font:600 16px Lexend,sans-serif;cursor:pointer;background:var(--coral);color:#2b0b05}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn:focus-visible,.seg button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.msg{min-height:26px;margin-top:12px;color:var(--muted)}
+.msg.trap{color:#ffc2b8}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.tier{display:inline-block;font-weight:700;font-size:22px;color:var(--glass)}
+.tier.zero{color:var(--coral)}
+.big{font-size:clamp(40px,7vw,64px);font-weight:700;line-height:1;margin:8px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px;padding:0;list-style:none}
+.chips li{background:var(--card2);border-radius:10px;padding:4px 12px;font-size:15px}
+.chips li b{color:var(--glass);font-weight:600;margin-left:6px;font-size:13px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:15px}
+td,th{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500}
+td.n{text-align:right;white-space:nowrap}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:18px 0;padding:0;list-style:none}
+.legend li{background:var(--deep);border-radius:12px;padding:10px 12px;font-size:14px}
+.legend b{display:block;color:var(--glass)}
+.note{font-size:13px;color:var(--muted);margin-top:18px}
+/* gauge */
+.gauge{position:relative;border-radius:22px;overflow:hidden;min-height:560px;background:linear-gradient(180deg,#3fb5c4 0%,#16788f 18%,#0b4660 45%,#052433 75%,#01090d 100%);border:1px solid var(--line)}
+.gauge .tick{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,255,255,.22);font-size:13px;color:rgba(255,255,255,.75);padding:2px 8px}
+.gauge .fill{position:absolute;left:0;right:0;top:0;height:0;background:linear-gradient(180deg,rgba(127,209,199,0),rgba(127,209,199,.25));transition:height 1s ease}
+.diver{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);transition:top 1s cubic-bezier(.3,1.3,.5,1)}
+.diver .read{position:absolute;left:50%;transform:translateX(-50%);top:34px;white-space:nowrap;background:var(--coral);color:#2b0b05;font-weight:700;font-size:13px;border-radius:8px;padding:2px 8px}
+@media(prefers-reduced-motion:reduce){.diver,.gauge .fill,.timer i{transition:none}.shake{animation:none}}
+@media(max-width:720px){
+ .wrap{grid-template-columns:minmax(0,1fr)}
+ .gauge{order:-1;grid-row:2;min-height:0;height:64px;background:linear-gradient(90deg,#3fb5c4,#0b4660 45%,#01090d)}
+ .gauge .tick{top:0!important;bottom:0;left:auto;right:auto;border-top:0;border-left:1px dashed rgba(255,255,255,.22);padding:4px}
+ .gauge .fill{display:none}
+ .diver{top:50%!important;transition:left 1s ease}
+ .diver .read{top:auto;bottom:-2px;left:26px;transform:none}
+ main{grid-row:3}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header>
+  <div>
+   <a class="back" href="../index.html#simulators">← Back to the Chemistry Hub</a>
+   <h1>IB Chem Dive</h1>
+   <p class="sub" id="dateline">Seven prompts. 25 seconds each. Rare chemistry sinks you deeper.</p>
+  </div>
+  <div class="seg" role="group" aria-label="Level">
+   <button id="lvSL" aria-pressed="false">SL</button><button id="lvHL" aria-pressed="false">HL</button>
+  </div>
+ </header>
+ <main id="app" class="card" aria-live="polite"></main>
+ <aside class="gauge" id="gauge" aria-label="Depth gauge">
+  <div class="fill" id="fill"></div>
+  <div class="diver" id="diver">
+   <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="#ff6b57"/><circle cx="22" cy="22" r="17" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/><rect x="12" y="15" width="20" height="12" rx="6" fill="#06303b"/><rect x="14" y="17" width="16" height="8" rx="4" fill="#7fd1c7"/><circle cx="35" cy="9" r="3" fill="#fff" fill-opacity=".7"/><circle cx="38" cy="3" r="2" fill="#fff" fill-opacity=".5"/></svg>
+   <span class="read" id="read">0 m</span>
+  </div>
+ </aside>
+</div>
+<script>
+{
+const TIERS=[{n:"Surface",p:10},{n:"Reef",p:30},{n:"Twilight zone",p:60},{n:"Midnight zone",p:85},{n:"One in a mole",p:100}];
+const MAXD=7000;
+// Each prompt: t = guide topic, hl = HL-only, q, a = five tiers of "Display|alias|alias", x = wrong-but-tempting answers with feedback
+const P=[
+{t:"S1.1",q:"Name a technique used to separate the components of a mixture",a:[
+["Filtration|filtering|filter","Distillation|simple distillation"],
+["Evaporation|evaporating","Crystallization|crystallising","Paper chromatography|chromatography","Decanting|decantation"],
+["Fractional distillation","Solvent extraction|liquid-liquid extraction|separating funnel","Centrifugation|centrifuging|centrifuge","Sieving|sieve"],
+["Magnetic separation|magnet","Sublimation","Thin-layer chromatography|TLC","Recrystallization"],
+["Steam distillation","Gas chromatography|GC","Column chromatography","Vacuum filtration|suction filtration|Buchner filtration","Froth flotation|flotation","Dialysis","Electrophoresis"]]},
+{t:"S1.2",q:"Name a subatomic particle",a:[["Proton","Electron","Neutron"],[],["Positron|antielectron","Quark","Neutrino"],["Photon","Muon","Antiproton","Antineutron"],["Gluon","Pion|pi meson","Tau lepton|tau","Higgs boson|higgs"]]},
+{t:"S1.3",q:"Name a series of lines in the hydrogen emission spectrum",a:[["Balmer series|Balmer"],["Lyman series|Lyman"],["Paschen series|Paschen"],["Brackett series|Brackett"],["Pfund series|Pfund","Humphreys series|Humphreys"]]},
+{t:"S1.3",q:"Name an element (Z ≤ 20) whose atoms have exactly one unpaired electron in the ground state",a:[["Hydrogen|H","Sodium|Na","Lithium|Li"],["Chlorine|Cl","Fluorine|F","Potassium|K"],["Boron|B","Aluminium|Al"],[],[]],
+x:{"Oxygen|O":"O is 1s²2s²2p⁴: two unpaired 2p electrons.","Carbon|C":"C has two unpaired 2p electrons.","Nitrogen|N":"N has three unpaired 2p electrons (Hund's rule).","Helium|He":"He has none: 1s² is full.","Beryllium|Be":"Be is 2s²: no unpaired electrons.","Magnesium|Mg":"Mg is 3s²: no unpaired electrons.","Calcium|Ca":"Ca is 4s²: no unpaired electrons.","Phosphorus|P":"P has three unpaired 3p electrons.","Sulfur|S":"S has two unpaired 3p electrons.","Silicon|Si":"Si has two unpaired 3p electrons.","Neon|Ne":"Ne is a full shell.","Argon|Ar":"Ar is a full shell."}},
+{t:"S1.4",q:"Name a primary standard used to standardise a solution",a:[["Sodium carbonate|Na2CO3|anhydrous sodium carbonate"],["Potassium hydrogen phthalate|KHP","Oxalic acid|ethanedioic acid|H2C2O4"],["Potassium dichromate(VI)|potassium dichromate|K2Cr2O7","Borax|sodium tetraborate","Potassium iodate|KIO3"],["Benzoic acid","Sodium oxalate|sodium ethanedioate","Sulfamic acid"],["Potassium bromate|KBrO3","Arsenic(III) oxide|arsenic trioxide|As2O3","TRIS|tris(hydroxymethyl)aminomethane"]],
+x:{"Sodium hydroxide|NaOH":"NaOH absorbs water and CO₂ from the air, so its mass is unreliable: it must itself be standardised.","Hydrochloric acid|HCl":"HCl(aq) is volatile and its concentration drifts.","Potassium manganate(VII)|potassium permanganate|KMnO4":"KMnO₄ is not pure enough and decomposes slowly in solution."}},
+{t:"S1.4",q:"Name a piece of equipment used in an acid–base titration",a:[["Burette|buret","Pipette|pipet","Conical flask|Erlenmeyer flask"],["Volumetric flask|graduated flask","Pipette filler|pipette bulb","White tile","Funnel"],["Clamp stand|retort stand|burette clamp|clamp","Beaker","Wash bottle"],["Volumetric pipette|bulb pipette","pH meter|pH probe","Magnetic stirrer"],["Data logger|datalogger","Conductivity probe|conductivity meter","Analytical balance|balance"]]},
+{t:"S1.5",q:"Name a unit of pressure",a:[["Pascal|Pa","Kilopascal|kPa"],["Atmosphere|atm","Bar"],["Millimetres of mercury|mmHg","Torr"],["Newtons per square metre|N m-2|N/m2","Pounds per square inch|psi"],["Millibar|mbar","Hectopascal|hPa","Inches of mercury|inHg","Barye"]]},
+{t:"S2.1",q:"Name a polyatomic ion",a:[
+["Sulfate|SO4|SO42","Nitrate|NO3","Hydroxide|OH","Carbonate|CO3|CO32","Ammonium|NH4"],
+["Phosphate|PO4|PO43","Hydrogencarbonate|hydrogen carbonate|bicarbonate|HCO3","Nitrite|NO2","Sulfite|SO32"],
+["Hydrogensulfate|hydrogen sulfate|bisulfate|HSO4","Ethanoate|acetate|CH3COO|CH3CO2","Dichromate(VI)|dichromate|Cr2O7|Cr2O72","Manganate(VII)|permanganate|MnO4","Cyanide|CN","Chromate(VI)|chromate|CrO4|CrO42"],
+["Thiosulfate|S2O3|S2O32","Chlorate(I)|hypochlorite|ClO","Chlorate(V)|chlorate|ClO3","Peroxide|O22","Oxonium|hydronium|H3O","Ethanedioate|oxalate|C2O4|C2O42","Hydrogenphosphate|hydrogen phosphate|HPO4|HPO42","Dihydrogenphosphate|dihydrogen phosphate|H2PO4"],
+["Thiocyanate|SCN","Chlorate(VII)|perchlorate|ClO4","Chlorate(III)|chlorite|ClO2","Bromate|BrO3","Iodate|IO3","Azide|N3","Silicate|SiO3|SiO4","Methanoate|formate|HCOO","Cyanate|OCN","Tetrahydroxoaluminate|aluminate"]],
+x:{"Chloride|Cl":"Cl⁻ is a single atom: monatomic, not polyatomic.","Oxide|O2":"O²⁻ is monatomic.","Sulfide|S2":"S²⁻ is monatomic.","Sodium|Na":"Na⁺ is monatomic."}},
+{t:"S2.2",q:"Name a polar molecule",a:[
+["Water|H2O","Ammonia|NH3","Hydrogen chloride|HCl"],
+["Hydrogen fluoride|HF","Hydrogen sulfide|H2S","Sulfur dioxide|SO2","Chloromethane|CH3Cl","Phosphorus trichloride|PCl3","Ethanol|C2H5OH|CH3CH2OH"],
+["Trichloromethane|chloroform|CHCl3","Dichloromethane|CH2Cl2","Hydrogen cyanide|HCN","Propanone|acetone|CH3COCH3","Nitrogen trifluoride|NF3","Phosphine|PH3","Methanol|CH3OH","Hydrogen bromide|HBr","Ozone|O3","Carbon monoxide|CO"],
+["Oxygen difluoride|OF2","Nitrogen dioxide|NO2","Ethanal|acetaldehyde","Ethanoic acid|acetic acid","Hydrogen peroxide|H2O2","Fluoromethane|CH3F","Sulfur tetrafluoride|SF4","Chlorine trifluoride|ClF3"],
+["Bromine pentafluoride|BrF5","Iodine pentafluoride|IF5","Xenon oxytetrafluoride|XeOF4","Thionyl chloride|SOCl2","Phosgene|carbonyl chloride|COCl2","Iodine monochloride|ICl","Nitrosyl chloride|NOCl"]],
+x:{"Carbon dioxide|CO2":"CO₂ is linear: the two C=O dipoles cancel, so it is non-polar.","Methane|CH4":"CH₄ is symmetrical tetrahedral: no net dipole.","Tetrachloromethane|carbon tetrachloride|CCl4":"CCl₄ is symmetrical: the C–Cl dipoles cancel.","Boron trifluoride|BF3":"BF₃ is trigonal planar: dipoles cancel.","Sulfur hexafluoride|SF6":"SF₆ is octahedral: dipoles cancel.","Benzene|C6H6":"Benzene is symmetrical and non-polar.","Xenon tetrafluoride|XeF4":"XeF₄ is square planar: dipoles cancel.","Phosphorus pentachloride|PCl5":"PCl₅ is trigonal bipyramidal: dipoles cancel.","Hydrogen|H2":"H–H is a non-polar bond.","Chlorine|Cl2":"Cl–Cl is a non-polar bond.","Oxygen|O2":"O=O is a non-polar bond.","Nitrogen|N2":"N≡N is a non-polar bond."}},
+{t:"S2.2",q:"Name a non-polar molecule that contains polar bonds",a:[
+["Carbon dioxide|CO2","Methane|CH4","Tetrachloromethane|carbon tetrachloride|CCl4"],
+["Boron trifluoride|BF3","Sulfur hexafluoride|SF6","Boron trichloride|BCl3","Benzene|C6H6"],
+["Phosphorus pentachloride|PCl5","Xenon tetrafluoride|XeF4","Silicon tetrachloride|SiCl4","Beryllium chloride|BeCl2","Tetrafluoromethane|CF4","Ethane|C2H6","Ethene|C2H4","Ethyne|C2H2"],
+["Xenon difluoride|XeF2","Sulfur trioxide|SO3","Silane|SiH4","Phosphorus pentafluoride|PF5","Tetrachloroethene"],
+["Silicon tetrafluoride|SiF4","Selenium hexafluoride|SeF6","Uranium hexafluoride|UF6","Iodine heptafluoride|IF7","Xenon tetroxide|XeO4"]],
+x:{"Water|H2O":"Water is bent: its dipoles don't cancel, so it is polar.","Ammonia|NH3":"NH₃ is trigonal pyramidal: polar overall.","Hydrogen chloride|HCl":"HCl is polar overall.","Hydrogen|H2":"H₂ has no polar bonds.","Chlorine|Cl2":"Cl₂ has no polar bonds.","Oxygen|O2":"O₂ has no polar bonds.","Nitrogen|N2":"N₂ has no polar bonds.","Sulfur dioxide|SO2":"SO₂ is bent: polar overall.","Trichloromethane|chloroform|CHCl3":"CHCl₃ is tetrahedral but the C–H and C–Cl dipoles don't cancel: polar.","Dichloromethane|CH2Cl2":"CH₂Cl₂ is polar overall.","Chloromethane|CH3Cl":"CH₃Cl is polar overall."}},
+{t:"S2.2",q:"Name a molecule or ion with a bent (V-shaped) molecular geometry",a:[
+["Water|H2O"],["Hydrogen sulfide|H2S","Sulfur dioxide|SO2"],
+["Ozone|O3","Nitrite ion|nitrite","Oxygen difluoride|OF2","Amide ion|NH2","Sulfur dichloride|SCl2"],
+["Nitrogen dioxide|NO2","Chlorine dioxide|ClO2","Hydrogen selenide|H2Se","Chlorite ion|chlorite","Tin(II) chloride|SnCl2"],
+["Dichlorine monoxide|Cl2O","Hydrogen telluride|H2Te","Disulfur monoxide|S2O"]],
+x:{"Carbon dioxide|CO2":"CO₂ has two domains and no lone pairs: linear.","Beryllium chloride|BeCl2":"BeCl₂ is linear.","Hydrogen cyanide|HCN":"HCN is linear.","Ammonia|NH3":"NH₃ is trigonal pyramidal.","Xenon difluoride|XeF2":"XeF₂ is linear (three lone pairs sit equatorially)."}},
+{t:"S2.2",q:"Name a molecule or ion with a tetrahedral molecular geometry",a:[
+["Methane|CH4","Tetrachloromethane|carbon tetrachloride|CCl4"],
+["Ammonium ion|ammonium|NH4","Silicon tetrachloride|SiCl4","Tetrafluoromethane|CF4"],
+["Sulfate ion|sulfate|SO4|SO42","Phosphate ion|phosphate|PO4|PO43","Silane|SiH4","Chloromethane|CH3Cl","Dichloromethane|CH2Cl2","Trichloromethane|chloroform|CHCl3","Tetrafluoroborate|BF4"],
+["Chlorate(VII)|perchlorate|ClO4","Tetrachloroaluminate|AlCl4","Germane|GeH4","Phosphonium|PH4","Tetrahydridoborate|borohydride|BH4"],
+["Manganate(VII)|permanganate|MnO4","Chromate|CrO4","Xenon tetroxide|XeO4","Tetrachlorocobaltate(II)|CoCl4","Tetrachlorocuprate(II)|CuCl4","Silicon tetrafluoride|SiF4"]],
+x:{"Ammonia|NH3":"NH₃ has four electron domains but one is a lone pair: trigonal pyramidal.","Water|H2O":"Two lone pairs make water bent.","Xenon tetrafluoride|XeF4":"XeF₄ is square planar.","Sulfur tetrafluoride|SF4":"SF₄ is see-saw.","Boron trifluoride|BF3":"BF₃ is trigonal planar."}},
+{t:"S2.2",hl:1,q:"Name a molecule or ion with an octahedral molecular geometry",a:[
+["Sulfur hexafluoride|SF6"],["Hexafluorophosphate|PF6"],
+["Hexachlorophosphate|PCl6","Hexafluorosilicate|SiF6","Hexaaquacopper(II)|Cu(H2O)62"],
+["Hexafluoroaluminate|AlF6","Selenium hexafluoride|SeF6","Hexaaquairon(III)|Fe(H2O)63","Hexacyanoferrate|ferricyanide|ferrocyanide|Fe(CN)6"],
+["Uranium hexafluoride|UF6","Tellurium hexafluoride|TeF6","Molybdenum hexafluoride|MoF6","Tungsten hexafluoride|WF6"]],
+x:{"Xenon tetrafluoride|XeF4":"Six domains, but two are lone pairs: square planar.","Bromine pentafluoride|BrF5":"One lone pair: square pyramidal.","Iodine pentafluoride|IF5":"One lone pair: square pyramidal.","Phosphorus pentachloride|PCl5":"Five domains: trigonal bipyramidal."}},
+{t:"S2.2",q:"Name an allotrope of carbon",a:[["Diamond","Graphite"],["Graphene","Buckminsterfullerene|fullerene|C60|buckyball"],["Carbon nanotube|nanotube|CNT"],["Amorphous carbon","Lonsdaleite|hexagonal diamond","C70"],["Glassy carbon","Cyclocarbon","Graphyne","Carbon nanofoam|nanofoam","Q-carbon"]],
+x:{"Coal":"Coal is a mixture containing H, O, N and S: not an allotrope.","Carbon dioxide|CO2":"CO₂ is a compound; allotropes are forms of an element.","Charcoal":"Charcoal is impure; the allotrope is amorphous carbon."}},
+{t:"S2.2",q:"Name a type of intermolecular force",a:[
+["Hydrogen bonding|hydrogen bond|H bonding|H bond"],
+["Dipole–dipole|dipole dipole|dipole dipole forces|dipole dipole interactions|permanent dipole","London dispersion|London dispersion forces|London forces|dispersion forces|dispersion|London|induced dipole|instantaneous dipole"],
+["Van der Waals forces|van der waals|vdw"],
+["Dipole–induced dipole|dipole induced dipole|permanent dipole induced dipole"],
+["Ion–dipole|ion dipole","Debye force","Keesom force"]],
+x:{"Covalent bond|covalent|covalent bonding":"Covalent bonds are intramolecular.","Ionic bond|ionic|ionic bonding":"Ionic bonding is electrostatic attraction in a lattice, not between molecules.","Metallic bond|metallic|metallic bonding":"Metallic bonding is not intermolecular."}},
+{t:"S2.2",q:"Name a substance with a covalent network structure",a:[
+["Diamond","Silicon dioxide|silica|SiO2|quartz"],["Graphite","Silicon|Si","Graphene"],["Silicon carbide|carborundum|SiC"],["Boron nitride|BN","Germanium|Ge","Boron|B"],["Aluminium nitride|AlN","Boron carbide|B4C","Silicon nitride|Si3N4","Red phosphorus","Grey tin"]],
+x:{"Iodine|I2":"Iodine is a simple molecular solid.","Buckminsterfullerene|C60|fullerene":"C₆₀ is molecular: discrete molecules held by London forces.","Sodium chloride|NaCl":"NaCl is an ionic lattice.","Carbon dioxide|CO2|dry ice":"CO₂ is simple molecular."}},
+{t:"S2.3",q:"Name an alloy",a:[
+["Steel","Brass","Bronze"],["Stainless steel","Solder"],
+["Pewter","Amalgam","Nichrome","Cupronickel","White gold","Duralumin"],
+["Electrum","Invar","Nitinol","Sterling silver","Alnico","Rose gold","Nickel silver"],
+["Galinstan","Magnalium","Constantan","Wood's metal","Field's metal","Mischmetal","Babbitt metal|babbitt","Manganin","Inconel"]],
+x:{"Iron|Fe":"Iron is a pure metal; steel is the alloy.","Copper|Cu":"Copper is a pure metal.","Aluminium|Al":"Aluminium is a pure metal.","Gold|Au":"Pure gold is not an alloy (white or rose gold are)."}},
+{t:"S2.4",q:"Name a polymer",a:[
+["Poly(ethene)|polyethene|polyethylene|polythene|PE","Poly(chloroethene)|PVC|polyvinyl chloride|polychloroethene"],
+["Poly(propene)|polypropene|polypropylene|PP","Poly(phenylethene)|polystyrene|polyphenylethene","Nylon","PTFE|teflon|poly(tetrafluoroethene)"],
+["Kevlar","PET|polyester|terylene|poly(ethylene terephthalate)","Protein","DNA","Starch","Cellulose"],
+["Natural rubber|rubber|polyisoprene","PMMA|perspex|acrylic","Polycarbonate","Polyurethane","Chitin","Glycogen","RNA"],
+["Lignin","Silicone|polysiloxane","Bakelite","Neoprene","PLA|polylactic acid|poly(lactic acid)","PEEK","Polyacrylonitrile|PAN","Polyamide"]],
+x:{"Glucose":"Glucose is the monomer of starch and cellulose.","Ethene|ethylene":"Ethene is the monomer.","Amino acid":"Amino acids are monomers of proteins."}},
+{t:"S3.1",q:"Name an alkali metal",a:[["Sodium|Na","Lithium|Li","Potassium|K"],["Rubidium|Rb"],["Caesium|Cs"],[],["Francium|Fr"]],
+x:{"Hydrogen|H":"Hydrogen sits above group 1 but is a non-metal.","Calcium|Ca":"Calcium is a group 2 alkaline earth metal.","Magnesium|Mg":"Magnesium is in group 2."}},
+{t:"S3.1",q:"Name a halogen",a:[["Chlorine|Cl","Fluorine|F"],["Bromine|Br","Iodine|I"],["Astatine|At"],[],["Tennessine|Ts"]],
+x:{"Chloride":"Chloride is the ion; the halogen is chlorine."}},
+{t:"S3.1",q:"Name a noble gas",a:[["Helium|He","Neon|Ne","Argon|Ar"],["Krypton|Kr","Xenon|Xe"],["Radon|Rn"],[],["Oganesson|Og"]],
+x:{"Nitrogen|N2|N":"Nitrogen is unreactive but it's in group 15, not 18."}},
+{t:"S3.1",q:"Name an element usually classed as a metalloid",a:[["Silicon|Si"],["Boron|B","Germanium|Ge"],["Arsenic|As","Antimony|Sb"],["Tellurium|Te"],["Polonium|Po","Astatine|At"]],
+x:{"Aluminium|Al":"Al is a metal (it sits next to the metalloid staircase).","Carbon|C":"Carbon is a non-metal, even though graphite conducts."}},
+{t:"S3.1",q:"Name a property that increases from left to right across period 3",a:[
+["First ionization energy|ionization energy|ionisation energy|first ionisation energy|IE","Electronegativity"],
+["Nuclear charge|proton number|atomic number","Number of valence electrons|valence electrons|outer electrons"],
+["Effective nuclear charge|Zeff"],
+["Electron affinity (more exothermic)|electron affinity"],
+["Acidity of the oxides|acidic character of oxides|acidity of oxides","Non-metallic character|nonmetallic character"]],
+x:{"Atomic radius|radius":"Atomic radius decreases across a period: more protons, same shielding.","Metallic character":"Metallic character decreases across a period.","Ionic radius":"Ionic radius doesn't change steadily: it drops, jumps at P³⁻, then drops again.","Melting point":"Melting point peaks at Si and then falls."}},
+{t:"S3.1",q:"Name an oxide that forms an acidic solution in water",a:[
+["Carbon dioxide|CO2","Sulfur dioxide|SO2"],
+["Sulfur trioxide|SO3","Nitrogen dioxide|NO2","Phosphorus(V) oxide|phosphorus pentoxide|P4O10|P2O5"],
+["Dinitrogen pentoxide|N2O5","Dichlorine heptoxide|Cl2O7","Phosphorus(III) oxide|P4O6|P2O3"],
+["Dichlorine monoxide|Cl2O","Dinitrogen trioxide|N2O3","Selenium dioxide|SeO2"],
+["Manganese(VII) oxide|Mn2O7","Chromium(VI) oxide|CrO3"]],
+x:{"Sodium oxide|Na2O":"Na₂O is basic: it forms NaOH(aq).","Magnesium oxide|MgO":"MgO is basic.","Aluminium oxide|Al2O3":"Al₂O₃ is amphoteric and insoluble.","Silicon dioxide|SiO2":"SiO₂ is an acidic oxide but insoluble: no acidic solution.","Carbon monoxide|CO":"CO is a neutral oxide.","Nitrogen monoxide|nitric oxide|NO":"NO is a neutral oxide.","Dinitrogen monoxide|nitrous oxide|N2O":"N₂O is a neutral oxide.","Calcium oxide|CaO":"CaO is basic."}},
+{t:"S3.1",hl:1,q:"Name a transition element (IB definition: incomplete d-sublevel in the atom or one of its ions)",a:[
+["Iron|Fe","Copper|Cu"],
+["Nickel|Ni","Chromium|Cr","Cobalt|Co","Manganese|Mn","Titanium|Ti","Silver|Ag","Gold|Au","Platinum|Pt"],
+["Scandium|Sc","Vanadium|V","Palladium|Pd","Tungsten|W","Molybdenum|Mo"],
+["Zirconium|Zr","Rhodium|Rh","Iridium|Ir","Osmium|Os","Ruthenium|Ru","Niobium|Nb","Tantalum|Ta","Yttrium|Y"],
+["Technetium|Tc","Rhenium|Re","Hafnium|Hf","Rutherfordium|Rf","Darmstadtium|Ds"]],
+x:{"Zinc|Zn":"Zn is 3d¹⁰ and Zn²⁺ is 3d¹⁰: no incomplete d-sublevel, so not a transition element.","Cadmium|Cd":"Cd and Cd²⁺ have a full 4d sublevel.","Mercury|Hg":"Hg's common ions keep a full 5d sublevel.","Aluminium|Al":"Al is a p-block metal."}},
+{t:"S3.1",hl:1,q:"Name a d-block ion that gives a coloured aqueous solution",a:[
+["Copper(II)|Cu2","Iron(III)|Fe3"],
+["Iron(II)|Fe2","Cobalt(II)|Co2","Nickel(II)|Ni2","Chromium(III)|Cr3","Manganate(VII)|permanganate|MnO4"],
+["Dichromate(VI)|dichromate|Cr2O7","Chromate(VI)|chromate|CrO4","Manganese(II)|Mn2","Vanadium(III)|V3"],
+["Vanadium(II)|V2","Titanium(III)|Ti3","Oxovanadium(IV)|vanadyl|VO2"],
+["Chromium(II)|Cr2","Cobalt(III)|Co3","Manganese(III)|Mn3","Vanadium(IV)|V4"]],
+x:{"Zinc|Zn2|zinc(II)":"Zn²⁺ is 3d¹⁰: no d–d transitions, so colourless.","Scandium|Sc3|scandium(III)":"Sc³⁺ is 3d⁰: colourless.","Copper(I)|Cu":"Cu⁺ is 3d¹⁰: colourless in solution.","Titanium(IV)|Ti4":"Ti⁴⁺ is 3d⁰: colourless.","Silver|Ag":"Ag⁺ is 4d¹⁰: colourless.","Copper":"Which ion? Give the oxidation state, e.g. copper(II).","Iron":"Which ion? Give the oxidation state, e.g. iron(III)."}},
+{t:"S3.2",q:"Name a functional group",a:[
+["Hydroxyl|hydroxy","Carbonyl","Carboxyl"],
+["Amino|amine","Ester","Halogeno|halo|halide"],
+["Amido|amide","Alkenyl|alkene|C=C","Phenyl","Ether","Aldehyde","Ketone"],
+["Nitrile|cyano","Alkoxy","Nitro","Alkynyl|alkyne"],
+["Acyl chloride|acyl halide","Anhydride","Thiol|sulfhydryl","Imine","Isocyanate","Sulfonic acid"]]},
+{t:"S3.2",q:"Name a homologous series",a:[
+["Alkanes","Alkenes","Alcohols"],
+["Carboxylic acids","Aldehydes","Ketones","Esters","Halogenoalkanes|haloalkanes|alkyl halides"],
+["Ethers","Amines","Amides","Alkynes"],
+["Nitriles","Cycloalkanes","Arenes"],
+["Acyl chlorides","Thiols","Acid anhydrides|anhydrides","Nitroalkanes"]],
+x:{"Benzene":"Benzene is a compound, not a series."}},
+{t:"S3.2",q:"Name a structural isomer of C₄H₁₀O",a:[
+["Butan-1-ol|1-butanol|n-butanol"],["Butan-2-ol|2-butanol|sec-butanol"],
+["2-Methylpropan-2-ol|2-methyl-2-propanol|tert-butanol|t-butanol","2-Methylpropan-1-ol|2-methyl-1-propanol|isobutanol","Ethoxyethane|diethyl ether"],
+["1-Methoxypropane|methoxypropane|methyl propyl ether"],["2-Methoxypropane|methyl isopropyl ether"]],
+x:{"Butanal":"Butanal is C₄H₈O.","Butanone":"Butanone is C₄H₈O.","Butanoic acid":"Butanoic acid is C₄H₈O₂.","Propan-1-ol|propanol":"Propanol is C₃H₈O."}},
+{t:"S3.2",q:"Name a structural isomer of C₅H₁₂",a:[["Pentane|n-pentane"],[],["2-Methylbutane|methylbutane|isopentane"],[],["2,2-Dimethylpropane|dimethylpropane|neopentane"]],
+x:{"Cyclopentane":"Cyclopentane is C₅H₁₀.","Pentene|pent-1-ene":"Pentene is C₅H₁₀.","3-Methylbutane":"Number from the other end: that's 2-methylbutane, but say it that way.","Butane":"Butane is C₄H₁₀."}},
+{t:"S3.2",hl:1,q:"Name a type of stereoisomerism",a:[["Cis–trans|cis trans|geometric|geometrical"],["Optical|enantiomers|enantiomerism"],["E/Z|EZ"],["Conformational|conformers"],["Diastereomerism|diastereomers","Atropisomerism"]],
+x:{"Structural|chain|position":"That's structural isomerism, not stereoisomerism."}},
+{t:"S3.2",q:"Name an analytical technique used to determine the structure of an organic compound",a:[
+["Infrared spectroscopy|IR|infrared|IR spectroscopy","Mass spectrometry|mass spec|MS|mass spectroscopy"],
+["¹H NMR spectroscopy|NMR|1H NMR|proton NMR|nuclear magnetic resonance"],
+["X-ray crystallography|X-ray diffraction|XRD","UV-vis spectroscopy|UV-visible|UV vis"],
+["Combustion analysis|elemental analysis","¹³C NMR|13C NMR|carbon-13 NMR","GC-MS"],
+["Raman spectroscopy|Raman","2D NMR|COSY","Microwave spectroscopy"]],
+x:{"Chromatography|paper chromatography":"Chromatography separates and identifies by comparison, but doesn't give structure on its own.","Titration":"Titration finds amounts, not structure."}},
+{t:"R1.1",q:"Name an exothermic process",a:[
+["Combustion|burning","Neutralization|neutralisation","Respiration"],
+["Freezing|solidification","Condensation|condensing","Rusting","Bond formation|bond making|making bonds|forming bonds"],
+["Dissolving sodium hydroxide|dissolving NaOH","Deposition","Thermite reaction|thermite","Sodium with water"],
+["Lattice formation","Setting of cement|hydration of cement","Nuclear fusion","Hydration of ions|hydration"],
+["Polymerization|addition polymerization","Hydrogenation","First electron affinity of chlorine","Dissolving calcium chloride"]],
+x:{"Melting":"Melting needs energy to overcome attractions: endothermic.","Evaporation|boiling|vaporization":"Endothermic: energy is absorbed.","Photosynthesis":"Photosynthesis is endothermic.","Thermal decomposition":"Usually endothermic.","Bond breaking|breaking bonds":"Breaking bonds always absorbs energy.","Sublimation":"Sublimation is endothermic."}},
+{t:"R1.1",q:"Name an endothermic process",a:[
+["Melting","Evaporation|vaporization|boiling","Photosynthesis"],
+["Thermal decomposition","Bond breaking|breaking bonds","Sublimation","Dissolving ammonium nitrate"],
+["Electrolysis","Cracking|thermal cracking","Ionization|first ionization energy","Atomization"],
+["Dissolving ammonium chloride","Sodium hydrogencarbonate with citric acid|baking soda and citric acid","Barium hydroxide with ammonium chloride","Lattice dissociation|lattice enthalpy"],
+["Second electron affinity","Steam reforming","Cooking|thermal denaturation"]],
+x:{"Combustion|burning":"Combustion releases energy: exothermic.","Neutralization":"Neutralization is exothermic.","Freezing":"Freezing releases energy.","Condensation":"Condensation releases energy.","Respiration":"Respiration is exothermic."}},
+{t:"R1.3",q:"Name a fossil fuel",a:[
+["Coal","Crude oil|oil|petroleum","Natural gas"],
+["Methane|CH4","Petrol|gasoline","Diesel","Kerosene|paraffin|jet fuel"],
+["Peat","LPG|propane|butane","Lignite|brown coal","Anthracite"],
+["Shale gas|shale oil|oil shale","Bitumen|tar sands|oil sands","Fuel oil","Naphtha"],
+["Methane clathrate|methane hydrate","Coke","Coal gas|town gas"]],
+x:{"Biodiesel":"Biodiesel is made from plant oils: a biofuel.","Ethanol|bioethanol":"Ethanol from fermentation is a biofuel.","Wood":"Wood is biomass, not a fossil fuel.","Hydrogen|H2":"Hydrogen is not a fossil fuel (though it's often made from one).","Uranium":"Uranium is a nuclear fuel."}},
+{t:"R1.3",q:"Name a greenhouse gas",a:[
+["Carbon dioxide|CO2","Methane|CH4","Water vapour|water|H2O"],
+["Dinitrogen monoxide|nitrous oxide|N2O","Ozone|O3","CFCs|chlorofluorocarbons|CFC"],
+["Sulfur hexafluoride|SF6","HFCs|hydrofluorocarbons|HFC"],
+["Nitrogen trifluoride|NF3","Tetrafluoromethane|CF4|PFCs|perfluorocarbons","HCFCs|hydrochlorofluorocarbons"],
+["Trifluoromethane|CHF3|HFC-23","Hexafluoroethane|C2F6","Sulfuryl fluoride|SO2F2"]],
+x:{"Nitrogen|N2":"N₂ has no changing dipole when it vibrates: IR inactive.","Oxygen|O2":"O₂ is IR inactive.","Argon|Ar":"Argon is monatomic: IR inactive.","Carbon monoxide|CO":"CO absorbs IR weakly; it's an indirect, not a major, greenhouse gas."}},
+{t:"R2.2",q:"Name a factor that affects the rate of a reaction",a:[
+["Temperature","Concentration","Catalyst|catalysts|adding a catalyst","Surface area"],
+["Pressure","Particle size"],
+["Light|light intensity|UV","Stirring|agitation","Nature of the reactants"],
+["Solvent","Activation energy"],
+["Ionic strength","Inhibitor|inhibitors","Enzyme concentration"]]},
+{t:"R2.2",q:"Name a method of measuring the rate of a reaction in the lab",a:[
+["Gas syringe|volume of gas|collecting gas","Mass loss|change in mass|balance"],
+["Colour change|colorimetry|colorimeter","pH probe|pH change|pH","Conductivity","Disappearing cross|turbidity|precipitate formation|cloudiness"],
+["Titration|quenching","Pressure sensor|pressure change|gas pressure","Inverted measuring cylinder|upturned burette"],
+["Spectrophotometry|absorbance","Temperature probe|temperature change"],
+["Polarimetry","Dilatometry","Clock reaction|iodine clock","Gas chromatography"]]},
+{t:"R2.2",q:"Name an industrial catalyst",a:[
+["Iron|Fe","Platinum|Pt","Vanadium(V) oxide|vanadium pentoxide|V2O5"],
+["Nickel|Ni","Zeolite|zeolites","Enzymes|enzyme"],
+["Rhodium|Rh","Palladium|Pd","Aluminium oxide|alumina|Al2O3","Sulfuric acid|concentrated sulfuric acid|H2SO4","Phosphoric acid|H3PO4"],
+["Platinum–rhodium gauze|platinum rhodium","Ziegler–Natta|Ziegler Natta|titanium(IV) chloride","Silica|silicon dioxide","Copper|Cu"],
+["Cobalt|Co","Chromium(III) oxide|Cr2O3","Wilkinson's catalyst","Iron oxide|Fe2O3|Fe3O4","Silver|Ag"]],
+x:{"Manganese(IV) oxide|MnO2|manganese dioxide":"MnO₂ is a lab catalyst for H₂O₂, not a big industrial one. Try another.","Hydrogen peroxide|H2O2":"H₂O₂ is a reactant, not a catalyst."}},
+{t:"R2.3",q:"Name a change that can shift the position of an equilibrium",a:[["Temperature|changing temperature","Concentration|changing concentration","Pressure|changing pressure"],["Removing a product|removing product","Adding a reactant|adding reactant"],["Volume|changing volume"],["Adding an ion that reacts|common ion","Precipitating a product"],["Adding a complexing agent|complexing agent"]],
+x:{"Catalyst|adding a catalyst|catalysts":"A catalyst speeds up both directions equally: equilibrium is reached faster, but its position doesn't change.","Adding an inert gas|inert gas|noble gas":"At constant volume, an inert gas leaves partial pressures unchanged: no shift."}},
+{t:"R2.3",q:"Name an industrial process based on a reversible reaction",a:[["Haber process|Haber|Haber-Bosch|ammonia synthesis"],["Contact process|contact"],["Ostwald process|Ostwald","Hydration of ethene|ethanol production","Methanol synthesis|methanol"],["Steam reforming|steam methane reforming","Water-gas shift|water gas shift"],["Deacon process|Deacon","Solvay process|Solvay","Esterification"]]},
+{t:"R3.1",q:"Name a strong acid",a:[
+["Hydrochloric acid|HCl|hydrochloric","Sulfuric acid|H2SO4|sulfuric","Nitric acid|HNO3|nitric"],
+["Hydrobromic acid|HBr|hydrobromic","Hydroiodic acid|HI|hydroiodic"],
+["Perchloric acid|chloric(VII) acid|HClO4"],
+["Chloric acid|chloric(V) acid|HClO3","Triflic acid|trifluoromethanesulfonic acid"],
+["Fluoroantimonic acid","Fluorosulfuric acid","Tetrafluoroboric acid|HBF4"]],
+x:{"Hydrofluoric acid|HF":"HF is weak: the strong H–F bond means it only partly dissociates.","Ethanoic acid|acetic acid|CH3COOH":"Ethanoic acid is weak.","Carbonic acid|H2CO3":"Carbonic acid is weak.","Phosphoric acid|H3PO4":"Phosphoric acid is weak (partial dissociation).","Citric acid":"Citric acid is weak."}},
+{t:"R3.1",q:"Name a weak acid",a:[
+["Ethanoic acid|acetic acid|CH3COOH|vinegar","Carbonic acid|H2CO3","Citric acid"],
+["Hydrofluoric acid|HF","Phosphoric acid|H3PO4","Methanoic acid|formic acid|HCOOH","Ammonium ion|ammonium|NH4"],
+["Benzoic acid","Propanoic acid","Lactic acid","Hydrocyanic acid|HCN|hydrogen cyanide","Hydrogen sulfide|H2S","Sulfurous acid|H2SO3","Nitrous acid|HNO2","Ascorbic acid|vitamin C","Ethanedioic acid|oxalic acid"],
+["Boric acid|H3BO3","Chloric(I) acid|hypochlorous acid|HOCl|HClO","Phenol","Hydrogensulfate ion|HSO4","Hexaaquaaluminium ion|Al(H2O)63"],
+["Tartaric acid","Uric acid","Butanoic acid","Salicylic acid","Chloroethanoic acid","Dihydrogenphosphate|H2PO4"]],
+x:{"Hydrochloric acid|HCl":"HCl is strong.","Sulfuric acid|H2SO4":"H₂SO₄ is strong (first dissociation).","Nitric acid|HNO3":"HNO₃ is strong."}},
+{t:"R3.1",q:"Name a strong base",a:[["Sodium hydroxide|NaOH","Potassium hydroxide|KOH"],["Lithium hydroxide|LiOH","Barium hydroxide|Ba(OH)2"],["Calcium hydroxide|Ca(OH)2","Strontium hydroxide|Sr(OH)2","Rubidium hydroxide|RbOH","Caesium hydroxide|CsOH"],["Oxide ion|O2","Sodium amide|NaNH2","Sodium ethoxide","Sodium hydride|NaH"],["Butyllithium|n-butyllithium","LDA|lithium diisopropylamide","Potassium tert-butoxide"]],
+x:{"Ammonia|NH3":"NH₃ is a weak base: it only partly reacts with water.","Sodium carbonate|Na2CO3":"Carbonate is a weak base.","Sodium hydrogencarbonate|NaHCO3|baking soda":"Hydrogencarbonate is a weak base."}},
+{t:"R3.1",q:"Name a weak base",a:[
+["Ammonia|NH3"],
+["Methylamine|CH3NH2","Ethylamine","Carbonate ion|carbonate|sodium carbonate","Ethanoate ion|ethanoate|acetate"],
+["Pyridine","Phenylamine|aniline","Hydrogencarbonate|sodium hydrogencarbonate|bicarbonate|NaHCO3","Dimethylamine","Trimethylamine"],
+["Hydrazine","Caffeine","Fluoride ion|fluoride"],
+["Nicotine","Urea","Imidazole","Morphine"]],
+x:{"Sodium hydroxide|NaOH":"NaOH is a strong base.","Potassium hydroxide|KOH":"KOH is a strong base."}},
+{t:"R3.1",q:"Name an acid–base indicator",a:[
+["Universal indicator","Litmus","Phenolphthalein","Methyl orange"],
+["Bromothymol blue","Red cabbage"],
+["Methyl red","Thymol blue","Phenol red","Bromophenol blue"],
+["Bromocresol green","Thymolphthalein","Congo red","Alizarin yellow"],
+["Cresol red","Turmeric","Hibiscus","Methyl violet"]]},
+{t:"R3.1",hl:1,q:"Name a Lewis acid that is not a Brønsted–Lowry acid",a:[
+["Boron trifluoride|BF3","Aluminium chloride|AlCl3"],
+["Iron(III) chloride|FeCl3","Iron(III) bromide|FeBr3","Copper(II) ion|Cu2"],
+["Boron trichloride|BCl3","Zinc chloride|ZnCl2","Silver ion|Ag","Sulfur trioxide|SO3","Carbon dioxide|CO2"],
+["Tin(IV) chloride|SnCl4","Titanium(IV) chloride|TiCl4","Magnesium ion|Mg2","Iron(III) ion|Fe3"],
+["Borane|BH3","Antimony pentafluoride|SbF5","Phosphorus pentafluoride|PF5"]],
+x:{"Hydrochloric acid|HCl|hydrogen chloride":"HCl donates H⁺: it is a Brønsted–Lowry acid.","Ammonia|NH3":"NH₃ is a Lewis base (lone-pair donor).","Water|H2O":"Water can act as a Brønsted–Lowry acid."}},
+{t:"R3.2",q:"Name an oxidizing agent",a:[
+["Oxygen|O2","Chlorine|Cl2","Potassium manganate(VII)|potassium permanganate|KMnO4|manganate(VII)|permanganate"],
+["Potassium dichromate(VI)|potassium dichromate|K2Cr2O7|dichromate","Fluorine|F2","Hydrogen peroxide|H2O2","Ozone|O3"],
+["Concentrated nitric acid|nitric acid|HNO3","Bromine|Br2","Concentrated sulfuric acid","Sodium chlorate(I)|sodium hypochlorite|bleach"],
+["Iodine|I2","Iron(III)|Fe3","Copper(II)|Cu2","Silver ion|Ag"],
+["Osmium tetroxide|OsO4","Lead(IV) oxide|PbO2","Cerium(IV)|Ce4","Tollens' reagent|Tollens","Fehling's solution|Fehlings"]],
+x:{"Sodium|Na":"Sodium loses electrons easily: a reducing agent.","Zinc|Zn":"Zinc is a reducing agent.","Hydrogen|H2":"H₂ is usually a reducing agent.","Magnesium|Mg":"Magnesium is a reducing agent.","Carbon monoxide|CO":"CO is a reducing agent (blast furnace)."}},
+{t:"R3.2",q:"Name a reducing agent",a:[
+["Hydrogen|H2","Carbon|C|coke","Carbon monoxide|CO"],
+["Zinc|Zn","Magnesium|Mg","Sodium|Na","Iron(II)|Fe2","Sulfur dioxide|SO2"],
+["Lithium aluminium hydride|LiAlH4","Sodium borohydride|NaBH4|sodium tetrahydridoborate","Iodide ion|iodide|I","Hydrogen sulfide|H2S","Sodium thiosulfate|thiosulfate","Ascorbic acid|vitamin C"],
+["Tin(II) chloride|SnCl2|tin(II)","Ethanedioic acid|oxalic acid","Hydrazine","Aluminium|Al"],
+["DIBAL|diisobutylaluminium hydride","Sodium dithionite","Hydroquinone","Lithium|Li"]],
+x:{"Oxygen|O2":"O₂ is an oxidizing agent.","Chlorine|Cl2":"Cl₂ is an oxidizing agent.","Potassium manganate(VII)|potassium permanganate|KMnO4|permanganate":"Manganate(VII) is a strong oxidizing agent.","Fluorine|F2":"F₂ is the strongest common oxidizing agent."}},
+{t:"R3.2",q:"Name a metal that is more reactive than hydrogen (higher in the activity series)",a:[
+["Magnesium|Mg","Zinc|Zn","Sodium|Na","Potassium|K"],
+["Calcium|Ca","Aluminium|Al","Iron|Fe","Lithium|Li"],
+["Tin|Sn","Lead|Pb","Nickel|Ni","Chromium|Cr","Manganese|Mn"],
+["Barium|Ba","Strontium|Sr","Caesium|Cs","Rubidium|Rb","Cobalt|Co","Cadmium|Cd"],
+["Titanium|Ti","Vanadium|V","Beryllium|Be","Cerium|Ce","Uranium|U"]],
+x:{"Copper|Cu":"Copper is below hydrogen: it doesn't release H₂ from dilute acids.","Silver|Ag":"Silver is below hydrogen.","Gold|Au":"Gold is below hydrogen.","Platinum|Pt":"Platinum is below hydrogen.","Mercury|Hg":"Mercury is below hydrogen."}},
+{t:"R3.2",q:"Name a product of electrolysis of aqueous sodium chloride (brine)",a:[["Chlorine|Cl2"],["Hydrogen|H2"],["Sodium hydroxide|NaOH|hydroxide ions|OH"],["Oxygen|O2"],[]],
+x:{"Sodium|Na":"In aqueous solution H₂O is reduced in preference to Na⁺, so hydrogen forms at the cathode, not sodium.","Sodium chloride|NaCl":"That's the electrolyte, not a product."}},
+{t:"R3.2",q:"Name a type of battery or electrochemical cell",a:[
+["Lithium-ion|lithium ion|Li-ion","Alkaline|alkaline battery","Lead–acid|lead acid|car battery"],
+["Fuel cell|hydrogen fuel cell","Daniell cell|Daniell","Zinc–carbon|zinc carbon|Leclanché|Leclanche"],
+["Nickel–cadmium|NiCd|nickel cadmium","Nickel–metal hydride|NiMH","Voltaic cell|galvanic cell","Electrolytic cell"],
+["Silver oxide|button cell","Zinc–air|zinc air","Lithium polymer|LiPo","Solid-state battery|solid state"],
+["Sodium-ion|sodium ion","Redox flow|vanadium flow|flow battery","Mercury cell","Sodium–sulfur|sodium sulfur","Lithium iron phosphate|LFP"]]},
+{t:"R3.3",q:"Name a term used in a radical substitution mechanism",a:[["Initiation","Termination","Propagation"],["Homolytic fission|homolysis"],["Radical|free radical"],["UV light|ultraviolet light|UV"],["Chain reaction","Fishhook arrow|half arrow"]],
+x:{"Heterolytic fission|heterolysis":"Heterolytic fission makes ions; radical reactions start with homolytic fission.","Carbocation":"Carbocations belong to ionic mechanisms (e.g. SN1)."}},
+{t:"R3.4",q:"Name a type of organic reaction",a:[
+["Substitution","Addition","Combustion"],
+["Nucleophilic substitution","Electrophilic addition","Radical substitution|free radical substitution","Oxidation","Reduction"],
+["Condensation","SN1","SN2","Esterification","Hydrolysis","Polymerization"],
+["Electrophilic substitution","Elimination","Hydrogenation","Hydration"],
+["Nucleophilic addition","Cracking","Transesterification","Decarboxylation","Diels–Alder|Diels Alder"]]},
+{t:"R3.4",hl:1,q:"Name a nucleophile",a:[
+["Hydroxide ion|hydroxide|OH","Water|H2O","Ammonia|NH3"],
+["Cyanide ion|cyanide|CN","Chloride ion|chloride|Cl","Amines|amine"],
+["Ethoxide|alkoxide","Alcohols|alcohol|ethanol","Bromide ion|bromide|Br","Iodide ion|iodide|I"],
+["Hydride ion|hydride","Thiolate","Carbanion"],
+["Azide ion|azide","Grignard reagent|Grignard","Enolate"]],
+x:{"H+|proton|hydrogen ion":"H⁺ is an electron-pair acceptor: an electrophile.","Nitronium ion|nitronium|NO2+":"NO₂⁺ is an electrophile.","Carbocation":"A carbocation is an electrophile."}},
+{t:"R3.4",hl:1,q:"Name an electrophile",a:[
+["Proton|hydrogen ion|H+","Nitronium ion|nitronium|NO2+"],
+["Bromine|Br2","Hydrogen bromide|HBr","Carbocation"],
+["Chlorine|Cl2","Hydrogen chloride|HCl","Sulfur trioxide|SO3","Acylium ion|acylium"],
+["Boron trifluoride|BF3","Aluminium chloride|AlCl3","Iodine monochloride|ICl"],
+["Dichlorocarbene","Methyl cation|CH3+","Bromonium ion|bromonium"]],
+x:{"Hydroxide|OH-|OH":"OH⁻ is a lone-pair donor: a nucleophile.","Cyanide|CN":"CN⁻ is a nucleophile.","Ammonia|NH3":"NH₃ is a nucleophile.","Water|H2O":"Water usually acts as a nucleophile."}}
+];
+
+// ---------- matching ----------
+const sub={"₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9","⁰":"0","¹":"1","²":"2","³":"3","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9"};
+const norm=s=>{let n=String(s).replace(/[₀-₉⁰-⁹¹²³]/g,c=>sub[c]||c).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"");
+ n=n.replace(/sulph/g,"sulf").replace(/aluminum/g,"aluminium").replace(/cesium/g,"caesium").replace(/isation/g,"ization").replace(/ising/g,"izing").replace(/vapour/g,"vapor").replace(/colour/g,"color").replace(/litre/g,"liter").replace(/metre/g,"meter");
+ n=n.replace(/[^a-z0-9]/g,"");
+ if(n.length>4&&/[^s]s$/.test(n))n=n.slice(0,-1);
+ return n};
+const idx=new WeakMap();
+function index(p){if(idx.has(p))return idx.get(p);const ok=new Map(),tr=new Map();
+ p.a.forEach((tier,ti)=>tier.forEach(e=>{const al=e.split("|"),d=al[0];al.forEach(a=>{const k=norm(a);if(k&&!ok.has(k))ok.set(k,{ti,d})})}));
+ Object.entries(p.x||{}).forEach(([k,m])=>k.split("|").forEach(a=>{const n=norm(a);if(n&&!ok.has(n))tr.set(n,m)}));
+ const r={ok,tr};idx.set(p,r);return r}
+function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;let pr=Array.from({length:b.length+1},(_,i)=>i);
+ for(let i=1;i<=a.length;i++){const c=[i];let lo=i;for(let j=1;j<=b.length;j++){c[j]=Math.min(pr[j]+1,c[j-1]+1,pr[j-1]+(a[i-1]===b[j-1]?0:1));lo=Math.min(lo,c[j])}if(lo>max)return max+1;pr=c}return pr[b.length]}
+function match(p,raw){const n=norm(raw);if(!n)return{k:"empty"};const {ok,tr}=index(p);
+ if(ok.has(n))return{k:"ok",...ok.get(n)};if(tr.has(n))return{k:"trap",m:tr.get(n)};
+ if(n.length>=5){const max=n.length>=9?2:1;for(const [k,v] of ok)if(k.length>=5&&lev(n,k,max)<=max)return{k:"ok",...v};
+  for(const [k,m] of tr)if(k.length>=5&&lev(n,k,max)<=max)return{k:"trap",m}}
+ return{k:"miss"}}
+
+// ---------- daily selection ----------
+const pad=n=>String(n).padStart(2,"0");
+const dkey=(d=new Date())=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+function rngFrom(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19}
+ let a=h>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,r){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pick(seed,lvl){const r=rngFrom(seed+"|"+lvl);const pool=P.filter(p=>lvl==="HL"||!p.hl);
+ const S=shuffle(pool.filter(p=>p.t[0]==="S"),r),R=shuffle(pool.filter(p=>p.t[0]==="R"),r);
+ const take=(arr,n)=>{const out=[],c={};for(const p of arr){if(out.length>=n)break;if((c[p.t]||0)<2){out.push(p);c[p.t]=(c[p.t]||0)+1}}return out};
+ const nS=r()<.5?3:4;return shuffle(take(S,nS).concat(take(R,7-nS)),r)}
+
+// ---------- storage ----------
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let level=store.get("chemdive:level")||"SL";
+
+// ---------- state & UI ----------
+const app=document.getElementById("app"),diver=document.getElementById("diver"),read=document.getElementById("read"),fill=document.getElementById("fill"),gauge=document.getElementById("gauge");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let G=null,timer=null;
+const depthOf=pts=>pts*10;
+function setDepth(m){const f=Math.min(m/MAXD,1);const narrow=matchMedia("(max-width:720px)").matches;
+ if(narrow){diver.style.left=(6+f*80)+"%";diver.style.top="50%"}else{diver.style.left="50%";diver.style.top=(4+f*90)+"%";fill.style.height=(4+f*90)+"%"}
+ read.textContent=m.toLocaleString()+" m"}
+function ticks(){[0,1000,2000,3000,4000,5000,6000,7000].forEach(m=>{const t=document.createElement("div");t.className="tick";const f=m/MAXD;t.style.top=(4+f*90)+"%";t.style.left=matchMedia("(max-width:720px)").matches?(6+f*80)+"%":"";t.textContent=m?m/1000+"k":"0";gauge.appendChild(t)})}
+function redrawTicks(){gauge.querySelectorAll(".tick").forEach(t=>t.remove());ticks();setDepth(G?depthOf(G.scores.reduce((a,b)=>a+(b||0),0)):0)}
+addEventListener("resize",redrawTicks);
+
+function setLevel(l){level=l;store.set("chemdive:level",l);document.getElementById("lvSL").setAttribute("aria-pressed",l==="SL");document.getElementById("lvHL").setAttribute("aria-pressed",l==="HL");if(!G||G.done||G.i===-1)home()}
+document.getElementById("lvSL").onclick=()=>{if(!G||G.i<0||G.done)setLevel("SL")};
+document.getElementById("lvHL").onclick=()=>{if(!G||G.i<0||G.done)setLevel("HL")};
+
+const fmtDate=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})};
+
+function home(){clearInterval(timer);const k=dkey();const saved=store.get("chemdive:"+k+":"+level);
+ document.getElementById("dateline").textContent=fmtDate(k)+" · "+level+" dive";
+ if(saved){G={...saved,list:pick(k,level),done:true,practice:false};return results()}
+ G=null;setDepth(0);
+ app.innerHTML=`<div class="meta"><span>Today's dive</span><span class="tag">${level}</span></div>
+ <p class="q">Seven chemistry prompts from across the DP guide. Everyone in ${level} gets the same seven today.</p>
+ <p>Type any correct answer. Obvious ones keep you near the surface; rarer correct chemistry takes you deeper. If an answer is rejected you can try again until the 25 seconds run out.</p>
+ <ul class="legend">${TIERS.map(t=>`<li><b>${t.n}</b>${t.p} pts · ${(t.p*10).toLocaleString()} m</li>`).join("")}</ul>
+ <div class="row"><button class="btn" id="go">Start today's dive</button><button class="btn ghost" id="pr">Practice dive</button></div>
+ <p class="note">One scored dive per day per level, saved on this device. A new dive unlocks at midnight.</p>`;
+ document.getElementById("go").onclick=()=>start(k,false);document.getElementById("pr").onclick=()=>start("practice-"+Math.random(),true)}
+
+function start(seed,practice){G={key:dkey(),list:pick(seed,level),i:-1,scores:[],answers:[],practice,done:false};next()}
+
+function next(){G.i++;if(G.i>=G.list.length)return finish();const p=G.list[G.i];let left=25,locked=false;
+ app.innerHTML=`<div class="meta"><span>Prompt ${G.i+1} of 7</span><span class="tag">${p.t}${p.hl?" · HL":""}</span></div>
+ <p class="q">${esc(p.q)}</p><div class="timer" id="tm"><i id="tb"></i></div>
+ <form id="f" autocomplete="off"><input id="in" aria-label="Your answer" placeholder="Type an answer…" autocapitalize="off" spellcheck="false"><button class="btn">Dive</button><button type="button" class="btn ghost" id="pass">Pass</button></form>
+ <div class="msg" id="msg">${left} seconds</div>`;
+ const inp=document.getElementById("in"),msg=document.getElementById("msg"),tb=document.getElementById("tb"),tm=document.getElementById("tm");inp.focus();
+ const t0=Date.now();clearInterval(timer);
+ timer=setInterval(()=>{const el=(Date.now()-t0)/1000;left=Math.max(0,25-el);tb.style.width=(left/25*100)+"%";tm.classList.toggle("low",left<6);
+  if(!msg.dataset.hold)msg.textContent=Math.ceil(left)+" seconds";if(left<=0&&!locked){locked=true;lock(null)}},100);
+ document.getElementById("pass").onclick=()=>{if(!locked){locked=true;lock(null)}};
+ document.getElementById("f").onsubmit=e=>{e.preventDefault();if(locked)return;const v=inp.value.trim();if(!v)return;const r=match(p,v);
+  if(r.k==="ok"){locked=true;lock(r,v)}
+  else{inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");msg.dataset.hold=1;
+   msg.className="msg"+(r.k==="trap"?" trap":"");msg.textContent=r.k==="trap"?r.m+" Try another.":"Not in the answer bank. Check spelling or try another.";
+   inp.select();setTimeout(()=>{delete msg.dataset.hold;msg.className="msg"},3200)}}}
+
+function lock(r,raw){clearInterval(timer);const p=G.list[G.i];const pts=r?TIERS[r.ti].p:0;G.scores.push(pts);G.answers.push(r?{d:r.d,ti:r.ti}:null);
+ const tot=G.scores.reduce((a,b)=>a+b,0);setDepth(depthOf(tot));
+ const deeper=[];for(let t=4;t>(r?r.ti:-1)&&deeper.length<6;t--)p.a[t].forEach(e=>{if(deeper.length<6&&(!r||e.split("|")[0]!==r.d))deeper.push({d:e.split("|")[0],ti:t})});
+ const others=deeper.length?deeper:p.a.flatMap((tier,ti)=>tier.map(e=>({d:e.split("|")[0],ti}))).filter(o=>o.d!==r.d).slice(0,6);
+ app.innerHTML=`<div class="meta"><span>Prompt ${G.i+1} of 7</span><span class="tag">${p.t}</span></div>
+ <p class="q">${esc(p.q)}</p>
+ ${r?`<p>You said <b>${esc(r.d)}</b></p><span class="tier">${TIERS[r.ti].n} · +${(pts*10).toLocaleString()} m</span>`:`<span class="tier zero">No answer · +0 m</span>`}
+ <p style="margin:18px 0 0;color:var(--muted)">${deeper.length?"Deeper answers you could have given":"Other answers"}</p>
+ <ul class="chips">${others.map(o=>`<li>${esc(o.d)}<b>${TIERS[o.ti].n}</b></li>`).join("")}</ul>
+ <div class="row"><button class="btn" id="nx">${G.i<6?"Next prompt":"Surface and see results"}</button></div>`;
+ const b=document.getElementById("nx");b.focus();b.onclick=next}
+
+function finish(){G.done=true;if(!G.practice)store.set("chemdive:"+G.key+":"+level,{key:G.key,scores:G.scores,answers:G.answers});results()}
+
+function shareText(){const tot=G.scores.reduce((a,b)=>a+b,0);return `IB Chem Dive · ${G.key} · ${level}\n${(tot*10).toLocaleString()} m of 7,000 m\n`+G.answers.map((a,i)=>(i+1)+". "+(a?TIERS[a.ti].n:"—")).join("\n")}
+
+function results(){clearInterval(timer);const tot=G.scores.reduce((a,b)=>a+b,0);setDepth(depthOf(tot));
+ const best=G.answers.reduce((m,a)=>a&&a.ti>m?a.ti:m,-1);
+ app.innerHTML=`<div class="meta"><span>${G.practice?"Practice dive":"Today's dive · "+fmtDate(G.key)}</span><span class="tag">${level}</span></div>
+ <div class="big">${(tot*10).toLocaleString()} m</div><p style="margin:0;color:var(--muted)">${tot} of 700 points${best>=0?" · deepest find: "+TIERS[best].n:""}</p>
+ <table class="stack"><thead><tr><th>Prompt</th><th>Your answer</th><th>Zone</th><th class="n">Depth</th></tr></thead><tbody>
+ ${G.list.map((p,i)=>{const a=G.answers[i];return `<tr><td>${esc(p.q)} <span style="color:var(--muted)">(${p.t})</span></td><td>${a?esc(a.d):"—"}</td><td>${a?TIERS[a.ti].n:"Missed"}</td><td class="n">${((G.scores[i]||0)*10).toLocaleString()} m</td></tr>`}).join("")}
+ </tbody></table>
+ <div class="row">${G.practice?"":`<button class="btn" id="cp">Copy result</button>`}<button class="btn ${G.practice?"":"ghost"}" id="pr">Practice dive</button>${G.practice?`<button class="btn ghost" id="hm">Back to today</button>`:""}</div>
+ <p class="msg" id="cd"></p>
+ <p class="note">Rarity zones reflect how often DP students tend to think of each answer: a teacher's judgement, not live player data. Answers are matched with common spellings, formulae and small typos.</p>`;
+ const cp=document.getElementById("cp");if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(shareText());cp.textContent="Copied"}catch(e){cp.textContent="Copy blocked"}};
+ document.getElementById("pr").onclick=()=>start("practice-"+Math.random(),true);
+ const hm=document.getElementById("hm");if(hm)hm.onclick=home;
+ if(!G.practice){const cd=document.getElementById("cd");const tick=()=>{const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);const s=Math.max(0,(m-n)/1000|0);cd.textContent="Next dive in "+Math.floor(s/3600)+" h "+pad(Math.floor(s%3600/60))+" min";if(s===0)home()};tick();clearInterval(timer);timer=setInterval(tick,30000)}}
+
+ticks();setLevel(level);
+}
+</script>
+</body>
+</html>
